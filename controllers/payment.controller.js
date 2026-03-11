@@ -14,7 +14,7 @@ const mode=req.mode
     redirect
   })
   await pay.save()
-  res.json({status:true,order,message:"Order Created",link:"http://localhost:8000/pay/"+order,timestamp:Date.now()})
+  res.json({status:true,order,message:"Order Created",link:"https://u-pay-seven.vercel.app/pay/"+order,timestamp:Date.now()})
 }
 
 export default createOrder;
