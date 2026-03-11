@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0x403 FORBIDDEN_ACCESS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        :root {
+            --neon-red: #ff003c;
+            --neon-red-low: rgba(255, 0, 60, 0.15);
+            --neon-blue: #00fff2;
+        }
+
+        @font-face {
+            font-family: 'VT323';
+            src: url('https://fonts.gstatic.com/s/vt323/v17/pxiGyp06RdYNi1MVf78.woff2') format('woff2');
+        }
+
+        body {
+            background-color: #000;
+            color: var(--neon-red);
+            font-family: 'VT323', monospace;
+            /* Allow scrolling on mobile if content overflows */
+            overflow-x: hidden; 
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-2px, -1px); }
+            20%, 40%, 60%, 80% { transform: translate(2px, 1px); }
+        }
+
+        @keyframes glitchHeavy {
+            0% { text-shadow: 0.5px 0 0 var(--neon-red), -0.5px 0 0 var(--neon-blue); }
+            4% { text-shadow: 1px 0 0 var(--neon-red), -1px 0 0 var(--neon-blue); }
+            5% { text-shadow: -0.5px 0 0 var(--neon-red), 0.5px 0 0 var(--neon-blue); }
+            100% { text-shadow: 0.5px 0 0 var(--neon-red), -0.5px 0 0 var(--neon-blue); }
+        }
+
+        @keyframes drawScan { to { stroke-dashoffset: 0; opacity: 1; } }
+        
+        @keyframes scanBar {
+            0%, 100% { transform: translateY(-10px); opacity: 0; }
+            10%, 90% { opacity: 1; }
+            50% { transform: translateY(120px); opacity: 1; }
+        }
+
+        @keyframes rotateHud { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        @keyframes matrixScroll {
+            from { background-position: 0 0; }
+            to { background-position: 0 1000px; }
+        }
+
+        .shake-container { animation: shake 0.5s ease-in-out 2; }
+        .glitch-heavy { animation: glitchHeavy 0.2s ease-in-out infinite; }
+        
+        .matrix-bg {
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(255,0,60,0.05) 50%, rgba(0,0,0,0) 100%),
+                        url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHRleHQgeD0iMCIgeT0iMjAiIGZpbGw9InJlZCIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIxMCI+MTExMDEwMTAwMTwvdGV4dD48dGV4dCB4PSIwIiB5PSI0MCIgZmlsbD0icmVkIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjEwIj4wMTAxMTAxMTAxPC90ZXh0Pjwvc3ZnPg==');
+            background-size: 100% 100%, 80px 80px;
+            animation: matrixScroll 30s linear infinite;
+            opacity: 0.15;
+        }
+
+        .hud-ring {
+            border: 2px dashed var(--neon-red);
+            border-radius: 50%;
+            position: absolute;
+            animation: rotateHud 15s linear infinite;
+        }
+
+        .fingerprint-path {
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+            stroke: var(--neon-red);
+            stroke-width: 2;
+            fill: none;
+            opacity: 0;
+            animation: drawScan 1.5s ease-out forwards 1s;
+        }
+
+        .scanner-bar {
+            width: 100%;
+            height: 2px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            position: absolute;
+            animation: scanBar 2s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        .bracket { width: 15px; height: 15px; border: 2px solid var(--neon-red); position: absolute; }
+    </style>
+</head>
+<body class="p-4 md:p-10 min-h-screen flex items-center justify-center relative bg-black">
+
+    <div class="fixed inset-0 matrix-bg pointer-events-none"></div>
+    <div class="fixed inset-0 bg-gradient-to-b from-transparent via-[#ff003c]/10 to-transparent h-32 w-full animate-[scan_8s_linear_infinite] pointer-events-none z-50"></div>
+    <style> @keyframes scan { 0% { transform: translateY(-100vh); } 100% { transform: translateY(100vh); } } </style>
+
+    <main class="relative z-10 w-full max-w-4xl mx-auto p-1 border border-[#ff003c]/30 bg-black/90 backdrop-blur-md shake-container shadow-[0_0_40px_rgba(255,0,60,0.15)]">
+        
+        <div class="bracket top-0 left-0 border-r-0 border-b-0"></div>
+        <div class="bracket top-0 right-0 border-l-0 border-b-0"></div>
+        <div class="bracket bottom-0 left-0 border-r-0 border-t-0"></div>
+        <div class="bracket bottom-0 right-0 border-l-0 border-t-0"></div>
+
+        <div class="p-4 sm:p-6 md:p-10 border border-[#ff003c]/20 relative">
+            
+            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 text-[10px] sm:text-[11px] uppercase tracking-[0.2em] opacity-70 gap-2">
+                <div>SYSTEM_STATUS: <span class="animate-pulse text-[#ff003c]">BREACH_DETECTED</span></div>
+                <div class="text-left sm:text-right">NODE: X-OMEGA // CORE_SEC: 9.98%</div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mb-8">
+                
+                <div class="flex flex-col items-center col-span-1 md:border-r border-[#ff003c]/10 md:pr-8 relative min-h-[180px]">
+                    <h3 class="text-xs uppercase tracking-wider mb-4 text-center">Biometric Scan<br> (AUTH_ID: 99x-A)</h3>
+                    
+                    <div class="relative w-[110px] h-[110px] flex items-center justify-center">
+                        <div class="hud-ring w-[130px] h-[130px]" style="animation-duration: 20s"></div>
+                        <div class="hud-ring w-[100px] h-[100px]" style="animation-duration: 10s; border-style: dotted; border-color: var(--neon-blue); opacity: 0.3"></div>
+                        
+                        <svg width="80" height="80" viewBox="0 0 100 100" class="drop-shadow-[0_0_8px_rgba(255,0,60,0.8)]">
+                            <path class="fingerprint-path" d="M30,70 c0-15,10-25,20-25 c10,0,20,10,20,25 M25,70 c0-18,12-30,25-30 c13,0,25,12,25,30 M20,70 c0-21,15-35,30-35 c15,0,30,14,30,35 M15,70 c0-24,18-40,35-40 c17,0,35,16,35,40 M10,70 c0-27,21-45,40-45 c19,0,40,18,40,45 M50,45 v25" />
+                        </svg>
+                        <div class="scanner-bar"></div>
+                    </div>
+
+                    <div class="mt-6 w-full text-center">
+                        <p class="inline-block text-[10px] font-bold text-black bg-[#ff003c] px-3 py-1 animate-[pulse_0.5s_ease-in-out_infinite] opacity-0 animate-[fadeIn_0.2s_ease-in_2.5s_forwards] tracking-[0.2em] skew-x-[-15deg]">
+                            SCAN_FAILED: IDENTITY_UNKNOWN
+                        </p>
+                    </div>
+                    <style> @keyframes fadeIn { to { opacity: 1; } } </style>
+                </div>
+
+                <div class="col-span-1 md:col-span-2 flex flex-col items-center md:items-start text-center md:text-left">
+                    <p class="text-[9px] sm:text-[10px] uppercase opacity-50 mb-2">> Critical_Intrusion_Alert / protocol_403</p>
+                    
+                    <h1 class="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tighter uppercase glitch-heavy mb-4">
+                        Forbidden
+                    </h1>
+                    
+                    <div class="bg-[#ff003c]/5 p-4 sm:p-5 border border-[#ff003c]/40 w-full">
+                        <p class="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide leading-tight animate-pulse mb-3">
+                            Clearance Level (OMEGA) Required.
+                        </p>
+                        <p class="text-[11px] sm:text-xs text-[#ff003c]/70 leading-relaxed text-justify sm:text-left">
+                             unauthorized access to core memory sectors detected. credentials provided do not match security parameters. your current grid location and system ID have been forwarded to central defense. further bypass attempts will result in node termination.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[9px] sm:text-[10px] uppercase border-t border-[#ff003c]/20 pt-6">
+                <div class="space-y-1">
+                    <p class="opacity-50">> TRACE_ROUTE</p>
+                    <p class="font-bold truncate"><%=ip%></p>
+                </div>
+                <div class="space-y-1">
+                    <p class="opacity-50">> NODE_ID</p>
+                    <p class="font-bold">X-992 // ALFA-7</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="opacity-50">> ENCRYPTION</p>
+                    <p class="font-bold">AES-256-GCM</p>
+                </div>
+                <div class="space-y-1 text-right">
+                    <p class="opacity-50">> TERMINATION</p>
+                    <p class="font-bold text-yellow-500 animate-pulse">00:00:14:88</p>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 sm:gap-5">
+                <button class="flex-1 border-2 border-[#ff003c] bg-[#ff003c] text-black font-extrabold py-4 px-6 text-xs sm:text-sm hover:bg-white hover:border-white hover:scale-[1.02] active:scale-95 transition-all cursor-pointer uppercase skew-x-[-10deg] shadow-[0_0_15px_#ff003c]">
+                    Emergency Shutdown
+                </button>
+                <button class="flex-1 border-2 border-[#ff003c] text-[#ff003c] font-extrabold py-4 px-6 text-xs sm:text-sm hover:bg-[#ff003c]/10 hover:border-[#ff003c]/80 active:scale-95 transition-all cursor-pointer uppercase skew-x-[-10deg]">
+                    Initiate Escalation
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="fixed inset-0 pointer-events-none opacity-10" style="background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 3px 100%;"></div>
+
+</body>
+</html>

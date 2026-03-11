@@ -1,0 +1,52 @@
+import {Schema,model} from "mongoose";
+const paymentSchema=new Schema({
+  order:{
+    type:String,
+    required:true,
+    unique:true,
+  },
+  mode:{
+    type:String,
+    required:true,
+  },
+  company:{
+    type:String,
+    required:true,
+  },
+  amount:{
+    required:true,
+    type:Number
+  },
+  isPaid:{
+    type:Boolean,
+    required:true,
+    default:false,
+  },
+  utr:{
+    type:String
+  },
+  created_at:{
+    type:Date,
+    default:Date.now(),
+    required:true,
+  },
+  MID:{
+    type:String,
+    required:true,
+  },
+  upi_address:{
+    type:String
+  },
+  callback:{
+    type:String,
+    
+  },
+  redirect:{
+    type:String
+  },
+  api_response:{
+    type:String,
+  }
+})
+const paymentModel=model("payment",paymentSchema);
+export default paymentModel;

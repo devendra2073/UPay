@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* 1. Draw the outer green circle */
+        @keyframes stroke-circle {
+            100% { stroke-dashoffset: 0; }
+        }
+        
+        /* 2. Draw the white checkmark */
+        @keyframes stroke-check {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        /* 3. Fill the background green */
+        @keyframes fill-green {
+            100% { box-shadow: inset 0px 0px 0px 80px #22c55e; }
+        }
+
+        .checkmark-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            margin: 2rem auto;
+            /* Start with no shadow, then fill with green */
+            box-shadow: inset 0px 0px 0px #22c55e;
+            animation: fill-green 0.4s ease-in-out 0.4s forwards;
+        }
+
+        .circle-element {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke: #22c55e;
+            fill: none;
+            animation: stroke-circle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .check-element {
+            /* We use a slightly larger dasharray to ensure it covers the path */
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            stroke: #ffffff;
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            /* Starts after the circle begins and before the fill finishes */
+            animation: stroke-check 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.7s forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans antialiased">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-6">
+        
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl shadow-slate-200/50 overflow-hidden">
+            
+            <div class="pt-10 pb-6 flex flex-col items-center">
+                <div class="checkmark-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" class="w-20 h-20">
+                        <circle class="circle-element" cx="26" cy="26" r="25" />
+                        <path class="check-element" d="M14 27l7 7 16-16" />
+                    </svg>
+                </div>
+                
+                <h1 class="text-2xl font-bold text-slate-800 mt-4">Payment Successful!</h1>
+                <p class="text-slate-500 mt-2 text-center px-8 leading-relaxed">
+                    Your order has been confirmed.
+                </p>
+            </div>
+
+            <div class="px-8 py-6 bg-slate-50 border-y border-slate-100">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 text-sm">Payment ID</span>
+                        <span class="text-slate-900 font-mono text-xs font-semibold bg-slate-200 px-2 py-1 rounded"><%=ORDERID%></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 text-sm">Amount Paid</span>
+                        <span class="text-slate-900 font-bold">&#8377; <%=amount%></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 text-sm">Payment Method</span>
+                        <span class="text-slate-900 text-sm font-medium">UPI</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 px-8 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl">🎁</span>
+                    <p class="text-xs text-indigo-900 font-medium">Get $20 off your next order!</p>
+                </div>
+                <button class="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:underline cursor-pointer">Invite</button>
+            </div>
+        </div>
+
+        <button class="mt-8 text-slate-400 hover:text-slate-600 transition-colors text-sm font-medium cursor-pointer">
+            Contact support if you have any questions
+        </button>
+    </div>
+
+</body>
+</html>
