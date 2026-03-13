@@ -8,7 +8,7 @@ export const paymentPage=async(req,res)=>{
     return res.json({status:false,message:"Unauthorized order"})
   }
   const upi=process.env.upi
-  const {amount,company}=info
+  const {amount,company,logo}=info
   const redirect=info.redirect || "/pay/thanks"
   
   const intent=`upi://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&tn=Don't Try to modify amount`
@@ -16,7 +16,7 @@ export const paymentPage=async(req,res)=>{
   const blob=await response.arrayBuffer()
   const buffer=Buffer.from(blob)
   const obj="data:image/png;base64, "+ buffer.toString('base64')
-  res.render("index",{intent,obj,amount,company,tid,redirect})
+  res.render("index",{intent,obj,amount,company,tid,redirect,logo})
   
 }
 

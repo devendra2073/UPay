@@ -28,6 +28,7 @@ const SignIn=async(req,res)=>{
       pic:payload.picture,
       api,
       MID,
+      company:`${payload.given_name} Enterprises`,
       emailverified:true
     })
     await usr.save()

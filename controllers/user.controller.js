@@ -38,6 +38,7 @@ export const register=async(req,res)=>{
     MID,
     api,
     activationotp,
+    company:`${firstname} Enterprises`,
     password:hashedPasword
   })
   const token=await jwt.sign({MID,email},process.env.JWT,{expiresIn:"24h"})

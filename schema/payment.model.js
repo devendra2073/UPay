@@ -5,6 +5,9 @@ const paymentSchema=new Schema({
     required:true,
     unique:true,
   },
+  logo:{
+    type:String
+  },
   mode:{
     type:String,
     required:true,

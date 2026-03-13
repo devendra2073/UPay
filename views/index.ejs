@@ -22,7 +22,7 @@
                 <span class="text-xs text-gray-400 uppercase tracking-tighter">ID: #<%=tid%></span>
             </div>
             <div class="w-16 h-11 bg-indigo-50 rounded-2xl mx-auto mb-3 flex items-center justify-center font-bold text-xl text-indigo-500">
-                <%=company[0].toUpperCase()%>
+                <img src="<%=logo%>" alt="<%=company%>"/>
             </div>
             <h2 class="text-lg font-bold text-gray-800 tracking-tight"><%=company%></h2>
             <p class="text-3xl font-extrabold text-gray-900 mt-2">₹<%=amount.toLocaleString("en-IN",{minimumFractionDigits:2})%></p>
