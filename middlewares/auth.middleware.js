@@ -23,3 +23,24 @@ export const order=async(req,res,next)=>{
   req.amount=amount
   next()
 }
+export const resendOtp=async(req,res,next)=>{
+  const {session}=req.cookies;
+  if(!session) return res.json({status:false,message:"Unauthorized"})
+  const decode=jwt.verify(session,process.env.JWT)
+  if(!decode) return res.json({status:false,message:"Unauthorized"})
+  const usr=await user.findOne({email:decode.email})
+  if(!usr) return res.json({status:false,message:"Unauthorized"})
+  if(usr.otpblockedtime){
+    if(usr.otpblockedtime<Date.now()){
+      req.user=usr
+      return next()
+    }
+    return res.json({status:false,message:"OTP Exausted for your account.Please try after some time"})
+  }
+  req.user=usr
+  return next()
+  
+  
+  
+  
+}

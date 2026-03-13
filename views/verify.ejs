@@ -42,15 +42,68 @@
             <button onclick="verifyOTP()" id="verify-btn" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-200 active:scale-[0.98]">
                 Verify Code
             </button>
-
-            <div class="text-center mt-6">
-                <p class="text-slate-500 text-sm">Didn't receive code? <a href="#" class="text-indigo-600 font-bold hover:underline">Resend</a></p>
-            </div>
+<div class="text-center mt-6">
+    <p class="text-slate-500 text-sm">
+        Didn't receive code? 
+        <button id="resend-btn" onclick="resendOTP()" class="text-indigo-600 font-bold hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed">
+            Resend
+        </button>
+        <span id="timer-text" class="text-slate-400 ml-1 hidden">(<span id="timer">60</span>s)</span>
+    </p>
+</div>
         </div>
     </div>
 
     <script>
         const inputs = document.querySelectorAll('.otp-input');
+         
+    let timerInterval;
+    const resendBtn = document.getElementById('resend-btn');
+    const timerText = document.getElementById('timer-text');
+    const timerDisplay = document.getElementById('timer');
+
+    function startTimer(seconds = 60) {
+        // Reset UI state
+        resendBtn.disabled = true;
+        timerText.classList.remove('hidden');
+        let timeLeft = seconds;
+        
+        timerDisplay.innerText = timeLeft;
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                resendBtn.disabled = false;
+                timerText.classList.add('hidden');
+            }
+        }, 1000);
+    }
+
+    async function resendOTP() {
+        // Prevent action if already counting down
+        if (resendBtn.disabled) return;
+
+        try {
+            // Optional: Call your backend to trigger a new email
+            const resp= await fetch('/user/resend-otp', { method: 'POST' })
+             const res=await resp.json()
+             if(res.status){
+               tst(res.message);
+            startTimer(60); // Start 60s cooldown
+            return 0;
+             }
+          tst("Failed to resend code", true);  
+            
+        } catch (err) {
+            tst("Failed to resend code", true);
+        }
+    }
+
+    // Optional: Start the timer automatically when page loads
+     window.onload = () => startTimer(30);
         
         function tst(text, isError = false) {    
             Toastify({

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPay | Sign In</title>
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center">
+        <h1 class="text-2xl font-bold text-slate-900 mb-2 italic text-blue-600">UPay</h1>
+        <p class="text-slate-500 text-sm mb-8">Access your payment dashboard</p>
+
+        <div class="flex justify-center mb-6">
+            <div id="g_id_onload"
+                 data-client_id="382846360562-rvchitsflgo2tnmqlk5o7ueps7p877kt.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+              Log
+            </div>
+
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="pill"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left"
+                 data-width="320">
+            </div>
+        </div>
+
+        <div class="relative flex items-center py-4">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink mx-4 text-slate-400 text-xs uppercase tracking-widest">or</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <a href="/login-email" class="text-sm text-blue-600 font-medium hover:underline">
+            Sign in with email and password
+        </a>
+    </div>
+
+    <script>
+        function handleCredentialResponse(response) {
+            // This is the JWT token sent by Google
+            const id_token = response.credential;
+            
+            // Send this to your Express backend
+            fetch('/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: id_token })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) window.location.href = '/dashboard';
+            });
+        }
+    </script>
+</body>
+</html>

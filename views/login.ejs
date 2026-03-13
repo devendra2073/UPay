@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UPay - Login & Registration</title>
+    <script src="/js/google.js" defer=""></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
     <style>
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
@@ -56,11 +58,16 @@
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
                     <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
                 </div>
+                
+                <div class="flex justify-center py-2">
+                    <div class="g-recaptcha" data-sitekey="6Lcaq4csAAAAAJwVD8N3_NP8ToFWYBnrU7baLOnc"></div>
+                </div>
+
                 <div class="flex items-center justify-between text-sm">
                     <label class="flex items-center text-slate-600 cursor-pointer">
                         <input type="checkbox" name="remember" class="mr-2 rounded border-gray-300 text-indigo-600"> Remember me
                     </label>
-                    <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-700">Forgot password?</a>
+                    <a href="/user/forgot-password" class="text-indigo-600 font-semibold hover:text-indigo-700">Forgot password?</a>
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-200 active:scale-[0.98] flex items-center justify-center">
                     <span>Sign In</span>
@@ -86,6 +93,11 @@
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Create Password</label>
                     <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
                 </div>
+
+                <div class="flex justify-center py-2">
+                    <div class="g-recaptcha" data-sitekey="6Lcaq4csAAAAAJwVD8N3_NP8ToFWYBnrU7baLOnc"></div>
+                </div>
+
                 <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-200 mt-2 flex items-center justify-center">
                     <span>Create Account</span>
                 </button>
@@ -98,14 +110,10 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <button class="flex items-center justify-center gap-2 border border-slate-200 py-2.5 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-600">
-                    <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-4 h-4" alt="Google"> Google
-                </button>
-                <button class="flex items-center justify-center gap-2 border border-slate-200 py-2.5 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-600">
-                    <img src="https://www.svgrepo.com/show/448234/linkedin.svg" class="w-4 h-4" alt="LinkedIn"> LinkedIn
-                </button>
-            </div>
+        
+                <div id="buttonDiv"></div>
+               
+            
         </div>
 
         <p class="text-center mt-8 text-slate-500 font-medium">
@@ -113,9 +121,7 @@
             <button id="toggle-btn" class="text-indigo-600 font-bold hover:underline ml-1 cursor-pointer">Sign up</button>
         </p>
     </div>
-
     <script>
-        // --- TOAST NOTIFICATION HELPER ---
         function tst(text, type = 'success') {    
             Toastify({
                 text: text,
@@ -123,11 +129,8 @@
                 close: true,
                 gravity: "top",
                 position: "right",
-                stopOnFocus: true,
                 style: {
-                    background: type === 'success' 
-                        ? "linear-gradient(to right, #00b09b, #96c93d)" 
-                        : "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    background: type === 'success' ? "#4f46e5" : "#ef4444",
                     borderRadius: "12px",
                 }
             }).showToast();
@@ -143,13 +146,12 @@
 
         let isLogin = true;
 
-        // --- TOGGLE LOGIC ---
         toggleBtn.addEventListener('click', (e) => {
             e.preventDefault();
             isLogin = !isLogin;
-            
             loginForm.classList.toggle('hidden-form');
             registerForm.classList.toggle('hidden-form');
+            grecaptcha.reset(); // Reset captcha when switching forms
             
             if (isLogin) {
                 pageTitle.innerText = "Welcome Back";
@@ -164,17 +166,24 @@
             }
         });
 
-        // --- API HANDLER ---
         async function handleFormSubmit(event, endpoint) {
             event.preventDefault();
             const form = event.target;
+            
+            // --- reCAPTCHA Validation ---
+            const captchaResponse = grecaptcha.getResponse(isLogin ? 0 : 1);
+            if (!captchaResponse) {
+                return tst("Please verify that you are not a robot!", "error");
+            }
+
             const submitBtn = form.querySelector('button[type="submit"]');
             const btnSpan = submitBtn.querySelector('span');
-            
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            
+            // Send captcha response to backend
+            data['g-recaptcha-response'] = captchaResponse;
 
-            // Loading State
             const originalText = btnSpan.innerText;
             submitBtn.disabled = true;
             btnSpan.innerHTML = `<span class="spinner"></span> Processing...`;
@@ -190,35 +199,73 @@
 
                 if (response.ok && result.status) {
                     tst(result.message || "Action Successful!");
-                    
-                    // Specific Redirection Logic
                     setTimeout(() => {
-                        if (endpoint === "/user/register") { 
-                            window.location.href = "/user/verify";
-                        } else {
-                            window.location.href = "/user/dashboard";
-                        }
+                        window.location.href = (endpoint === "/user/register") ? "/user/verify" : "/user/dashboard";
                     }, 1200);
-
                 } else {
                     tst(result.message || "An error occurred", "error");
-                    if (result.rdr)
-                    {
-                      location.href=result.rdr
-                    }
+                    grecaptcha.reset(); // Reset on error so they can try again
+                    if (result.rdr) location.href = result.rdr;
                 }
             } catch (error) {
-                console.error("Submission Error:", error);
-                tst("Could not connect to the server. Please try again later.", "error");
+                tst("Server connection failed.", "error");
+                grecaptcha.reset();
             } finally {
                 submitBtn.disabled = false;
                 btnSpan.innerText = originalText;
             }
         }
 
-        // Event Listeners
         loginForm.addEventListener('submit', (e) => handleFormSubmit(e, '/user/login'));
         registerForm.addEventListener('submit', (e) => handleFormSubmit(e, '/user/register'));
+          
+        async function handleCredentialResponse(response) {
+          const res=  await fetch("/user/SignInWithGoogle",{
+              method:"post",
+              headers:{
+                "Content-Type":"application/json"
+              },
+              body:JSON.stringify({idToken:response.credential})
+            })
+            const rs=await res.json()
+            console.log(rs)
+            if(rs.status){
+              tst(rs.message)
+              setTimeout(()=>{
+                location.href="/user/dashboard"
+              },2000)
+              
+            }
+            else{
+              tst(rs.message)
+            }
+            
+            // Yahan se token backend ko bhejo verify karne ke liye
+        }
+
+        window.onload = function () {
+            // 2. Initialize Google Identity
+            google.accounts.id.initialize({
+                client_id: "382846360562-rvchitsflgo2tnmqlk5o7ueps7p877kt.apps.googleusercontent.com", // <-- APNA ID YAHA DALO
+                callback: handleCredentialResponse,
+                use_fedcm_for_prompt: true, // Naye browser standard ke liye
+                auto_select: false,
+                itp_support:true// User ko choose karne do
+            });
+
+            // 3. One Tap Prompt dikhao
+            google.accounts.id.prompt((notification) => {
+                if (notification.isNotDisplayed()) {
+                    console.warn("One Tap displayed nahi hua. Reason: " + notification.getNotDisplayedReason());
+                }
+            });
+
+            // 4. Fallback Button (Extra safety ke liye)
+            google.accounts.id.renderButton(
+                document.getElementById("buttonDiv"),
+                { theme: "outline", size: "large", shape: "pill" }
+            );
+        };
     </script>
 </body>
 </html>

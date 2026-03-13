@@ -21,21 +21,25 @@ const userSchema=new Schema({
   },
   password:{
     type:String,
-    required:true
   },
   activationotp:{
     type:Number,
     required:true,
     default:0,
   },
+  
+  pic:{
+    type:String
+  }
+  ,
   activationotpexpireat:{
     type:Number,
     default:Date.now()+10*60*1000
   },
-  resetotp:{
-    type:Number
+  resettoken:{
+    type:String
   },
-  resetotpexpireat:{
+  resettokenexpireat:{
     type:Number
   },
   emailverified:{
@@ -82,6 +86,9 @@ const userSchema=new Schema({
   company:{
     type:String,
     default:"Your Company Name"
+  },
+  otpblockedtime:{
+    type:Number
   }
 })
 
