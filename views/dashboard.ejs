@@ -7,6 +7,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="/js/trig.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -132,8 +133,9 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     </button>
                     <div class="relative group">
-                        <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=4f46e5&color=fff&bold=true`%>" class="w-10 h-10 rounded-2xl ring-4 ring-white shadow-md">
+                        <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=4f46e5&color=fff&bold=true`%>" class="w-10 h-10 rounded-2xl ring-4 ring-white shadow-md"id="prfl">
                         <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+              <div id="menuc"></div>
                     </div>
                 </div>
             </header>
@@ -711,6 +713,13 @@ DepositPopup.open()
 }
         // Boot
         window.onload = () => Terminal.init();
+        const myMenuItems = [
+    { name: "Logout", link: "/user/logout", isLogout: true }
+];
+
+window.onload = () => {
+    setupDynamicMenu('prfl', 'menuc', myMenuItems);
+};
         
     </script>
    

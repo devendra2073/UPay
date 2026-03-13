@@ -256,3 +256,8 @@ export const resend=async(req,res)=>{
   const maskmail=`${msk}@${usr.email.split("@")[1]}`
   return res.json({status:true,message:`OTP Send to ${maskmail}`})
 }
+
+export const logout=async(req,res)=>{
+  res.clearCookie("session")
+  res.status(301).redirect("/user/login")
+}
