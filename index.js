@@ -1,6 +1,7 @@
 import express from "express";
 import dot from "dotenv"
 import fs from "fs"
+import cloudinary from "cloudinary"
 import mongoose from "mongoose"
 import path from "path"
 import apirouter from "./routes/api.routes.js"
@@ -10,6 +11,12 @@ import payrouter from "./routes/pay.routes.js"
 dot.config()
 const PORT=process.env.PORT || 3000
 const URI=process.env.MONGO_URI || null
+cloudinary.config({ 
+  cloud_name: process.env.my_cloud_name, 
+  api_key: process.env.my_key, 
+  api_secret: process.env.my_secret
+});
+
 if (URI){
   await mongoose.connect(URI)
 }

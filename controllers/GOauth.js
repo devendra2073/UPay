@@ -1,7 +1,6 @@
 import {OAuth2Client} from "google-auth-library"
-import fs from 'fs/promises'
+import upload from "../utils/cloud.js"
 import crypto from "crypto"
-import path from "path"
 import user from "../schema/user.model.js"
 import log from "../utils/logger.js"
 import jwt from "jsonwebtoken"
@@ -26,14 +25,12 @@ const SignIn=async(req,res)=>{
     const blb=await rd.blob()
     const arb=await blb.arrayBuffer()
     const buff=Buffer.from(arb)
-    const fn= crypto.randomBytes(20)
-    const filename=fn.toString("hex")+"."+blb.type.split("/")[1]
-    await fs.writeFile(path.join(import.meta.dirname,'../public/assets/',filename),buff)
+    const cn=await upload(buff)
     const usr=new user({
       email:payload.email,
       firstname:payload.given_name,
       lastname:payload.family_name,
-      pic:`/assets/${filename}`,
+      pic:cn.secure_url,
       api,
       MID,
       company:`${payload.given_name} Enterprises`,
