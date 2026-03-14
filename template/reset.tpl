@@ -61,7 +61,7 @@
                                 123 Fintech Plaza, Silicon Valley, CA
                             </p>
                             <div style="margin-top: 15px;">
-                                <a href="#" style="color: #64748b; text-decoration: underline; font-size: 12px;">Privacy Policy</a>
+                                <a href="https://u-pay-seven.vercel.app/privacy.html" style="color: #64748b; text-decoration: underline; font-size: 12px;">Privacy Policy</a>
                                 <span style="color: #cbd5e1; padding: 0 8px;">|</span>
                                 <a href="#" style="color: #64748b; text-decoration: underline; font-size: 12px;">Support Center</a>
                             </div>

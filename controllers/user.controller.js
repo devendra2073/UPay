@@ -200,7 +200,7 @@ export const sendResetMail=async(req,res)=>{
   usr.resettokenexpireat=Date.now()+60*60*60;
   const byte=crypto.randomBytes(25)
   const token=byte.toString("hex")
-  const link=`http://localhost:8000/user/reset/${token}`
+  const link=`http://u-pay-seven.vercel.app/user/reset/${token}`
   usr.resettoken=token
   const html=await parser("reset",{firstname:usr.firstname,link})
   await mailer({email:usr.email,firstname:usr.firstname,html,subject:"Reset your Upay password"})
