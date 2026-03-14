@@ -263,8 +263,8 @@ export const logout=async(req,res)=>{
   res.status(301).redirect("/user/login")
 }
 export const paytmconf=async(req,res)=>{
-  if(req.user?.paytm?.MID) return res.render("paytmconf",{paytm:req.user.paytm})
-  return res.render("paytmconf")
+ return res.render("paytmconf",{paytm:req.user?.paytm})
+
 }
 export const paytmcnf=async(req,res)=>{
   const {MID,UPI}=req.body
