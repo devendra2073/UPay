@@ -54,6 +54,7 @@ const SignIn=async(req,res)=>{
     return res.json({status:true,message:"Signing In..."})
     
   } catch (e) {
+    console.log(e)
     log(req,e.message)
     return res.json({status:false,message:"Something went wrong"})
   }
