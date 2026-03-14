@@ -24,7 +24,7 @@ const SignIn=async(req,res)=>{
     const api=buffer.toString("hex")
     const rd=await fetch(payload.picture)
     const blb=await rd.blob()
-    const arb=blb.arrayBuffer()
+    const arb=await blb.arrayBuffer()
     const buff=Buffer.from(arb)
     const fn= crypto.randomBytes(20)
     const filename=fn.toString("hex")+"."+blb.type.split("/")[1]
