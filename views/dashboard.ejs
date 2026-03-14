@@ -184,6 +184,16 @@
                                 </div>
                             </div>
                             <% } %>
+                            <div class="u-card p-6 flex items-center justify-between border-slate-200" onclick="location.href='dashboard/paytm'">
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Provider</p>
+                                    <h4 class="text-lg font-extrabold text-slate-800 mt-1"><%=user.provider?user.provider:""%></h4>
+                                    <p class="font-mono text-xs text-slate-500 font-bold tracking-tighter"><%=user.paytm?.UPI?user.paytm?.UPI:"UPI is not linked"%></p>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-2xl">
+                                  <img src="/assets/<%=user.paytm?.UPI?"paytm":"not"%>.png" alt="Paytm Logo" class="h-12"/>
+                                </div>
+                            </div>
                             
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="u-card p-6 border-slate-200">

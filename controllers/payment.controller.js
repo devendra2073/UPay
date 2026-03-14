@@ -1,7 +1,8 @@
 import {auth}from "../middlewares/auth.middleware.js"
 import paymentModel from "../schema/payment.model.js"
 const createOrder=async(req,res)=>{
-  const {MID,company,redirect,pic}=req.user;
+  const {MID,company,redirect,pic,paytm}=req.user;
+  const paytmdata={MID:paytm.MID?paytm.MID:process.env.mid,UPI:paytm.UPI?paytm.UPI:process.env.upi}
   const amount=req.amount;
 const mode=req.mode
 const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=${company}`
@@ -13,7 +14,8 @@ const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=
     MID,
     mode,
     company,
-    redirect
+    redirect,
+    paytm:paytmdata
   })
   await pay.save()
   res.json({status:true,order,message:"Order Created",link:"https://u-pay-seven.vercel.app/pay/"+order,timestamp:Date.now()})

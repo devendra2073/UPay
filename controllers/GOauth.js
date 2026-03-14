@@ -1,5 +1,7 @@
 import {OAuth2Client} from "google-auth-library"
+import fs from 'fs/promises'
 import crypto from "crypto"
+import path from "path"
 import user from "../schema/user.model.js"
 import log from "../utils/logger.js"
 import jwt from "jsonwebtoken"
@@ -16,16 +18,22 @@ const SignIn=async(req,res)=>{
     })
     const payload=ticket.getPayload()
     const exuser=await user.findOne({email:payload.email})
-    
     if(!exuser){
       const MID=genMID();
       const buffer=await crypto.randomBytes(16)
     const api=buffer.toString("hex")
+    const rd=await fetch(payload.picture)
+    const blb=await rd.blob()
+    const arb=blb.arrayBuffer()
+    const buff=Buffer.from(arb)
+    const fn= crypto.randomBytes(20)
+    const filename=fn.toString("hex")+"."+blb.type.split("/")[1]
+    await fs.writeFile(path.join(import.meta.dirname,'../public/assets/',filename),buff)
     const usr=new user({
       email:payload.email,
       firstname:payload.given_name,
       lastname:payload.family_name,
-      pic:payload.picture,
+      pic:`/assets/${filename}`,
       api,
       MID,
       company:`${payload.given_name} Enterprises`,

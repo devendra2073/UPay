@@ -7,7 +7,7 @@ export const paymentPage=async(req,res)=>{
   if (!info){
     return res.json({status:false,message:"Unauthorized order"})
   }
-  const upi=process.env.upi
+  const upi=info?.paytm?.UPI?info.paytm.UPI:process.env.upi
   const {amount,company,logo}=info
   const redirect=info.redirect || "/pay/thanks"
   
@@ -29,7 +29,7 @@ export const paymentStatus=async(req,res)=>{
   const amount=dbresp?.amount
   const callback=dbresp?.callback
   const PAYTM="https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData="
-  const PAYTMMID=process.env.mid;
+  const PAYTMMID=dbresp?.paytm?.MID?dbresp.paytm.MID:process.env.mid;
   if(!PAYTMMID) res.json({status:false,message:"Internal Server Error ",errorCode:2})
   const data=PAYTM+JSON.stringify({MID:PAYTMMID,ORDERID})
   const response=await fetch(data)

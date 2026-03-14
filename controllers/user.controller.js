@@ -262,3 +262,15 @@ export const logout=async(req,res)=>{
   res.clearCookie("session")
   res.status(301).redirect("/user/login")
 }
+export const paytmconf=async(req,res)=>{
+  if(req.user?.paytm?.MID) return res.render("paytmconf",{paytm:req.user.paytm})
+  return res.render("paytmconf")
+}
+export const paytmcnf=async(req,res)=>{
+  const {MID,UPI}=req.body
+  if(!MID || !UPI) return res.json({status:false,message:"Invalid Details"})
+  const usr=await user.findOne({email:req.user.email})
+  usr.paytm={MID,UPI}
+  await usr.save()
+  res.json({status:true,message:"Configuration Done Please Deposit an amount to check that your PG is working or not"})
+}

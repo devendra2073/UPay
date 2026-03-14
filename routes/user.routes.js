@@ -3,7 +3,7 @@ import {auth,order,resendOtp} from "../middlewares/auth.middleware.js"
 import recaptcha from "../middlewares/recaptcha.middleware.js"
 import pay from "../controllers/payment.controller.js"
 import unauth from "../middlewares/unauth.middleware.js"
-import {loginPage,register,login,verify,verifyPage,dashboard,bank,transections,balance,profile,callback,forgot,sendResetMail,reset,updatePassword,resend,logout} from "../controllers/user.controller.js"
+import {loginPage,register,login,verify,verifyPage,dashboard,bank,transections,balance,profile,callback,forgot,sendResetMail,reset,updatePassword,resend,logout,paytmconf,paytmcnf} from "../controllers/user.controller.js"
 import SignIn from "../controllers/GOauth.js"
 const router=Router()
 router.use("/login",unauth)
@@ -23,6 +23,8 @@ router.post("/resend-otp",resend)
 router.use("/dashboard",auth)
 router.get("/dashboard",dashboard)
 router.get("/dashboard/transections",transections)
+router.get("/dashboard/paytm",paytmconf)
+router.post("/dashboard/paytm",paytmcnf)
 router.get("/dashboard/balance",balance)
 router.post("/dashboard/bank",bank)
 router.post("/dashboard/profile",profile)

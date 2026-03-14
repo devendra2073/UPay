@@ -49,6 +49,10 @@ const paymentSchema=new Schema({
   },
   api_response:{
     type:String,
+  },
+  paytm:{
+    MID:String,
+    UPI:String
   }
 })
 const paymentModel=model("payment",paymentSchema);

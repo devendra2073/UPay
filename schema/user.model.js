@@ -89,6 +89,10 @@ const userSchema=new Schema({
   },
   otpblockedtime:{
     type:Number
+  },
+  paytm:{
+    MID:String,
+    UPI:String
   }
 })
 
