@@ -12,7 +12,7 @@ export const paymentPage=async(req,res)=>{
   const redirect=info.redirect || "/pay/thanks"
   
   const intent=`upi://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&tn=Don't Try to modify amount`
-  const response=await fetch("https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+encodeURIComponent(intent))
+  const response=await fetch("https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(intent))
   const blob=await response.arrayBuffer()
   const buffer=Buffer.from(blob)
   const obj="data:image/png;base64, "+ buffer.toString('base64')
@@ -44,7 +44,17 @@ export const paymentStatus=async(req,res)=>{
     usr.wallet+=amount;
     await usr.save()
     if (callback){
-      await fetch(`${callback}?order=${ORDERID}`)
+      await fetch(callback,{
+        method:'post',
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          ORDERID,
+          amount,
+          UTR:info.BANKTXNID
+        })
+      })
     }
     const payinfo=jwt.sign({amount,ORDERID},process.env.JWT,{expiresIn:"1h"})
     res.cookie("payment_session",payinfo,{

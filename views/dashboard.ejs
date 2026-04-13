@@ -506,7 +506,7 @@
                 // Simulate API Latency
                 await fetch("/user/dashboard/balance").then(e=>{return e.json()}).then(e=> {
                     
-                    this.state.balance=e.wallet;
+                    this.state.balance=e.wallet ||0;
                     
                     gsap.to(this.state, {
                         balance: this.state.balance,
