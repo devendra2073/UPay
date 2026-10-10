@@ -18,7 +18,7 @@ const phonepe  =`phonepe://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&mc
   const blob=await response.arrayBuffer()
   const buffer=Buffer.from(blob)
   const obj="data:image/png;base64, "+ buffer.toString('base64')
-  res.render("index",{intent,obj,amount,company,tid,redirect,logo})
+  res.render("index",{intent,obj,amount,company,tid,redirect,logo,paytmp,phonepe})
   
 }
 
