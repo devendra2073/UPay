@@ -12,6 +12,8 @@ export const paymentPage=async(req,res)=>{
   const redirect=info.redirect || "/pay/thanks"
   
   const intent=`upi://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&tn=Don't Try to modify amount`
+  const paytmp=`paytmmp://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&tn=Don't Try to modify amount`
+const phonepe  =`phonepe://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&mc=5651&tn=Don't Try to modify amount`
   const response=await fetch("https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(intent))
   const blob=await response.arrayBuffer()
   const buffer=Buffer.from(blob)
