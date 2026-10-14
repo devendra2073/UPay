@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,6 +16,7 @@
 
     <div id="payment-card" class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 relative">
         
+        <!-- Header Info -->
         <div class="p-4 text-center border-b border-gray-50">
             <div class="flex justify-between items-center mb-4">
                 <span class="text-xs font-bold tracking-widest text-indigo-600 uppercase">Upay Gateway</span>
@@ -31,6 +32,7 @@
             <p class="text-3xl font-extrabold text-gray-900 mt-2">₹<%=amount.toLocaleString("en-IN",{minimumFractionDigits:2})%></p>
         </div>
 
+        <!-- QR & App Selection Section -->
         <div class="p-4 text-center">
             <p class="text-sm font-medium text-gray-500 mb-3">Scan QR or select an app to pay</p>
             <div class="qr-gradient p-1 inline-block rounded-2xl shadow-lg mb-2">
@@ -39,7 +41,7 @@
                 </div>
             </div>
             
-            <button onclick="downloadQR()" class="flex items-center justify-center mx-auto mb-6 text-[10px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-widest transition-all active:scale-95">
+            <button onclick="downloadQR()" class="flex items-center justify-center mx-auto mb-6 text-[10px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-widest transition-all active:scale-95 cursor-pointer">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Save QR to Gallery
             </button>
@@ -67,6 +69,7 @@
             </div>
         </div>
 
+        <!-- Footer / Timer -->
         <div class="bg-gray-50 p-4 flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             <div class="flex items-center">
                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
@@ -78,34 +81,54 @@
             </div>
         </div>
 
+        <!-- Overlays (Success / Timeout / Failed) -->
         <div id="popup-overlay" class="hidden absolute inset-0 modal-overlay z-50 flex items-center justify-center p-6">
+            
+            <!-- Success Popup -->
             <div id="success-popup" class="hidden bg-white rounded-3xl p-8 text-center w-full shadow-2xl">
                 <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-800">Payment Success!</h3>
                 <p class="text-gray-500 text-sm mt-2">Transfer verified. Redirecting...</p>
-                <p class="text-gray-300 text-sm mt-2"><b>UTR:</b> <span id="utr"></span></p>
+                <p class="text-gray-400 text-xs mt-3"><b>UTR:</b> <span id="utr" class="font-mono text-gray-700"></span></p>
             </div>
+
+            <!-- Timeout Popup -->
             <div id="timeout-popup" class="hidden bg-white rounded-3xl p-8 text-center w-full shadow-2xl">
                 <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-800">Time's Up!</h3>
                 <p class="text-gray-500 text-sm mt-2">For your security, this session has expired.</p>
-                <button onclick="location.reload()" class="mt-6 w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Refresh Page</button>
+                <button onclick="location.reload()" class="mt-6 w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition cursor-pointer">Refresh Page</button>
             </div>
+
+            <!-- Failed Popup -->
+            <div id="failed-popup" class="hidden bg-white rounded-3xl p-8 text-center w-full shadow-2xl">
+                <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Payment Failed</h3>
+                <p id="failed-message" class="text-gray-500 text-sm mt-2">Transaction could not be completed.</p>
+                <button onclick="location.reload()" class="mt-6 w-full py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 transition cursor-pointer">Try Again</button>
+            </div>
+
         </div>
     </div>
+
     <script>
-        let interval;
+        let pollTimer = null;
+        let isPollingStopped = false;
         let timeInSeconds = 300; 
+
         const timerElement = document.getElementById('timer');
         const overlay = document.getElementById('popup-overlay');
         const timeoutPopup = document.getElementById('timeout-popup');
         const successPopup = document.getElementById('success-popup');
+        const failedPopup = document.getElementById('failed-popup');
 
-        // Timer Logic
+        // 1. Timer Countdown
         const countdown = setInterval(() => {
             const minutes = Math.floor(timeInSeconds / 60);
             const seconds = timeInSeconds % 60;
@@ -113,6 +136,7 @@
 
             if (timeInSeconds <= 0) {
                 clearInterval(countdown);
+                stopPolling();
                 showPopup('timeout');
             }
             timeInSeconds--;
@@ -122,13 +146,19 @@
             overlay.classList.remove('hidden');
             if (type === 'timeout') timeoutPopup.classList.remove('hidden');
             if (type === 'success') successPopup.classList.remove('hidden');
+            if (type === 'failed') failedPopup.classList.remove('hidden');
         }
 
-        // New Download Functionality
+        function stopPolling() {
+            isPollingStopped = true;
+            if (pollTimer) clearTimeout(pollTimer);
+            clearInterval(countdown);
+        }
+
+        // 2. QR Code Image Download
         async function downloadQR() {
             const img = document.getElementById('qr-image');
             try {
-                // We draw to a canvas to ensure the file is named correctly upon download
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = img.naturalWidth || 500;
@@ -140,7 +170,6 @@
                 link.download = `Upay_QR_${Date.now()}.png`;
                 link.click();
             } catch (err) {
-                // Fallback for strict CORS
                 const link = document.createElement('a');
                 link.href = img.src;
                 link.download = 'payment_qr.png';
@@ -148,22 +177,47 @@
             }
         }
 
-        // Status Polling
-        const getStatus = async () => {
+        // 3. Reliable Recursive Polling
+        const checkPaymentStatus = async () => {
+            if (isPollingStopped) return;
+
             try {
                 const response = await fetch("/pay/status/<%=tid%>");
                 const data = await response.json();
-                if (data.status) {
+
+                // Payment SUCCESS
+                if (data.status === true || data.state === "SUCCESS") {
+                    stopPolling();
+                    document.getElementById("utr").innerText = data.utr || "Verified";
                     showPopup("success");
-                    document.getElementById("utr").innerText = data.utr;
-                    clearInterval(interval);
-                    clearInterval(countdown);
-                    setTimeout(() => { location.href = "<%=redirect%>" }, 4000);
+                    
+                    setTimeout(() => { 
+                        location.href = "<%=redirect%>"; 
+                    }, 3000);
+                    return;
                 }
-            } catch (e) { console.error("Status check failed", e); }
+
+                // Payment FAILED
+                if (data.state === "FAILED") {
+                    stopPolling();
+                    document.getElementById("failed-message").innerText = data.message || "Payment was rejected or cancelled.";
+                    showPopup("failed");
+                    return;
+                }
+
+            } catch (e) {
+                console.error("Polling network error:", e);
+            }
+
+            // Agli call sirf tabhi trigger hogi jab pichli call complete ho chuki ho
+            if (!isPollingStopped) {
+                pollTimer = setTimeout(checkPaymentStatus, 3000);
+            }
         };
 
-        interval = setInterval(getStatus, 2000);
+        // Page load ke 2 second baad polling shuru karein
+        pollTimer = setTimeout(checkPaymentStatus, 2000);
     </script>
 </body>
 </html>
+
