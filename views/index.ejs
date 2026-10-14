@@ -184,11 +184,12 @@
             try {
                 const response = await fetch("/pay/status/<%=tid%>");
                 const data = await response.json();
-
+               const aud= new Audio("/assets/done.mp3")
                 // Payment SUCCESS
                 if (data.status === true || data.state === "SUCCESS") {
                     stopPolling();
                     document.getElementById("utr").innerText = data.utr || "Verified";
+                    aud.play()
                     showPopup("success");
                     
                     setTimeout(() => { 
