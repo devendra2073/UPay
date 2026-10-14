@@ -157,13 +157,14 @@ export const paymentStatus = async (req, res) => {
       
       });
 
-      return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID });
+      return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID ,payinfo});
     }
 
     // Agar transaction explicitly Fail ho chuki hai
     if (info.STATUS === "TXN_FAILURE") {
       return res.status(200).json({
         status: false,
+        info
         
       
       });
