@@ -6,7 +6,6 @@ export const paymentPage = async (req, res) => {
   try {
     const { tid } = req.params;
     const info = await paymentModel.findOne({ order: tid });
-
     if (!info) {
       return res.status(404).json({ status: false, message: "Order not found" });
     }
