@@ -1,4 +1,3 @@
-
 import QRCode from "qrcode";
 import jwt from "jsonwebtoken";
 import paymentModel from "../schema/payment.model.js";
@@ -7,10 +6,15 @@ import user from "../schema/user.model.js";
 export const paymentPage = async (req, res) => {
   try {
     const { tid } = req.params;
-    const info = await paymentModel.findOne({ order: tid, isPaid: false });
+    const info = await paymentModel.findOne({ order: tid });
 
     if (!info) {
-      return res.status(404).json({ status: false, message: "Order not found or already paid" });
+      return res.status(404).json({ status: false, message: "Order not found" });
+    }
+
+    // Agar user pehle se pay kar chuka hai, to direct redirect page par bhej dein
+    if (info.isPaid) {
+      return res.redirect(info.redirect || "/pay/thanks");
     }
 
     const upi = info.paytm?.UPI || process.env.UPI_ID;
@@ -47,19 +51,48 @@ export const paymentStatus = async (req, res) => {
   try {
     const { ORDERID } = req.params;
     if (!ORDERID) {
-      return res.status(400).json({ status: false, message: "Order ID is required" });
+      return res.status(400).json({ status: false, state: "ERROR", message: "Order ID is required" });
     }
 
-    const dbresp = await paymentModel.findOne({ order: ORDERID, isPaid: false });
+    // 1. Order ko find karein (isPaid filter hata kar)
+    const dbresp = await paymentModel.findOne({ order: ORDERID });
     if (!dbresp) {
-      return res.status(404).json({ status: false, message: "Order not found or already processed" });
+      return res.status(404).json({ status: false, state: "NOT_FOUND", message: "Order not found" });
     }
+
+    // 2. CHECK: Agar order pehle hi verify ho chuka hai (Instant Response for Polling)
+    if (dbresp.isPaid) {
+      return res.status(200).json({
+        status: true,
+        state: "SUCCESS",
+        message: "Payment already verified",
+        utr: dbresp.utr
+      });
+    }
+
+    // 3. THROTTLING: Gateway ko har 1-2 sec me baar-baar call hone se bachayein
+    const now = Date.now();
+    const lastChecked = dbresp.lastCheckedAt ? new Date(dbresp.lastCheckedAt).getTime() : 0;
+    
+    // Agar pichli call ko abhi 3 second nahi hue hain, to Paytm ko skip karein
+    if (now - lastChecked < 3000) {
+      return res.status(200).json({
+        status: false,
+        state: "PENDING",
+        message: "Awaiting payment confirmation"
+      });
+    }
+
+    // Last checked timestamp update karein
+    dbresp.lastCheckedAt = new Date();
+    await dbresp.save();
 
     const paytmMid = dbresp.paytm?.MID || process.env.PAYTM_MID;
     if (!paytmMid) {
-      return res.status(500).json({ status: false, message: "Merchant ID configuration missing", errorCode: 2 });
+      return res.status(500).json({ status: false, state: "ERROR", message: "Merchant ID configuration missing", errorCode: 2 });
     }
 
+    // 4. Paytm Legacy Status Call
     const verifyUrl = `https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData=${encodeURIComponent(
       JSON.stringify({ MID: paytmMid, ORDERID })
     )}`;
@@ -70,62 +103,83 @@ export const paymentStatus = async (req, res) => {
     const isAmountValid = parseFloat(info.TXNAMOUNT) === parseFloat(dbresp.amount);
     const isStatusSuccess = info.STATUS === "TXN_SUCCESS";
 
-    if (!isStatusSuccess || !isAmountValid) {
-      return res.json({ status: false, message: "Transaction incomplete or amount mismatch" });
-    }
-
-    // Atomic update to prevent duplicate wallet increments
-    const updatedOrder = await paymentModel.findOneAndUpdate(
-      { order: ORDERID, isPaid: false },
-      {
-        $set: {
-          isPaid: true,
-          api_response: JSON.stringify(info),
-          utr: info.BANKTXNID,
+    // Agar payment SUCCESS ho gayi hai aur amount match karta hai
+    if (isStatusSuccess && isAmountValid) {
+      
+      // Atomic update - sirf tabhi update hoga agar kisi dusri parallel request ne update na kiya ho
+      const updatedOrder = await paymentModel.findOneAndUpdate(
+        { order: ORDERID, isPaid: false },
+        {
+          $set: {
+            isPaid: true,
+            api_response: JSON.stringify(info),
+            utr: info.BANKTXNID || "",
+          },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
 
-    if (!updatedOrder) {
-      return res.status(409).json({ status: false, message: "Order has already been processed" });
+      // Agar kisi concurrent request ne isko pehle hi update kar diya
+      if (!updatedOrder) {
+        return res.status(200).json({ status: true, state: "SUCCESS", utr: dbresp.utr });
+      }
+
+      // Wallet atomic increment
+      await user.findOneAndUpdate(
+        { MID: dbresp.MID },
+        { $inc: { wallet: dbresp.amount } }
+      );
+
+      // Webhook Trigger
+      if (dbresp.callback) {
+        fetch(dbresp.callback, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ORDERID,
+            amount: dbresp.amount,
+            UTR: info.BANKTXNID,
+            status: "SUCCESS"
+          }),
+          signal: AbortSignal.timeout(5000)
+        }).catch((err) => console.error("Webhook callback failed:", err.message));
+      }
+
+      // Cookie Session create karein
+      const payinfo = jwt.sign(
+        { amount: dbresp.amount, ORDERID },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      res.cookie("payment_session", payinfo, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+
+      return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID });
     }
 
-    // Atomic wallet balance increment
-    await user.findOneAndUpdate(
-      { MID: dbresp.MID },
-      { $inc: { wallet: dbresp.amount } }
-    );
-
-    // Asynchronous webhook dispatch
-    if (dbresp.callback) {
-      fetch(dbresp.callback, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ORDERID,
-          amount: dbresp.amount,
-          UTR: info.BANKTXNID,
-        }),
-      }).catch((err) => console.error("Webhook callback failed:", err.message));
+    // Agar transaction explicitly Fail ho chuki hai
+    if (info.STATUS === "TXN_FAILURE") {
+      return res.status(200).json({
+        status: false,
+        state: "FAILED",
+        message: info.RESPMSG || "Payment failed"
+      });
     }
 
-    const payinfo = jwt.sign(
-      { amount: dbresp.amount, ORDERID },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.cookie("payment_session", payinfo, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+    // Agar abhi tak user ne pay nahi kiya ya pending hai
+    return res.status(200).json({
+      status: false,
+      state: "PENDING",
+      message: "Waiting for payment completion"
     });
 
-    return res.json({ status: true, utr: info.BANKTXNID });
   } catch (error) {
     console.error("paymentStatus error:", error);
-    return res.status(500).json({ status: false, message: "Internal server error" });
+    return res.status(500).json({ status: false, state: "ERROR", message: "Internal server error" });
   }
 };
 
