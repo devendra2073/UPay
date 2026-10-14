@@ -2,7 +2,6 @@ import QRCode from "qrcode";
 import jwt from "jsonwebtoken";
 import paymentModel from "../schema/payment.model.js";
 import user from "../schema/user.model.js";
-
 export const paymentPage = async (req, res) => {
   try {
     const { tid } = req.params;
