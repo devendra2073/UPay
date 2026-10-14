@@ -190,7 +190,7 @@ export const thanks = async (req, res) => {
   }
 
   try {
-    const { amount, ORDERID } = jwt.verify(cookie, process.env.JWT_SECRET);
+    const { amount, ORDERID } = jwt.verify(cookie, process.env.JWT);
     return res.render("thanks", { amount, ORDERID });
   } catch (e) {
     return res.status(400).send("Invalid or expired session token");
