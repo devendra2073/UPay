@@ -1,81 +1,144 @@
-import paymentModel from "../schema/payment.model.js"
-import user from "../schema/user.model.js"
-import jwt from "jsonwebtoken"
-export const paymentPage=async(req,res)=>{
-  const {tid}=req.params;
-  const info=await paymentModel.findOne({order:tid,isPaid:false})
-  if (!info){
-    return res.json({status:false,message:"Unauthorized order"})
-  }
-  const upi=info?.paytm?.UPI?info.paytm.UPI:process.env.upi
-  const {amount,company,logo}=info
-  const redirect=info.redirect || "/pay/thanks"
-  
-  const intent=`upi://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&tn=Don't Try to modify amount`
-  const paytmp=`paytmmp://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&tn=Don't Try to modify amount`
-const phonepe  =`phonepe://pay?pa=${upi}&tr=${tid}&am=${amount}&pn=${company}&mc=5651&tn=Don't Try to modify amount`
-  const response=await fetch("https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(intent))
-  const blob=await response.arrayBuffer()
-  const buffer=Buffer.from(blob)
-  const obj="data:image/png;base64, "+ buffer.toString('base64')
-  res.render("index",{intent,obj,amount,company,tid,redirect,logo,paytmp,phonepe})
-  
-}
 
-export const paymentStatus=async(req,res)=>{
-  const {ORDERID}=req.params
-  if(!ORDERID){
-    res.json({status:false,message:"Unauthorized"})
-  }
-  const dbresp=await paymentModel.findOne({order:ORDERID,isPaid:false})
-  const amount=dbresp?.amount
-  const callback=dbresp?.callback
-  const PAYTM="https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData="
-  const PAYTMMID=dbresp?.paytm?.MID?dbresp.paytm.MID:process.env.mid;
-  if(!PAYTMMID) res.json({status:false,message:"Internal Server Error ",errorCode:2})
-  const data=PAYTM+JSON.stringify({MID:PAYTMMID,ORDERID})
-  const response=await fetch(data)
- const info=await response.json()
-  if(info.STATUS=="TXN_SUCCESS" && parseFloat(info.TXNAMOUNT)==parseFloat(amount)){
-    dbresp.isPaid=true;
-    dbresp.api_response=JSON.stringify(info)
-    dbresp.utr=info.BANKTXNID
-    await dbresp.save()
-    const usr=await user.findOne({MID:dbresp.MID})
-    if (!usr) return res.json({status:false,message:"Something went wrong"})
-    usr.wallet+=amount;
-    await usr.save()
-    if (callback){
-      await fetch(callback,{
-        method:'post',
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          ORDERID,
-          amount,
-          UTR:info.BANKTXNID
-        })
-      })
+import QRCode from "qrcode";
+import jwt from "jsonwebtoken";
+import paymentModel from "../schema/payment.model.js";
+import user from "../schema/user.model.js";
+
+export const paymentPage = async (req, res) => {
+  try {
+    const { tid } = req.params;
+    const info = await paymentModel.findOne({ order: tid, isPaid: false });
+
+    if (!info) {
+      return res.status(404).json({ status: false, message: "Order not found or already paid" });
     }
-    const payinfo=jwt.sign({amount,ORDERID},process.env.JWT,{expiresIn:"1h"})
-    res.cookie("payment_session",payinfo,{
-      httpOnly:true
-    })
-    res.json({status:true,utr:info.BANKTXNID})
+
+    const upi = info.paytm?.UPI || process.env.UPI_ID;
+    const { amount, company, logo } = info;
+    const redirect = info.redirect || "/pay/thanks";
+
+    const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(tid)}&am=${amount}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + tid)}`;
+    
+    const intent = `upi://pay?${commonParams}`;
+    const paytmp = `paytmmp://pay?${commonParams}`;
+    const phonepe = `phonepe://pay?${commonParams}&mc=5651`;
+
+    // Generate QR locally as Data URL
+    const obj = await QRCode.toDataURL(intent, { width: 300, margin: 2 });
+
+    return res.render("index", {
+      intent,
+      obj,
+      amount,
+      company,
+      tid,
+      redirect,
+      logo,
+      paytmp,
+      phonepe,
+    });
+  } catch (error) {
+    console.error("paymentPage error:", error);
+    return res.status(500).send("Unable to load payment page");
   }
-  else{
-    res.json({status:false})
+};
+
+export const paymentStatus = async (req, res) => {
+  try {
+    const { ORDERID } = req.params;
+    if (!ORDERID) {
+      return res.status(400).json({ status: false, message: "Order ID is required" });
+    }
+
+    const dbresp = await paymentModel.findOne({ order: ORDERID, isPaid: false });
+    if (!dbresp) {
+      return res.status(404).json({ status: false, message: "Order not found or already processed" });
+    }
+
+    const paytmMid = dbresp.paytm?.MID || process.env.PAYTM_MID;
+    if (!paytmMid) {
+      return res.status(500).json({ status: false, message: "Merchant ID configuration missing", errorCode: 2 });
+    }
+
+    const verifyUrl = `https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData=${encodeURIComponent(
+      JSON.stringify({ MID: paytmMid, ORDERID })
+    )}`;
+
+    const response = await fetch(verifyUrl);
+    const info = await response.json();
+
+    const isAmountValid = parseFloat(info.TXNAMOUNT) === parseFloat(dbresp.amount);
+    const isStatusSuccess = info.STATUS === "TXN_SUCCESS";
+
+    if (!isStatusSuccess || !isAmountValid) {
+      return res.json({ status: false, message: "Transaction incomplete or amount mismatch" });
+    }
+
+    // Atomic update to prevent duplicate wallet increments
+    const updatedOrder = await paymentModel.findOneAndUpdate(
+      { order: ORDERID, isPaid: false },
+      {
+        $set: {
+          isPaid: true,
+          api_response: JSON.stringify(info),
+          utr: info.BANKTXNID,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(409).json({ status: false, message: "Order has already been processed" });
+    }
+
+    // Atomic wallet balance increment
+    await user.findOneAndUpdate(
+      { MID: dbresp.MID },
+      { $inc: { wallet: dbresp.amount } }
+    );
+
+    // Asynchronous webhook dispatch
+    if (dbresp.callback) {
+      fetch(dbresp.callback, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ORDERID,
+          amount: dbresp.amount,
+          UTR: info.BANKTXNID,
+        }),
+      }).catch((err) => console.error("Webhook callback failed:", err.message));
+    }
+
+    const payinfo = jwt.sign(
+      { amount: dbresp.amount, ORDERID },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("payment_session", payinfo, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    return res.json({ status: true, utr: info.BANKTXNID });
+  } catch (error) {
+    console.error("paymentStatus error:", error);
+    return res.status(500).json({ status: false, message: "Internal server error" });
   }
-  
-}
-export const thanks=async(req,res)=>{
-  const cookie=req.cookies?.payment_session
-  try{
-    const {amount,ORDERID}=jwt.verify(cookie,process.env.JWT)
-    res.render("thanks",{amount,ORDERID})
-  }catch(e){
-    res.send("Something went wrong!")
+};
+
+export const thanks = async (req, res) => {
+  const cookie = req.cookies?.payment_session;
+  if (!cookie) {
+    return res.status(401).send("Session expired or invalid");
   }
-  
-}
+
+  try {
+    const { amount, ORDERID } = jwt.verify(cookie, process.env.JWT_SECRET);
+    return res.render("thanks", { amount, ORDERID });
+  } catch (e) {
+    return res.status(400).send("Invalid or expired session token");
+  }
+};
