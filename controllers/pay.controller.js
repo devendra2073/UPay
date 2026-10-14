@@ -154,8 +154,7 @@ export const paymentStatus = async (req, res) => {
 
       res.cookie("payment_session", payinfo, {
         httpOnly: true,
-        secure:true,
-        sameSite: "lax",
+      
       });
 
       return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID });
