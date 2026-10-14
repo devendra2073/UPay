@@ -37,6 +37,11 @@ const paymentSchema=new Schema({
     type:String,
     required:true,
   },
+  lastCheckedAt: {
+  type: Date,
+  default: null
+}
+,
   upi_address:{
     type:String
   },
