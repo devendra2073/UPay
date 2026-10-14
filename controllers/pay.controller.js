@@ -154,7 +154,7 @@ export const paymentStatus = async (req, res) => {
 
       res.cookie("payment_session", payinfo, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure:true,
         sameSite: "lax",
       });
 
