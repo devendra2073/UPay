@@ -148,7 +148,7 @@ export const paymentStatus = async (req, res) => {
       // Cookie Session create karein
       const payinfo = jwt.sign(
         { amount: dbresp.amount, ORDERID },
-        process.env.JWT_SECRET,
+        process.env.JWT,
         { expiresIn: "1h" }
       );
 
@@ -165,8 +165,8 @@ export const paymentStatus = async (req, res) => {
     if (info.STATUS === "TXN_FAILURE") {
       return res.status(200).json({
         status: false,
-        state: "FAILED",
-        message: info.RESPMSG || "Payment failed"
+        
+      
       });
     }
 
