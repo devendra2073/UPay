@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import crypto from "node:crypto"
 import jwt from "jsonwebtoken";
 import paymentModel from "../schema/payment.model.js";
 import user from "../schema/user.model.js";
@@ -129,14 +130,23 @@ export const paymentStatus = async (req, res) => {
 
       // Webhook Trigger
       if (dbresp.callback) {
-        fetch(dbresp.callback, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        const payment_info=JSON.stringify({
             ORDERID,
             amount: dbresp.amount,
             UTR: info.BANKTXNID,
             status: "SUCCESS"
+          })
+        const signature=crypto.createHmac("sha256",api).update(payment_info).digest("hex");
+        
+        fetch(dbresp.callback, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body:JSON.stringify({
+            ORDERID,
+            amount: dbresp.amount,
+            UTR: info.BANKTXNID,
+            status: "SUCCESS",
+            signature
           }),
           signal: AbortSignal.timeout(5000)
         }).catch((err) => console.error("Webhook callback failed:", err.message));
