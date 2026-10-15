@@ -3,107 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    
     <style>
-        /* 1. Draw the outer green circle */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 1. Circle stroke draw */
         @keyframes stroke-circle {
             100% { stroke-dashoffset: 0; }
         }
         
-        /* 2. Draw the white checkmark */
+        /* 2. Checkmark stroke draw */
         @keyframes stroke-check {
             100% { stroke-dashoffset: 0; }
         }
 
-        /* 3. Fill the background green */
-        @keyframes fill-green {
-            100% { box-shadow: inset 0px 0px 0px 80px #22c55e; }
+        /* 3. Disc background scale & color fill */
+        @keyframes fill-pop {
+            0% { transform: scale(0.85); box-shadow: inset 0px 0px 0px 0px #16a34a; }
+            60% { transform: scale(1.05); }
+            100% { transform: scale(1); box-shadow: inset 0px 0px 0px 50px #16a34a; }
         }
 
-        .checkmark-container {
-            width: 80px;
-            height: 80px;
+        .checkmark-wrapper {
+            width: 76px;
+            height: 76px;
             border-radius: 50%;
-            display: block;
-            margin: 2rem auto;
-            /* Start with no shadow, then fill with green */
-            box-shadow: inset 0px 0px 0px #22c55e;
-            animation: fill-green 0.4s ease-in-out 0.4s forwards;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0px 0px 0px 0px #16a34a;
+            animation: fill-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s forwards;
         }
 
         .circle-element {
             stroke-dasharray: 166;
             stroke-dashoffset: 166;
-            stroke-width: 2;
-            stroke: #22c55e;
+            stroke-width: 2.5;
+            stroke: #16a34a;
             fill: none;
             animation: stroke-circle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
         }
 
         .check-element {
-            /* We use a slightly larger dasharray to ensure it covers the path */
             stroke-dasharray: 50;
             stroke-dashoffset: 50;
             stroke: #ffffff;
-            stroke-width: 5;
+            stroke-width: 4.5;
             stroke-linecap: round;
             stroke-linejoin: round;
             fill: none;
-            /* Starts after the circle begins and before the fill finishes */
-            animation: stroke-check 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.7s forwards;
+            animation: stroke-check 0.35s cubic-bezier(0.65, 0, 0.45, 1) 0.75s forwards;
+        }
+
+        /* Ticket edge cutouts */
+        .notch-left, .notch-right {
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #f8fafc; /* match page bg */
+        }
+        .notch-left { left: -12px; }
+        .notch-right { right: -12px; }
+
+        @media print {
+            body { background: #fff !important; }
+            .no-print { display: none !important; }
+            .shadow-2xl { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
         }
     </style>
 </head>
-<body class="bg-slate-50 font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-emerald-100">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-6">
+    <main class="w-full max-w-md">
         
-        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl shadow-slate-200/50 overflow-hidden">
+        <!-- Receipt Card -->
+        <div class="bg-white rounded-3xl shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden relative transition-all">
             
-            <div class="pt-10 pb-6 flex flex-col items-center">
-                <div class="checkmark-container">
+            <!-- Top Section -->
+            <div class="pt-10 pb-8 px-6 flex flex-col items-center text-center">
+                <div class="checkmark-wrapper relative mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" class="w-20 h-20">
                         <circle class="circle-element" cx="26" cy="26" r="25" />
                         <path class="check-element" d="M14 27l7 7 16-16" />
                     </svg>
                 </div>
+
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 mt-4 border border-emerald-200/60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Transaction Confirmed
+                </span>
                 
-                <h1 class="text-2xl font-bold text-slate-800 mt-4">Payment Successful!</h1>
-                <p class="text-slate-500 mt-2 text-center px-8 leading-relaxed">
-                    Your order has been confirmed.
+                <h1 class="text-2xl font-extrabold text-slate-900 mt-3 tracking-tight">Payment Successful</h1>
+                <p class="text-slate-500 text-sm mt-1 max-w-[280px]">
+                    Your payment was received and your order is now being processed.
                 </p>
-            </div>
 
-            <div class="px-8 py-6 bg-slate-50 border-y border-slate-100">
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 text-sm">Payment ID</span>
-                        <span class="text-slate-900 font-mono text-xs font-semibold bg-slate-200 px-2 py-1 rounded"><%=ORDERID%></span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 text-sm">Amount Paid</span>
-                        <span class="text-slate-900 font-bold">&#8377; <%=amount%></span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 text-sm">Payment Method</span>
-                        <span class="text-slate-900 text-sm font-medium">UPI</span>
-                    </div>
+                <!-- Amount Block -->
+                <div class="mt-6 flex flex-baseline justify-center items-baseline text-slate-900">
+                    <span class="text-xl font-bold mr-1 text-slate-500">&#8377;</span>
+                    <span class="text-4xl font-extrabold tracking-tight">
+                        <%= typeof amount !== 'undefined' ? amount : '1,499.00' %>
+                    </span>
                 </div>
             </div>
 
-            <div class="bg-indigo-50 px-8 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="text-xl">🥰</span>
-                    <p class="text-xs text-indigo-900 font-medium">Thanks for shopping with us!</p>
+            <!-- Perforated Divider with Side Notches -->
+            <div class="relative py-2 bg-slate-50">
+                <div class="notch-left"></div>
+                <div class="notch-right"></div>
+                <div class="border-t-2 border-dashed border-slate-200 mx-5"></div>
+            </div>
+
+            <!-- Transaction Details Table -->
+            <div class="px-8 py-6 bg-slate-50/70 space-y-3.5 text-sm">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Order ID</span>
+                    <span class="text-slate-700 font-mono text-xs font-semibold bg-white border border-slate-200 px-2.5 py-1 rounded-md shadow-xs">
+                        #<%= typeof ORDERID !== 'undefined' ? ORDERID : 'TXN_98421038' %>
+                    </span>
                 </div>
-                <button class="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:underline cursor-pointer">💕</button>
+
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Payment Method</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        <span class="text-slate-800 font-semibold text-xs">UPI Auto-Collect</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Time</span>
+                    <span id="timestamp" class="text-slate-700 font-medium text-xs">Oct 15, 2026, 09:30 AM</span>
+                </div>
+            </div>
+
+            <!-- Bottom Thank You Bar -->
+            <div class="bg-indigo-600/5 px-6 py-4 flex items-center justify-between border-t border-indigo-100/60">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">✨</span>
+                    <p class="text-xs text-indigo-950 font-medium">Thank you for your purchase!</p>
+                </div>
+                <button onclick="window.print()" class="no-print text-xs font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1 cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print
+                </button>
             </div>
         </div>
 
-        <button class="mt-8 text-slate-400 hover:text-slate-600 transition-colors text-sm font-medium cursor-pointer">
-            Contact support if you have any questions
-        </button>
-    </div>
+        <!-- Call to Actions -->
+        <div class="no-print mt-6 space-y-3">
+            <a href="/" class="w-full flex items-center justify-center py-3.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white text-sm font-semibold rounded-2xl shadow-lg shadow-slate-900/10 transition-all cursor-pointer">
+                Return to Merchant
+            </a>
+            
+            <div class="text-center">
+                <a href="mailto:support@example.com" class="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors">
+                    Need help? Contact Customer Support
+                </a>
+            </div>
+        </div>
 
+    </main>
+
+    <script>
+        // Set dynamic formatted timestamp
+        try {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {}
+    </script>
 </body>
 </html>
