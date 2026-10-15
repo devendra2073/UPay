@@ -8,24 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* 1. Circle stroke draw */
-        @keyframes stroke-circle {
-            100% { stroke-dashoffset: 0; }
-        }
-        
-        /* 2. Checkmark stroke draw */
-        @keyframes stroke-check {
-            100% { stroke-dashoffset: 0; }
-        }
-
-        /* 3. Disc background scale & color fill */
+        @keyframes stroke-circle { 100% { stroke-dashoffset: 0; } }
+        @keyframes stroke-check { 100% { stroke-dashoffset: 0; } }
         @keyframes fill-pop {
             0% { transform: scale(0.85); box-shadow: inset 0px 0px 0px 0px #16a34a; }
             60% { transform: scale(1.05); }
@@ -63,14 +50,13 @@
             animation: stroke-check 0.35s cubic-bezier(0.65, 0, 0.45, 1) 0.75s forwards;
         }
 
-        /* Ticket edge cutouts */
         .notch-left, .notch-right {
             position: absolute;
             top: -12px;
             width: 24px;
             height: 24px;
             border-radius: 9999px;
-            background-color: #f8fafc; /* match page bg */
+            background-color: #f8fafc;
         }
         .notch-left { left: -12px; }
         .notch-right { right: -12px; }
@@ -108,11 +94,14 @@
                     Your payment was received and your order is now being processed.
                 </p>
 
-                <!-- Amount Block -->
-                <div class="mt-6 flex flex-baseline justify-center items-baseline text-slate-900">
-                    <span class="text-xl font-bold mr-1 text-slate-500">&#8377;</span>
-                    <span class="text-4xl font-extrabold tracking-tight">
-                        <%= typeof amount !== 'undefined' ? amount : '1,499.00' %>
+                <!-- Polished Decimal Amount Block -->
+                <div class="mt-6 flex items-baseline justify-center text-slate-900 select-none">
+                    <span class="text-2xl font-bold mr-1.5 text-slate-400 font-sans">&#8377;</span>
+                    <span class="text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums text-slate-900">
+                        <%= Number(typeof amount !== 'undefined' ? amount : 1499).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split('.')[0] %>
+                    </span>
+                    <span class="text-2xl font-bold text-slate-500 tracking-tight tabular-nums ml-0.5">
+                        .<%= Number(typeof amount !== 'undefined' ? amount : 1499).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split('.')[1] %>
                     </span>
                 </div>
             </div>
@@ -134,6 +123,13 @@
                 </div>
 
                 <div class="flex justify-between items-center">
+                    <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Amount Paid</span>
+                    <span class="text-slate-900 font-semibold text-xs font-mono">
+                        &#8377;<%= Number(typeof amount !== 'undefined' ? amount : 1499).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    </span>
+                </div>
+
+                <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Payment Method</span>
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
@@ -142,18 +138,18 @@
                 </div>
 
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Time</span>
-                    <span id="timestamp" class="text-slate-700 font-medium text-xs">Oct 15, 2026, 09:30 AM</span>
+                    <span class="text-slate-400 font-medium text-xs uppercase tracking-wider">Date &amp; Time</span>
+                    <span id="timestamp" class="text-slate-700 font-medium text-xs"></span>
                 </div>
             </div>
 
-            <!-- Bottom Thank You Bar -->
+            <!-- Bottom Action/Thank You Bar -->
             <div class="bg-indigo-600/5 px-6 py-4 flex items-center justify-between border-t border-indigo-100/60">
                 <div class="flex items-center gap-2.5">
                     <span class="text-lg">✨</span>
                     <p class="text-xs text-indigo-950 font-medium">Thank you for your purchase!</p>
                 </div>
-                <button onclick="window.print()" class="no-print text-xs font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1 cursor-pointer">
+                <button type="button" onclick="window.print()" class="no-print text-xs font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     Print
                 </button>
@@ -176,10 +172,9 @@
     </main>
 
     <script>
-        // Set dynamic formatted timestamp
         try {
             const now = new Date();
-            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
+            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-IN', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
