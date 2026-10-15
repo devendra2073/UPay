@@ -127,6 +127,8 @@ export const paymentStatus = async (req, res) => {
         { MID: dbresp.MID },
         { $inc: { wallet: dbresp.amount } }
       );
+      const user_for_api=user.findOne({MID:dbresp.MID});
+      const api=user_for_api.api;
 
       // Webhook Trigger
       if (dbresp.callback) {
