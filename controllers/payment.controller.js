@@ -3,8 +3,7 @@ const createOrder=async(req,res)=>{
   const {MID,company,redirect,pic,paytm,callback}=req.user;
   const paytmdata={MID:paytm.MID?paytm.MID:process.env.mid,UPI:paytm.UPI?paytm.UPI:process.env.upi}
   let amount=req.amount || req.body.amount;
-  if (amount>1){
-    amount=amount-1+Math.random()}
+
     
 const mode=req.mode
 const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=${company}`
