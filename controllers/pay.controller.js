@@ -9,7 +9,6 @@ export const paymentPage = async (req, res) => {
     if (!info) {
       return res.status(404).json({ status: false, message: "Order not found" });
     }
-
     // Agar user pehle se pay kar chuka hai, to direct redirect page par bhej dein
     if (info.isPaid) {
       return res.redirect(info.redirect || "/pay/thanks");
