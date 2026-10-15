@@ -1,94 +1,520 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upay | The Webhook-Powered UPI Gateway</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .gradient-bg {
-            background: radial-gradient(circle at top right, #1e1b4b, #030712);
+
+        /* Custom Keyframe Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.25; filter: blur(35px); }
+            50% { opacity: 0.5; filter: blur(45px); }
+        }
+
+        @keyframes radarSweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes packetStream {
+            0% { stroke-dashoffset: 120; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes pingSoft {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        .animate-glow {
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+
+        .animate-radar {
+            transform-origin: 150px 150px;
+            animation: radarSweep 8s linear infinite;
+        }
+
+        .animate-stream {
+            stroke-dasharray: 8, 8;
+            animation: packetStream 1.5s linear infinite;
+        }
+
+        .animate-ping-soft {
+            animation: pingSoft 3s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-gray-950 text-white gradient-bg min-h-screen">
+<body class="bg-gray-950 text-white min-h-screen selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
 
-    <nav class="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
-        <div class="text-2xl font-bold tracking-tighter italic">U<span class="text-indigo-500">pay</span></div>
-        <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
-            <a href="#" class="hover:text-white transition">API Docs</a>
-            <a href="#" class="hover:text-white transition">Webhook Events</a>
-            <a href="#" class="hover:text-white transition">Pricing</a>
+    <!-- Ambient Vector Backdrop Gradients -->
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute -top-32 right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-600/20 animate-glow"></div>
+        <div class="absolute top-[40%] left-[-15%] w-[550px] h-[550px] rounded-full bg-blue-600/15 animate-glow" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] rounded-full bg-purple-600/15 animate-glow" style="animation-delay: -3.5s;"></div>
+        
+        <!-- Subtle Vector Dot Grid Pattern -->
+        <svg class="absolute inset-0 w-full h-full opacity-[0.12]" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid-dots" width="32" height="32" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1.2" fill="#818cf8"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid-dots)" />
+        </svg>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="flex items-center justify-between px-6 md:px-8 py-6 max-w-7xl mx-auto border-b border-gray-900/70 sticky top-0 bg-gray-950/85 backdrop-blur-md z-50">
+        <div class="flex items-center gap-3">
+            <!-- Animated Geometric Vector Logo -->
+            <svg class="w-8 h-8 transform hover:scale-110 transition duration-300" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="url(#logo-grad)"/>
+                <path d="M12 14V22C12 25.3137 14.6863 28 18 28C21.3137 28 24 25.3137 24 22V14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                <path d="M28 20V26C28 27.1046 27.1046 28 26 28" stroke="#a5b4fc" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="28" cy="14" r="2" fill="#38bdf8"/>
+                <defs>
+                    <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#4f46e5"/>
+                        <stop stop-color="#06b6d4"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span class="text-2xl font-black tracking-tighter italic">U<span class="text-indigo-400">pay</span></span>
         </div>
-        <button class="border border-indigo-500 text-indigo-500 hover:bg-indigo-500 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold transition" onclick="location.href='/user/login'">
-            Dashboard
-        </button>
+
+        <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
+            <a href="#docs" class="hover:text-indigo-400 transition flex items-center gap-1.5">
+                <span>API Docs</span>
+            </a>
+            <a href="#diagram" class="hover:text-indigo-400 transition">Architecture</a>
+            <a href="#webhooks" class="hover:text-indigo-400 transition">Webhooks</a>
+            <a href="#features" class="hover:text-indigo-400 transition">Capabilities</a>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <button class="border border-indigo-500/80 text-indigo-300 hover:bg-indigo-600 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-indigo-500/25" onclick="location.href='/user/login'">
+                Dashboard
+            </button>
+        </div>
     </nav>
 
-    <header class="max-w-7xl mx-auto px-8 py-16 md:py-24">
+    <!-- Hero Section -->
+    <header class="max-w-7xl mx-auto px-6 md:px-8 py-16 md:py-24">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
-                <span class="text-indigo-400 font-semibold tracking-widest text-xs uppercase">No SDK. No Bloat.</span>
-                <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6 leading-tight">
-                    UPI Payments via <br><span class="text-indigo-500 italic">Pure Webhooks.</span>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-semibold tracking-wider text-xs uppercase mb-4 shadow-inner">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Direct Bank Settlement • Zero Escrow
+                </span>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mt-2 mb-6 leading-tight">
+                    Accept UPI with <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-400 to-purple-400 italic">Pure Webhooks.</span>
                 </h1>
-                <p class="text-gray-400 text-lg mb-10">
-                    The leanest way to accept UPI. Generate dynamic QRs via API and get notified instantly through our 99.9% uptime webhook engine. 
+                <p class="text-gray-400 text-base md:text-lg mb-8 leading-relaxed">
+                    The leanest managed UPI gateway for builders. Dispatch dynamic QRs and instant app intents through clean REST endpoints, with guaranteed webhook delivery when settlements occur.
                 </p>
-                <div class="flex gap-4">
-                    <button class="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-xl font-bold transition shadow-lg shadow-indigo-500/20"onclick="location.href='/user/login'">
-                        Get API Key
+                <div class="flex flex-wrap gap-4">
+                    <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-7 py-3.5 rounded-xl font-bold transition shadow-lg shadow-indigo-600/30 cursor-pointer flex items-center gap-2" onclick="location.href='/user/login'">
+                        <span>Generate API Key</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </button>
+                    <a href="#docs" class="bg-gray-900/90 hover:bg-gray-800 border border-gray-800 text-gray-300 px-7 py-3.5 rounded-xl font-semibold transition inline-flex items-center gap-2">
+                        <span>Read API Spec</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="bg-black/60 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
-                <div class="bg-gray-900/80 px-4 py-2 flex items-center justify-between">
-                    <span class="text-xs text-gray-500 mono">POST /v1/create-intent</span>
-                    <div class="flex space-x-1.5">
-                        <div class="w-2 h-2 bg-gray-700 rounded-full"></div>
-                        <div class="w-2 h-2 bg-gray-700 rounded-full"></div>
+            <!-- Dynamic Vector Art & Interactive Sandbox Preview -->
+            <div class="relative">
+                <div class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-indigo-500/20 via-sky-500/20 to-purple-500/20 blur-xl opacity-75"></div>
+                
+                <div class="relative bg-gray-900/90 border border-gray-800/90 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl">
+                    <!-- Terminal Tab Bar -->
+                    <div class="bg-gray-950/80 px-4 py-3 flex items-center justify-between border-b border-gray-800/80">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-rose-500/80 rounded-full"></div>
+                            <div class="w-3 h-3 bg-amber-500/80 rounded-full"></div>
+                            <div class="w-3 h-3 bg-emerald-500/80 rounded-full"></div>
+                            <span class="text-xs text-gray-400 mono font-medium ml-2">live-payment-simulation.json</span>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 mono border border-emerald-500/20">200 OK</span>
                     </div>
-                </div>
-                <div class="p-6 text-sm mono leading-relaxed overflow-x-auto">
-                    <p class="text-gray-500">// 1. Request Payment</p>
-                    <span class="text-indigo-400">await</span> axios.<span class="text-blue-400">post</span>(<span class="text-green-400">'https://api.upay.in/v1/pay'</span>, {<br>
-                    &nbsp;&nbsp;amount: <span class="text-orange-400">299.00</span>,<br>
-                    &nbsp;&nbsp;callback_url: <span class="text-green-400">'https://your-site.com/webhook'</span><br>
-                    });<br><br>
-                    <p class="text-gray-500">// 2. Receive Webhook</p>
-                    <span class="text-indigo-400">app</span>.<span class="text-blue-400">post</span>(<span class="text-green-400">'/webhook'</span>, (<span class="text-orange-400">req</span>) => {<br>
-                    &nbsp;&nbsp;<span class="text-indigo-400">const</span> { status } = req.body;<br>
-                    &nbsp;&nbsp;<span class="text-indigo-400">if</span> (status === <span class="text-green-400">'SUCCESS'</span>) <span class="text-blue-400">shipOrder()</span>;<br>
-                    });
+
+                    <!-- Vector Art Simulation Canvas -->
+                    <div class="p-6 md:p-8 flex flex-col items-center justify-center">
+                        <!-- Dynamic Floating Vector Flow Card -->
+                        <div class="w-full max-w-sm bg-gray-950/90 border border-indigo-500/30 rounded-xl p-5 shadow-inner relative animate-float">
+                            <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></div>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 mono">Dynamic Intent</span>
+                                </div>
+                                <span class="text-sm font-bold text-white mono">₹499.00</span>
+                            </div>
+
+                            <!-- Animated Vector QR Representation -->
+                            <div class="flex items-center justify-center py-2 relative">
+                                <svg class="w-36 h-36" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- QR Outer Grid Frame -->
+                                    <rect x="2" y="2" width="136" height="136" rx="10" fill="#030712" stroke="#312e81" stroke-width="1.5"/>
+                                    
+                                    <!-- Top-Left Target Finder -->
+                                    <rect x="14" y="14" width="34" height="34" rx="4" stroke="#6366f1" stroke-width="3"/>
+                                    <rect x="23" y="23" width="16" height="16" rx="2" fill="#818cf8"/>
+                                    
+                                    <!-- Top-Right Target Finder -->
+                                    <rect x="92" y="14" width="34" height="34" rx="4" stroke="#6366f1" stroke-width="3"/>
+                                    <rect x="101" y="23" width="16" height="16" rx="2" fill="#818cf8"/>
+                                    
+                                    <!-- Bottom-Left Target Finder -->
+                                    <rect x="14" y="92" width="34" height="34" rx="4" stroke="#6366f1" stroke-width="3"/>
+                                    <rect x="23" y="101" width="16" height="16" rx="2" fill="#818cf8"/>
+                                    
+                                    <!-- QR Internal Simulated Data Bit Stream -->
+                                    <circle cx="62" cy="24" r="4" fill="#38bdf8"/>
+                                    <rect x="72" y="20" width="8" height="8" rx="1.5" fill="#c084fc"/>
+                                    <circle cx="62" cy="40" r="3" fill="#818cf8"/>
+                                    <rect x="74" y="38" width="18" height="6" rx="1.5" fill="#38bdf8"/>
+                                    
+                                    <rect x="20" y="60" width="100" height="2" fill="#1e1b4b"/>
+                                    <circle cx="30" cy="72" r="3" fill="#818cf8"/>
+                                    <rect x="42" y="68" width="12" height="8" rx="1" fill="#38bdf8"/>
+                                    <circle cx="68" cy="72" r="4" fill="#c084fc"/>
+                                    <rect x="82" y="68" width="18" height="8" rx="1.5" fill="#818cf8"/>
+                                    <rect x="106" y="70" width="10" height="10" rx="1" fill="#38bdf8"/>
+                                    
+                                    <rect x="62" y="94" width="10" height="18" rx="1" fill="#818cf8"/>
+                                    <circle cx="88" cy="98" r="4" fill="#38bdf8"/>
+                                    <rect x="80" y="112" width="22" height="8" rx="1" fill="#c084fc"/>
+                                    <circle cx="116" cy="116" r="3" fill="#818cf8"/>
+                                    
+                                    <!-- Animated Vector Laser Scanning Line -->
+                                    <g>
+                                        <line x1="8" y1="70" x2="132" y2="70" stroke="url(#scanner-glow)" stroke-width="3" stroke-linecap="round">
+                                            <animate attributeName="y1" values="16;124;16" dur="3s" repeatCount="indefinite" />
+                                            <animate attributeName="y2" values="16;124;16" dur="3s" repeatCount="indefinite" />
+                                        </line>
+                                    </g>
+
+                                    <defs>
+                                        <linearGradient id="scanner-glow" x1="0" y1="0" x2="140" y2="0" gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#38bdf8" stop-opacity="0.1"/>
+                                            <stop stop-color="#38bdf8" stop-opacity="1"/>
+                                            <stop stop-color="#818cf8" stop-opacity="0.1"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <!-- Intent Status Banner -->
+                            <div class="mt-4 flex items-center justify-between text-xs text-gray-400 mono bg-black/50 p-2.5 rounded-lg border border-gray-800">
+                                <span>Ref: ORD-94827</span>
+                                <span class="text-indigo-400 font-semibold flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
+                                    Awaiting Payment
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Live UPI App Link Badges -->
+                        <div class="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs mono text-gray-400">
+                            <span class="px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-sky-400"></span> GPay
+                            </span>
+                            <span class="px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-purple-400"></span> PhonePe
+                            </span>
+                            <span class="px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-blue-400"></span> Paytm
+                            </span>
+                            <span class="px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> BHIM
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <section class="max-w-7xl mx-auto px-8 py-20 border-t border-gray-900">
-        <h2 class="text-3xl font-bold mb-12 text-center">Why Developers Love Upay</h2>
-        <div class="grid md:grid-cols-3 gap-12">
-            <div class="text-center">
-                <h4 class="text-xl font-semibold mb-2">Zero Redirection</h4>
-                <p class="text-gray-400 text-sm">Generate QRs or Intent links directly on your UI. No third-party payment pages to slow you down.</p>
-            </div>
-            <div class="text-center">
-                <h4 class="text-xl font-semibold mb-2">Retry Logic</h4>
-                <p class="text-gray-400 text-sm">Our webhooks retry up to 15 times with exponential backoff if your server is down.</p>
-            </div>
-            <div class="text-center">
-                <h4 class="text-xl font-semibold mb-2">Stateless Security</h4>
-                <p class="text-gray-400 text-sm">Verify every transaction with HMAC signatures. We don't just send data; we send proof.</p>
+    <!-- Animated Vector Flow Diagram -->
+    <section id="diagram" class="max-w-7xl mx-auto px-6 md:px-8 py-20 border-t border-gray-900">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-indigo-400 font-semibold tracking-wider text-xs uppercase mono">End-to-End Pipeline</span>
+            <h2 class="text-3xl md:text-4xl font-extrabold mt-2">Zero Redirection Architecture</h2>
+            <p class="text-gray-400 text-sm mt-3">Watch data stream smoothly between your merchant stack, the Upay cluster, and NPCI UPI banking networks.</p>
+        </div>
+
+        <!-- Interactive Animated SVG Diagram Canvas -->
+        <div class="bg-gray-900/40 border border-gray-800 rounded-2xl p-6 md:p-10 backdrop-blur-sm overflow-x-auto">
+            <div class="min-w-[700px]">
+                <svg viewBox="0 0 850 240" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                    <!-- Flow Connection Stream Lines -->
+                    <path d="M 180 120 L 360 120" stroke="#312e81" stroke-width="2" />
+                    <path d="M 180 120 L 360 120" stroke="#818cf8" stroke-width="2.5" class="animate-stream" />
+
+                    <path d="M 480 120 L 660 120" stroke="#312e81" stroke-width="2" />
+                    <path d="M 480 120 L 660 120" stroke="#38bdf8" stroke-width="2.5" class="animate-stream" style="animation-delay: -0.7s;" />
+
+                    <!-- Return Webhook Delivery Flow -->
+                    <path d="M 660 150 C 530 220, 310 220, 180 150" stroke="#065f46" stroke-width="2" stroke-dasharray="6, 6" />
+                    <path d="M 660 150 C 530 220, 310 220, 180 150" stroke="#34d399" stroke-width="2" stroke-dasharray="6, 6" class="animate-stream" />
+
+                    <!-- Node 1: Merchant App Server -->
+                    <g transform="translate(60, 60)">
+                        <rect width="130" height="120" rx="16" fill="#090d16" stroke="#3730a3" stroke-width="1.5" />
+                        <rect x="16" y="20" width="36" height="36" rx="8" fill="#1e1b4b" stroke="#6366f1" />
+                        <!-- Server Icon -->
+                        <path d="M 24 32 H 44 M 24 38 H 44 M 24 44 H 36" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="44" cy="44" r="1.5" fill="#34d399"/>
+                        <text x="16" y="80" fill="#ffffff" font-size="13" font-weight="700" font-family="'Inter', sans-serif">Merchant App</text>
+                        <text x="16" y="98" fill="#818cf8" font-size="10" font-family="'JetBrains Mono', monospace">Your Backend</text>
+                    </g>
+
+                    <!-- Node 2: Upay Managed Webhook Cluster -->
+                    <g transform="translate(360, 45)">
+                        <rect width="140" height="150" rx="20" fill="#030712" stroke="#4f46e5" stroke-width="2" />
+                        <rect x="20" y="20" width="40" height="40" rx="10" fill="#312e81" stroke="#818cf8" />
+                        <!-- Upay Gateway Emblem -->
+                        <path d="M 32 32 V 42 C 32 46, 36 49, 40 49 C 44 49, 48 46, 48 42 V 32" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <text x="20" y="88" fill="#ffffff" font-size="14" font-weight="800" font-family="'Inter', sans-serif">Upay Cluster</text>
+                        <text x="20" y="106" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace">Webhook Engine</text>
+                        <rect x="20" y="118" width="100" height="18" rx="6" fill="#1e1b4b"/>
+                        <text x="28" y="131" fill="#38bdf8" font-size="9" font-family="'JetBrains Mono', monospace">99.98% SLA</text>
+                    </g>
+
+                    <!-- Node 3: Bank UPI & Customer VPA -->
+                    <g transform="translate(660, 60)">
+                        <rect width="130" height="120" rx="16" fill="#090d16" stroke="#047857" stroke-width="1.5" />
+                        <rect x="16" y="20" width="36" height="36" rx="8" fill="#064e3b" stroke="#10b981" />
+                        <!-- Bank Pillars Icon -->
+                        <path d="M 22 44 H 46 M 24 44 V 34 M 34 44 V 34 M 44 44 V 34 M 20 34 L 34 26 L 48 34" stroke="#a7f3d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <text x="16" y="80" fill="#ffffff" font-size="13" font-weight="700" font-family="'Inter', sans-serif">UPI Network</text>
+                        <text x="16" y="98" fill="#34d399" font-size="10" font-family="'JetBrains Mono', monospace">Direct Settle</text>
+                    </g>
+
+                    <!-- Webhook Returning Delivery Tooltip Indicator -->
+                    <g transform="translate(370, 195)">
+                        <rect width="120" height="24" rx="6" fill="#022c22" stroke="#059669" stroke-width="1"/>
+                        <text x="10" y="16" fill="#6ee7b7" font-size="9" font-family="'JetBrains Mono', monospace">⚡ Verified Webhook</text>
+                    </g>
+                </svg>
             </div>
         </div>
     </section>
 
-    <footer class="py-12 border-t border-gray-900 text-center text-gray-600 text-xs">
-        <p>Built for the Indian Developer Ecosystem. &copy; 2026 Upay.</p>
+    <!-- Capabilities Section -->
+    <section id="features" class="max-w-7xl mx-auto px-6 md:px-8 py-20 border-t border-gray-900">
+        <h2 class="text-2xl md:text-3xl font-bold mb-12 text-center">Engineered for High-Frequency Collections</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-gray-900/40 border border-gray-800/80 p-8 rounded-2xl hover:border-indigo-500/50 transition">
+                <!-- Vector Icon: Zero Redirection -->
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                </div>
+                <h4 class="text-lg font-bold mb-2">Native In-App UI</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Embed live QRs or deep-link buttons inside your React, Next.js, or mobile apps without off-site redirects.</p>
+            </div>
+
+            <div class="bg-gray-900/40 border border-gray-800/80 p-8 rounded-2xl hover:border-indigo-500/50 transition">
+                <!-- Vector Icon: Webhook Exponential Backoff -->
+                <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </div>
+                <h4 class="text-lg font-bold mb-2">15x Exponential Retries</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">If your service encounters a cold start or temporary outage, our delivery queue automatically retries delivery with jitter.</p>
+            </div>
+
+            <div class="bg-gray-900/40 border border-gray-800/80 p-8 rounded-2xl hover:border-indigo-500/50 transition">
+                <!-- Vector Icon: Cryptographic Proof -->
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h4 class="text-lg font-bold mb-2">HMAC Cryptographic Proof</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Every dispatch is signed with a SHA-256 HMAC digest in request headers so you can verify payloads with certainty.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive REST API Documentation -->
+    <section id="docs" class="max-w-7xl mx-auto px-6 md:px-8 py-20 border-t border-gray-900">
+        <div class="mb-12">
+            <span class="text-indigo-400 font-semibold tracking-wider text-xs uppercase mono">Hosted API Reference</span>
+            <h2 class="text-3xl font-extrabold mt-2">API Documentation</h2>
+            <p class="text-gray-400 text-sm mt-1">Authenticate all incoming requests by providing your merchant key via the <code class="text-indigo-300 mono bg-indigo-950/70 px-1.5 py-0.5 rounded border border-indigo-500/30">Authorization</code> header.</p>
+        </div>
+
+        <div class="space-y-12">
+            <!-- Endpoint: Create Payment -->
+            <div class="bg-gray-900/40 border border-gray-800 rounded-2xl p-6 md:p-8">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-2.5 py-1 rounded-md text-xs font-bold mono">POST</span>
+                        <span class="font-mono text-base font-semibold text-gray-200">/api/payment/create</span>
+                    </div>
+                    <span class="text-xs text-gray-400 mono">Live Production Endpoint</span>
+                </div>
+
+                <p class="text-gray-400 text-sm mb-6">Generates a dynamic payment order with a valid UPI payload and instant checkout URL.</p>
+
+                <!-- Parameters Table -->
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-left text-xs mono border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-gray-400 uppercase text-[11px]">
+                                <th class="py-2.5">Parameter</th>
+                                <th class="py-2.5">Type</th>
+                                <th class="py-2.5">Requirement</th>
+                                <th class="py-2.5">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/60 text-gray-300">
+                            <tr>
+                                <td class="py-3 text-indigo-400">amount</td>
+                                <td class="py-3">Number</td>
+                                <td class="py-3 text-emerald-400">Required</td>
+                                <td class="py-3 text-gray-400">Amount in INR (e.g. 499.00)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 text-indigo-400">orderId</td>
+                                <td class="py-3">String</td>
+                                <td class="py-3 text-emerald-400">Required</td>
+                                <td class="py-3 text-gray-400">Unique identifier from your store database</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 text-indigo-400">customerName</td>
+                                <td class="py-3">String</td>
+                                <td class="py-3 text-emerald-400">Required</td>
+                                <td class="py-3 text-gray-400">Payer reference name displayed on app screens</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 mono">Request Body</h4>
+                        <div class="bg-black/60 rounded-xl p-4 mono text-xs text-gray-300 border border-gray-800/80 overflow-x-auto">
+                            {<br>
+                            &nbsp;&nbsp;<span class="text-indigo-300">"amount"</span>: <span class="text-orange-400">499.00</span>,<br>
+                            &nbsp;&nbsp;<span class="text-indigo-300">"orderId"</span>: <span class="text-green-400">"ORD_94827"</span>,<br>
+                            &nbsp;&nbsp;<span class="text-indigo-300">"customerName"</span>: <span class="text-green-400">"Rohan Sharma"</span><br>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 mono">Response (200 OK)</h4>
+                        <div class="bg-black/60 rounded-xl p-4 mono text-xs text-gray-300 border border-gray-800/80 overflow-x-auto">
+                            {<br>
+                            &nbsp;&nbsp;<span class="text-indigo-300">"status"</span>: <span class="text-green-400">"success"</span>,<br>
+                            &nbsp;&nbsp;<span class="text-indigo-300">"data"</span>: {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-300">"orderId"</span>: <span class="text-green-400">"ORD_94827"</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-300">"upiUri"</span>: <span class="text-green-400">"upi://pay?pa=store@upi&pn=Store..."</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-300">"paymentUrl"</span>: <span class="text-green-400">"https://upay.in/pay/ORD_94827"</span><br>
+                            &nbsp;&nbsp;}<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoint: Status Verification -->
+            <div class="bg-gray-900/40 border border-gray-800 rounded-2xl p-6 md:p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-md text-xs font-bold mono">GET</span>
+                    <span class="font-mono text-base font-semibold text-gray-200">/api/payment/status/:orderId</span>
+                </div>
+
+                <p class="text-gray-400 text-sm mb-4">Fallback query to verify settlement states during user-driven polling cycles.</p>
+                <div class="bg-black/60 rounded-xl p-4 mono text-xs text-gray-300 border border-gray-800/80 overflow-x-auto">
+                    {<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"status"</span>: <span class="text-green-400">"success"</span>,<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"data"</span>: {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-300">"orderId"</span>: <span class="text-green-400">"ORD_94827"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-300">"paymentStatus"</span>: <span class="text-green-400">"SUCCESS"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-300">"utr"</span>: <span class="text-green-400">"429103958102"</span><br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Webhook Integration -->
+    <section id="webhooks" class="max-w-7xl mx-auto px-6 md:px-8 py-20 border-t border-gray-900">
+        <div class="mb-10">
+            <span class="text-indigo-400 font-semibold tracking-wider text-xs uppercase mono">Asynchronous Notifications</span>
+            <h2 class="text-3xl font-extrabold mt-2">Webhook Verification</h2>
+            <p class="text-gray-400 text-sm mt-1">Configure your destination endpoint in the dashboard to ingest instant notifications upon successful UPI credit.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start">
+            <div class="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
+                <h4 class="text-sm font-semibold mb-4 text-gray-200 flex items-center justify-between">
+                    <span>Incoming JSON Dispatch</span>
+                    <span class="text-[11px] mono text-indigo-400">POST /webhook</span>
+                </h4>
+                <div class="bg-black/60 rounded-xl p-4 mono text-xs text-gray-300 border border-gray-800/80 overflow-x-auto leading-relaxed">
+                    {<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"event"</span>: <span class="text-green-400">"payment.success"</span>,<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"orderId"</span>: <span class="text-green-400">"ORD_94827"</span>,<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"amount"</span>: <span class="text-orange-400">499.00</span>,<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"utr"</span>: <span class="text-green-400">"429103958102"</span>,<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"status"</span>: <span class="text-green-400">"SUCCESS"</span>,<br>
+                    &nbsp;&nbsp;<span class="text-indigo-300">"timestamp"</span>: <span class="text-orange-400">1760527620</span><br>
+                    }
+                </div>
+            </div>
+
+            <div class="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
+                <h4 class="text-sm font-semibold mb-4 text-gray-200">Express Receiver Implementation</h4>
+                <div class="bg-black/60 rounded-xl p-4 mono text-xs text-gray-300 border border-gray-800/80 overflow-x-auto leading-relaxed">
+                    <span class="text-indigo-400">const</span> express = <span class="text-blue-400">require</span>(<span class="text-green-400">'express'</span>);<br>
+                    <span class="text-indigo-400">const</span> app = <span class="text-blue-400">express</span>();<br><br>
+                    app.<span class="text-blue-400">post</span>(<span class="text-green-400">'/webhook'</span>, express.<span class="text-blue-400">json</span>(), (<span class="text-orange-400">req, res</span>) => {<br>
+                    &nbsp;&nbsp;<span class="text-indigo-400">const</span> { orderId, status, utr } = req.body;<br><br>
+                    &nbsp;&nbsp;<span class="text-indigo-400">if</span> (status === <span class="text-green-400">'SUCCESS'</span>) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">fulfillOrder</span>(orderId, utr);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;res.<span class="text-blue-400">status</span>(<span class="text-orange-400">200</span>).<span class="text-blue-400">send</span>(<span class="text-green-400">'OK'</span>);<br>
+                    });
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="max-w-7xl mx-auto px-6 md:px-8 py-20 border-t border-gray-900 text-center relative">
+        <div class="max-w-xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Start Accepting Payments in 5 Minutes</h2>
+            <p class="text-gray-400 mb-8 text-sm md:text-base leading-relaxed">
+                Register your verified business VPA, generate your production keys, and plug our lightweight endpoint into your cart.
+            </p>
+            <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg shadow-indigo-600/30 cursor-pointer" onclick="location.href='/user/login'">
+                Launch Merchant Dashboard &rarr;
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-gray-900 text-center text-gray-500 text-xs">
+        <p>Built for the Indian Developer Ecosystem. &copy; 2026 Upay. All rights reserved.</p>
     </footer>
 
 </body>
