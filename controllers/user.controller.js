@@ -15,6 +15,7 @@ export const genMID=(len=8)=>{
   }
   return uid
 }
+
 export const register=async(req,res)=>{
   let {firstname,lastname,email,password}=req.body;
   firstname=firstname.trim()
