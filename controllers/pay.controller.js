@@ -33,7 +33,7 @@ export const paymentPage = async (req, res) => {
       tid,
       redirect,
       logo,
-      upiParams:commonParams
+      upiParams:commonParams.replace(/&amp;/g,'&')
     });
   } catch (error) {
     console.error("paymentPage error:", error);
