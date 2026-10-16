@@ -4,7 +4,7 @@ const createOrder=async(req,res)=>{
   const paytmdata={MID:paytm.MID?paytm.MID:process.env.mid,UPI:paytm.UPI?paytm.UPI:process.env.upi}
   let amount=req.amount || req.body.amount;
 if (amount>1){
-  amount=amount-1+.9+Math.random()/10
+  amount=Math.floor((amount-1+.9+Math.random()/10)*100)/100
 }
 
   
