@@ -79,12 +79,12 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-3 sm:p-6 lg:p-10">
 
-    <!-- Payment Container: Single card on mobile, Split side-by-side on lg: desktop -->
+    <!-- Payment Container -->
     <div id="payment-card" class="bg-white w-full max-w-md lg:max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-gray-100 relative transition-all">
 
         <div class="lg:grid lg:grid-cols-12 min-h-[580px]">
 
-            <!-- Left Panel / Desktop Context & Illustration Column -->
+            <!-- Left Panel -->
             <div class="lg:col-span-5 bg-gradient-to-b from-slate-50 via-indigo-50/30 to-purple-50/20 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-100">
                 <div>
                     <!-- Header Info -->
@@ -113,13 +113,10 @@
                     </div>
                 </div>
 
-                <!-- Animated Payment Illustration (Visible prominently on desktop) -->
+                <!-- Animated Payment Illustration -->
                 <div class="hidden lg:flex flex-col items-center justify-center my-6 relative py-4">
                     <svg class="w-56 h-44 drop-shadow-md" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Background glow aura -->
                         <ellipse class="pulse-subtle" cx="140" cy="115" rx="85" ry="40" fill="#e0e7ff"/>
-                        
-                        <!-- Floating Base / Card -->
                         <g class="float-anim">
                             <rect x="40" y="55" width="130" height="85" rx="12" fill="#4f46e5" fill-opacity="0.95"/>
                             <rect x="40" y="75" width="130" height="18" fill="#3730a3"/>
@@ -127,24 +124,16 @@
                             <circle cx="80" cy="112" r="7" fill="#f87171" fill-opacity="0.8"/>
                             <rect x="105" y="108" width="45" height="7" rx="3.5" fill="#c7d2fe"/>
                         </g>
-
-                        <!-- Mobile Device Floating -->
                         <g transform="translate(130, 20)">
                             <rect x="0" y="0" width="90" height="145" rx="16" fill="#1e1b4b"/>
                             <rect x="5" y="6" width="80" height="133" rx="12" fill="#ffffff"/>
                             <rect x="35" y="9" width="20" height="3" rx="1.5" fill="#cbd5e1"/>
-                            
-                            <!-- Scanner target on screen -->
                             <rect x="18" y="28" width="54" height="54" rx="8" fill="#f8fafc" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="3 3"/>
                             <path class="signal-wave" d="M24 55 H66" stroke="#6366f1" stroke-width="2" stroke-linecap="round"/>
-                            
-                            <!-- Success indicator pill -->
                             <rect x="15" y="94" width="60" height="16" rx="8" fill="#dcfce7"/>
                             <circle cx="24" cy="102" r="4" fill="#16a34a"/>
                             <rect x="33" y="100" width="34" height="4" rx="2" fill="#15803d"/>
                         </g>
-
-                        <!-- Floating Shield Badge -->
                         <g transform="translate(100, 95)" class="float-anim" style="animation-delay: -1.8s;">
                             <circle cx="20" cy="20" r="18" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.1))"/>
                             <path d="M20 10 L28 14 V20 C28 25 24 28 20 30 C16 28 12 25 12 20 V14 L20 10 Z" fill="#6366f1"/>
@@ -171,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- Right Panel / Interactive Action Section -->
+            <!-- Right Panel -->
             <div class="lg:col-span-7 flex flex-col justify-between">
                 
                 <!-- QR & App Selection Section -->
@@ -194,19 +183,30 @@
                     <div class="space-y-3 text-left max-w-sm mx-auto w-full">
                         <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center mb-3">Select UPI App</p>
                         <div class="grid grid-cols-2 gap-3">
-                            <a href="<%=gpayUri%>" class="flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95">
+                            <!-- GPay -->
+                            <a id="btn-gpay" href="#" class="upi-app-btn flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95"
+                               data-app="gpay">
                                 <img src="/assets/gpay.png" class="w-6 h-6 mr-3 object-contain" alt="GPay" onerror="this.style.display='none'">
                                 <span class="text-sm font-medium text-gray-700">GPay</span>
                             </a>
-                            <a href="<%=phonepeUri%>" class="flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95">
+
+                            <!-- PhonePe -->
+                            <a id="btn-phonepe" href="#" class="upi-app-btn flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95"
+                               data-app="phonepe">
                                 <img src="/assets/phonepe.jpeg" class="w-6 h-6 mr-3 object-contain" alt="PhonePe" onerror="this.style.display='none'">
                                 <span class="text-sm font-medium text-gray-700">PhonePe</span>
                             </a>
-                            <a href="<%=paytmUri%>" class="flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95">
+
+                            <!-- Paytm -->
+                            <a id="btn-paytm" href="#" class="upi-app-btn flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95"
+                               data-app="paytm">
                                 <img src="/assets/paytm.png" class="w-6 h-6 mr-3 object-contain" alt="Paytm" onerror="this.style.display='none'">
                                 <span class="text-sm font-medium text-gray-700">Paytm</span>
                             </a>
-                            <a href="<%=bhimUri%>" class="flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95">
+
+                            <!-- BHIM -->
+                            <a id="btn-bhim" href="#" class="upi-app-btn flex items-center p-3 border border-gray-200/80 rounded-xl hover:bg-gray-50/80 hover:border-indigo-200 transition active:scale-95"
+                               data-app="bhim">
                                 <img src="/assets/bhim.png" class="w-6 h-6 mr-3 object-contain" alt="BHIM" onerror="this.style.display='none'">
                                 <span class="text-sm font-medium text-gray-700">BHIM</span>
                             </a>
@@ -285,6 +285,48 @@
     </div>
 
     <script>
+        // --- 0. Dynamic OS Detection & Link Assignment ---
+        (function setupUpiLinks() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            // Server-provided common query string or individual links
+            // (Assuming you pass raw upi parameters, or using template tags)
+            const commonParams = "<%= typeof upiParams !== 'undefined' ? upiParams : '' %>";
+
+            const upiMap = {
+                gpay: {
+                    android: `<%= typeof gpayUri !== 'undefined' ? gpayUri : '' %>` || `intent://pay?${commonParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`,
+                    ios: `gpay://upi/pay?${commonParams}`
+                },
+                phonepe: {
+                    android: `<%= typeof phonepeUri !== 'undefined' ? phonepeUri : '' %>` || `intent://pay?${commonParams}#Intent;scheme=upi;package=com.phonepe.app;end`,
+                    ios: `phonepe://pay?${commonParams}`
+                },
+                paytm: {
+                    android: `<%= typeof paytmUri !== 'undefined' ? paytmUri : '' %>` || `intent://pay?${commonParams}#Intent;scheme=upi;package=net.one97.paytm;end`,
+                    ios: `paytmmp://pay?${commonParams}`
+                },
+                bhim: {
+                    android: `<%= typeof bhimUri !== 'undefined' ? bhimUri : '' %>` || `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.npci.upiapp;end`,
+                    ios: `bhim://pay?${commonParams}`
+                }
+            };
+
+            document.querySelectorAll('.upi-app-btn').forEach(btn => {
+                const app = btn.dataset.app;
+                if (!upiMap[app]) return;
+
+                if (isIOS) {
+                    btn.href = upiMap[app].ios;
+                } else {
+                    // Default to Android intent
+                    btn.href = upiMap[app].android;
+                }
+            });
+        })();
+
+        // --- Core Application State & Timers ---
         let pollTimer = null;
         let isPollingStopped = false;
         let timeInSeconds = 300;
@@ -301,7 +343,7 @@
             failed: document.getElementById('failed-popup')
         };
 
-        // Unlock audio on first user gesture (satisfies mobile Safari/Chrome autoplay policies)
+        // Unlock audio on first user gesture
         const unlockAudio = () => {
             doneSound.load();
             window.removeEventListener('click', unlockAudio);
@@ -337,7 +379,7 @@
             clearInterval(countdown);
         }
 
-        // Success animation: count-up amount, confetti, redirect progress bar
+        // Success Animation
         function playSuccess() {
             const out = document.getElementById('success-amount');
             const fmt = v => v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -390,7 +432,6 @@
                 document.body.removeChild(link);
                 URL.revokeObjectURL(blobUrl);
             } catch (err) {
-                // Fallback for strict CORS headers on image source
                 const link = document.createElement('a');
                 link.href = img.src;
                 link.target = '_blank';
@@ -407,7 +448,6 @@
                 const response = await fetch("/pay/status/<%=tid%>");
                 const data = await response.json();
 
-                // Payment SUCCESS
                 if (data.status === true || data.state === "SUCCESS") {
                     stopPolling();
                     document.getElementById("utr").innerText = data.utr || "Verified";
@@ -420,7 +460,6 @@
                     return;
                 }
 
-                // Payment FAILED
                 if (data.state === "FAILED") {
                     stopPolling();
                     document.getElementById("failed-message").innerText = data.message || "Payment was rejected or cancelled.";
