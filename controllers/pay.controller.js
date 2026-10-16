@@ -20,7 +20,7 @@ export const paymentPage = async (req, res) => {
     const redirect = info.redirect || "/pay/thanks";
 
     const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(tid)}&am=${amount}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + tid)}`;
-    
+    const intent=`upi://pay?${commonParams}`
 
     // Generate QR locally as Data URL
     const obj = await QRCode.toDataURL(intent, { width: 300, margin: 2 });
