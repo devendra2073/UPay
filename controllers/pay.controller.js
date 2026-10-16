@@ -188,7 +188,7 @@ export const paymentStatus = async (req, res) => {
     return res.status(200).json({
       status: false,
       state: "PENDING",
-      message: "Waiting for payment completion"
+      message: "Waiting for payment completion",
       amount:parseFloat(info.amount),
       a:parseFloat(dbresp.amount||1)
     });
