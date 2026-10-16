@@ -21,11 +21,17 @@ export const paymentPage = async (req, res) => {
 
     const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(tid)}&am=${amount}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + tid)}`;
     
-    const intent = `upi://pay?${commonParams}`;
-    const paytmUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
-    const phonepeUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
-    const gpayUri=`intent://pay?${commonParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`
-const bhimUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.npci.upiapp;end`;
+    // --- ANDROID INTENT URIs ---
+const paytmUriAndroid   = `intent://pay?${commonParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
+const phonepeUriAndroid = `intent://pay?${commonParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
+const gpayUriAndroid    = `intent://pay?${commonParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+const bhimUriAndroid    = `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.npci.upiapp;end`;
+
+// --- iOS CUSTOM SCHEME URIs ---
+const paytmUriIos       = `paytmmp://pay?${commonParams}`;
+const phonepeUriIos     = `phonepe://pay?${commonParams}`;
+const gpayUriIos        = `gpay://upi/pay?${commonParams}`;
+const bhimUriIos        = `bhim://pay?${commonParams}`;
 
 
     // Generate QR locally as Data URL
@@ -39,10 +45,14 @@ const bhimUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.n
       tid,
       redirect,
       logo,
-      paytmUri,
-      phonepeUri,
-      gpayUri,
-      bhimUri
+      paytmUriAndroid,
+      phonepeUriAndroid,
+      gpayUriAndroid,
+      bhimUriAndroid,
+      paytmUriIos,
+      phonepeUriIos,
+      gpayUriIos,
+      bhimUriIos
     });
   } catch (error) {
     console.error("paymentPage error:", error);
@@ -189,7 +199,7 @@ export const paymentStatus = async (req, res) => {
       status: false,
       state: "PENDING",
       message: "Waiting for payment completion",
-      amount:parseFloat(info.amount),
+      amount:parseFloat(info.TXNAMOUNT),
       a:parseFloat(dbresp.amount||1)
     });
 
