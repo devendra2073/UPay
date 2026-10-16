@@ -21,18 +21,6 @@ export const paymentPage = async (req, res) => {
 
     const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(tid)}&am=${amount}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + tid)}`;
     
-    // --- ANDROID INTENT URIs ---
-const paytmUriAndroid   = `intent://pay?${commonParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
-const phonepeUriAndroid = `intent://pay?${commonParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
-const gpayUriAndroid    = `intent://pay?${commonParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
-const bhimUriAndroid    = `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.npci.upiapp;end`;
-
-// --- iOS CUSTOM SCHEME URIs ---
-const paytmUriIos       = `paytmmp://pay?${commonParams}`;
-const phonepeUriIos     = `phonepe://pay?${commonParams}`;
-const gpayUriIos        = `gpay://upi/pay?${commonParams}`;
-const bhimUriIos        = `bhim://pay?${commonParams}`;
-
 
     // Generate QR locally as Data URL
     const obj = await QRCode.toDataURL(intent, { width: 300, margin: 2 });
@@ -45,14 +33,7 @@ const bhimUriIos        = `bhim://pay?${commonParams}`;
       tid,
       redirect,
       logo,
-      paytmUriAndroid,
-      phonepeUriAndroid,
-      gpayUriAndroid,
-      bhimUriAndroid,
-      paytmUriIos,
-      phonepeUriIos,
-      gpayUriIos,
-      bhimUriIos
+      upiParams:commonParams
     });
   } catch (error) {
     console.error("paymentPage error:", error);
@@ -181,15 +162,14 @@ export const paymentStatus = async (req, res) => {
       
       });
 
-      return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID ,payinfo});
+      return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID});
     }
 
     // Agar transaction explicitly Fail ho chuki hai
     if (info.STATUS === "TXN_FAILURE") {
       return res.status(200).json({
         status: false,
-        info
-        
+      
       
       });
     }
@@ -199,8 +179,6 @@ export const paymentStatus = async (req, res) => {
       status: false,
       state: "PENDING",
       message: "Waiting for payment completion",
-      amount:parseFloat(info.TXNAMOUNT),
-      a:parseFloat(dbresp.amount||1)
     });
 
   } catch (error) {
