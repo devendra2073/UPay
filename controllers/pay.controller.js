@@ -22,8 +22,11 @@ export const paymentPage = async (req, res) => {
     const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(tid)}&am=${amount}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + tid)}`;
     
     const intent = `upi://pay?${commonParams}`;
-    const paytmp = `paytmmp://pay?${commonParams}`;
-    const phonepe = `phonepe://pay?${commonParams}&mc=5651`;
+    const paytmUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
+    const phonepeUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
+    const gpayUri=`intent://pay?${commonParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`
+const bhimUri = `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.npci.upiapp;end`;
+
 
     // Generate QR locally as Data URL
     const obj = await QRCode.toDataURL(intent, { width: 300, margin: 2 });
@@ -36,8 +39,10 @@ export const paymentPage = async (req, res) => {
       tid,
       redirect,
       logo,
-      paytmp,
-      phonepe,
+      paytmUri,
+      phonepeUri,
+      gpayUri,
+      bhimUri
     });
   } catch (error) {
     console.error("paymentPage error:", error);
@@ -184,6 +189,8 @@ export const paymentStatus = async (req, res) => {
       status: false,
       state: "PENDING",
       message: "Waiting for payment completion"
+      amount:parseFloat(info.amount),
+      a:parseFloat(dbresp.amount||1)
     });
 
   } catch (error) {
