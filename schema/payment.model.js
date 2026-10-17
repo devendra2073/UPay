@@ -42,6 +42,18 @@ const paymentSchema=new Schema({
   default: null
 }
 ,
+  customerName:{
+    type:String,
+    default:"Not Given"
+  },
+  customerEmail:{
+    type:String,
+    default:"Not Given"
+  },
+  customerPhone:{
+    type:String,
+    default:"Not Given"
+  },
   upi_address:{
     type:String
   },
