@@ -165,14 +165,16 @@ export const paymentStatus = async (req, res) => {
       
       });
     
-      const marchent_name=user_for_api.company;
+      const merchant_name=user_for_api.company;
       const customer_name=updatedOrder.customerName;
       const mobile_number=updatedOrder.customerPhone;
       const email=updatedOrder.customerEmail
+      const order_id=updatedOrder.order;
+      const transaction_id=updatedOrder.upaytr;
       const amount=updatedOrder.amount;
       const dt=updatedOrder.paymentDate;
       const payment_date=dt.toLocaleString();
-      const html=await parser("purchase",{customer_name,mobile_number,marchent_name,email,amount})
+      const html=await parser("purchase",{customer_name,mobile_number,marchent_name,email,amount,payment_date,transaction_id,order_id})
       await sendMail({email,firstname:customer_name,subject:"Payment Confirmation "+marchent_name,html})
       
       
