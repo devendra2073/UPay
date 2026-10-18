@@ -165,7 +165,7 @@ export const paymentStatus = async (req, res) => {
       
       });
     
-      const merchant_name=user_for_api.company;
+      const merchant_name=updatedOrder.company;
       const customer_name=updatedOrder.customerName;
       const mobile_number=updatedOrder.customerPhone;
       const email=updatedOrder.customerEmail
