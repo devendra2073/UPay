@@ -1,6 +1,8 @@
 import QRCode from "qrcode";
 import crypto from "node:crypto"
 import jwt from "jsonwebtoken";
+import parser from "../utils/templateParser.js"
+import sendMail from " ../utils/mailer.js"
 import paymentModel from "../schema/payment.model.js";
 import user from "../schema/user.model.js";
 export const paymentPage = async (req, res) => {
@@ -161,6 +163,8 @@ export const paymentStatus = async (req, res) => {
         httpOnly: true,
       
       });
+      
+      await parser("purchase",
 
       return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID});
     }
