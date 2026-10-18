@@ -170,7 +170,8 @@ export const paymentStatus = async (req, res) => {
       const email=updatedOrder.customerEmail
       const amount=updatedOrder.amount;
       const html=await parser("purchase",{customer_name,mobile_number,marchent_name,email,amount})
-      await sendMail({email:customerEmail,subject:"Payment Confirmation "+marchent_name,html})
+      await sendMail({email:customer_email,subject:"Payment Confirmation "+marchent_name,html})
+      
       
 
       return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID});
