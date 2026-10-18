@@ -12,10 +12,11 @@ if (amount>1){
   
     
 const mode=req.mode
+req.customer=req.customer?req.customer:{customerName:req.user.firstname,customerEmail:req.user.email,customerMobile:req.user.mobile}
 const {customerName,customerMobile,customerEmail}=req.customer 
-  const buff=crypto.randomBytes(10);
-  const upaytr=buff.toString('hex');
   
+    const buff=crypto.randomBytes(10);
+  const upaytr=buff.toString('hex');
 const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=${company}`
   const order=`ORDER${Date.now()}${Math.floor(Math.random()*1000)}`
   const pay=new paymentModel({
