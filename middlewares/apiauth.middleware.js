@@ -1,11 +1,13 @@
 import user from "../schema/user.model.js"
 const apiAuth=async(req,res,next)=>{
   try{
-  let {api,MID}=req.body;
+  let {api,MID,customerName,customerEmail,customerMobile}=req.body;
   
   if(!api || !MID ) return res.json({status:false,message:"Missing api or MID key "})
   const usr=await user.findOne({api,MID})
   if(!usr) return res.json({status:false,message:"Account not found"})
+  if(!customerName || !customerEmail || !customerMobile){return res.json({status:false,message:"Customer details missing"})}
+  req.customer={customerName,customerEmail,customerMobile}
   req.user=usr
   req.mode="PORTAL"
 
