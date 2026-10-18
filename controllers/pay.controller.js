@@ -175,7 +175,7 @@ export const paymentStatus = async (req, res) => {
       const dt=updatedOrder.paymentDate;
       const payment_date=dt.toLocaleString();
       const html=await parser("purchase",{customer_name,mobile_number,merchant_name,email,amount,payment_date,transaction_id,order_id})
-      await sendMail({email,firstname:customer_name,subject:"Payment Confirmation "+marchent_name,html})
+      await sendMail({email,firstname:customer_name,subject:"Payment confirmation for "+merchant_name,html})
       
       
 
