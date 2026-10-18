@@ -42,6 +42,11 @@ const paymentSchema=new Schema({
   default: null
 }
 ,
+  upaytr:{
+    type:String,
+    unique:true,
+    required:true
+  },
   customerName:{
     type:String,
     default:"Not Given"
