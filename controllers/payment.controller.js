@@ -12,7 +12,7 @@ if (amount>1){
   
     
 const mode=req.mode
-const {customerName,customerMobile,customerName}=req.customer 
+const {customerName,customerMobile,customerEmail}=req.customer 
   const buff=crypto.randomBytes(10);
   const upaytr=buff.toString('hex');
   
