@@ -61,6 +61,10 @@ const paymentSchema=new Schema({
   },
   upi_address:{
     type:String
+  }
+  ,
+  paymentDate:{
+    type:Date
   },
   callback:{
     type:String,
