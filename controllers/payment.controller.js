@@ -1,6 +1,8 @@
+import crypto from "node:crypto";
 import paymentModel from "../schema/payment.model.js"
 const createOrder=async(req,res)=>{
   const {MID,company,redirect,pic,paytm,callback}=req.user;
+ 
   const paytmdata={MID:paytm.MID?paytm.MID:process.env.mid,UPI:paytm.UPI?paytm.UPI:process.env.upi}
   let amount=req.amount || req.body.amount;
 if (amount>1){
@@ -10,6 +12,10 @@ if (amount>1){
   
     
 const mode=req.mode
+const {customerName,customerMobile,customerName}=req.customer 
+  const buff=crypto.randomBytes(10);
+  const upaytr=buff.toString('hex');
+  
 const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=${company}`
   const order=`ORDER${Date.now()}${Math.floor(Math.random()*1000)}`
   const pay=new paymentModel({
@@ -21,6 +27,10 @@ const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=
     company,
     redirect,
     callback,
+    customerName,
+    customerEmail,
+    customerMobile,
+    upaytr,
     paytm:paytmdata
   })
   await pay.save()
