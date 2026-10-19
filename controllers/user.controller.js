@@ -3,6 +3,7 @@ import crypto from "crypto"
 import mailer from "../utils/mailer.js"
 import parser from "../utils/templateParser.js"
 import payment from "../schema/payment.model.js"
+import client from "../schema/clientModel.js";
 import banks from "../utils/getBanks.js"
 import jwt from "jsonwebtoken"
 import user from "../schema/user.model.js"
@@ -264,6 +265,44 @@ export const logout=async(req,res)=>{
 }
 export const paytmconf=async(req,res)=>{
  return res.render("paytmconf",{paytm:req.user?.paytm})
+
+}
+export const transaction=async(req,res)=>{
+const MID=req.user.MID;
+const {upaytr}=req.params;
+const order=await payment.findOne({MID,upaytr});
+if(!order) return res.send("Order Not found");
+const clientInfo=await client.findOne{{upaytr});
+if(!clientInfo) return res.send("Client Data not availble");
+const amount=order.amount;
+const utr=order.utr;
+const payment_date=order.payment_date.toLocaleString();
+const customerName=order.customerName;
+const timezone=clientInfo.location.timezone;                                     const customerEmail=order.customerEmail;
+                                      const customerPhone=order.customerPhone;
+                                      const merchant=order.company;
+                                      const upi=order.paytm.upi;
+                                      const ip=clientInfo.ip;
+                                      const deviceType=clientInfo.device.type
+                                      const deviceModel=clientInfo.device.model;
+                                      const deviceBrand=clientInfo.device.brand;
+                                      const osName=clientInfo.os.name;
+                                      const osVersion=clientInfo.os.version;
+                                      const browserName=clientInfo.browser.name;
+                                      const browserVersion=clientInfo.browser.version;
+                                      const isp=clientInfo.location.isp;
+                                      const country=clientInfo.location.country;
+                                      const region=clientInfo.location.region;
+                                      const city=clientInfo.location.city;
+                                      const zip=clientInfo.location.zip;
+                                      const lat=clientInfo.location.latitude;
+                                      const longt=clientInfo.location.longitude;
+                                    res.render("transactioninfo",{amount,utr,payment_date,customerName,customerEmail,customerPhone,timezone,merchant,upi,ip,deviceType,deviceBrand,deviceModel,osName,osVersion,browserName,browserVersion,isp,country,region,zip,city,lat,longt})
+                                      
+                                      
+                                      
+                                      
+  
 
 }
 export const paytmcnf=async(req,res)=>{
