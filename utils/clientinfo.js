@@ -1,7 +1,7 @@
 
 import { UAParser } from 'ua-parser-js';
 
-export default async function handler(req, res) {
+export default async function handler(req) {
   try {
     // 1. IP एड्रेस
     const forwarded = req.headers['x-forwarded-for'];
