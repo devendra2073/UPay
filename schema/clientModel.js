@@ -3,6 +3,10 @@ import mongoose from 'mongoose';
 
 const clientLogSchema = new mongoose.Schema(
   {
+    upaytr:{
+type:String,
+      required:true,
+    },
     ip: {
       type: String,
       required: true,
