@@ -272,7 +272,7 @@ const MID=req.user.MID;
 const {upaytr}=req.params;
 const order=await payment.findOne({MID,upaytr});
 if(!order) return res.send("Order Not found");
-const clientInfo=await client.findOne{{upaytr});
+const clientInfo=await client.findOne({upaytr});
 if(!clientInfo) return res.send("Client Data not availble");
 const amount=order.amount;
 const utr=order.utr;
