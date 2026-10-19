@@ -1,5 +1,7 @@
 import QRCode from "qrcode";
 import crypto from "node:crypto"
+import client from "../utils/clientinfo.js"
+import clientModel from "../schema/clientModel.js"
 import jwt from "jsonwebtoken";
 import parser from "../utils/templateParser.js"
 import sendMail from "../utils/mailer.js"
@@ -176,7 +178,13 @@ export const paymentStatus = async (req, res) => {
       const payment_date=dt.toLocaleString();
       const html=await parser("purchase",{customer_name,mobile_number,merchant_name,email,amount,payment_date,transaction_id,order_id})
       await sendMail({email,firstname:customer_name,subject:"Payment confirmation for "+merchant_name,html})
-      
+      const cl=await client(req);
+      const clientData=new clientModel(
+        {
+          upaytr:updatedOrder.upaytr,
+          ...cl
+        }   )
+      await clientData.save();
       
 
       return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID});
