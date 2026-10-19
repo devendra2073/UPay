@@ -499,53 +499,53 @@
      */
     const telemetryData = {
       transaction: {
-        amount: 2499.00,
+        amount: <%=amount%>,
         currency: "INR",
-        status: "Payment Settled",
+        status: "Payment Recieved",
         status_subtext: "Payment Successful",
-        utr: "429281749201",
-        upay_transaction_id: "UPAY_TXN_8849203819",
-        order_id: "ORD-9482710385",
-        payment_date: "19 Oct 2026, 13:41:22 IST",
-        payment_date_precise: "19 Oct 2026, 13:41:22.091 IST",
-        payment_mode: "UPI (PhonePe)",
-        vpa_provider: "PhonePe",
-        merchant_id: "MERCH_89201",
-        pg_id: "UP-9921",
+        utr: "<%=utr%>",
+        upay_transaction_id: "<%=upaytr%>",
+        order_id: "<%=order%>",
+        payment_date: "<%=payment_date%>",
+        payment_date_precise: "<%=payment_date%>",
+        payment_mode: "UPI",
+        vpa_provider: "Paytm",
+        merchant_id: "<%=merchant%>",
+        pg_id: "Unavailable",
         latency: "184 ms",
-        settlement_destination: "HDFC Bank •••• 9104"
+        settlement_destination: "<%=upi%>"
       },
       customer: {
-        name: "Aarav Deshmukh",
-        email: "aarav.deshmukh@example.com",
-        phone: "+91 98230 45812"
+        name: "<%=customerName>",
+        email: "<%=customerEmail%>",
+        phone: "<%=customerPhone%>"
       },
       client: {
-        ip: "223.228.42.108",
+        ip: "<%=ip%>",
         device: {
-          type: "mobile",
-          brand: "Apple",
-          model: "iPhone"
+          type: "<%=deviceType%>",
+          brand: "<%=deviceBrand%>",
+          model: "<%=deviceModel%>"
         },
         os: {
-          name: "iOS",
-          version: "26.6.0"
+          name: "<%=osName%>",
+          version: "<%=osVersion%>"
         },
-        browser: {
-          name: "Mobile Chrome",
-          version: "v152.0.7977.53"
+        browser:{
+          name: "<%=browserName%>",
+          version: "<%browserVersion%>"
         },
-        isp: "Bharti Airtel Ltd",
+        isp: "<%=isp%>",
         network_type: "Cellular 5G"
       },
       location: {
-        country: "India",
+        country: "<%=country%>",
         country_flag: "🇮🇳",
-        region: "Maharashtra",
-        city: "Pune",
-        zip: "411001",
-        latitude: 18.5211,
-        longitude: 73.8502,
+        region: "<%=region%>",
+        city: "<%=city%>",
+        zip: "<%=zip%>",
+        latitude: <%=lat%>,
+        longitude: <%=longt%>,
         timezone: "Asia/Kolkata (UTC+05:30)"
       },
       security: {
