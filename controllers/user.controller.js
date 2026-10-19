@@ -145,7 +145,7 @@ export const transections=async(req,res)=>{
   if(!req.user) return res.json({status:false,message:"Unauthorized"})
   const MID=req.user.MID
   if (!MID) return res.json({status:false,message:"Something went wrong"})
-  const trans=await payment.find({MID,isPaid:true}).select('amount utr mode MID -_id').sort({_id:-1})
+  const trans=await payment.find({MID,isPaid:true}).select('amount utr mode upaytr MID -_id').sort({_id:-1})
   return res.json(trans)
 }
 
