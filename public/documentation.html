@@ -16,9 +16,7 @@
       --bg-body: #0b0f19;
       --bg-surface: #111827;
       --bg-card: #182234;
-      --bg-card-hover: #1e293b;
       --border: #26334d;
-      --border-subtle: #1e293b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --code-bg: #030712;
@@ -75,9 +73,6 @@
       color: var(--text-main);
       font-size: 1.5rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     /* Sidebar Navigation */
@@ -189,9 +184,6 @@
       letter-spacing: -0.03em;
       margin-bottom: 16px;
       color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
 
     h3 {
@@ -209,7 +201,6 @@
       line-height: 1.7;
     }
 
-    /* Highlights & Hero Badge */
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -233,7 +224,7 @@
       box-shadow: 0 0 8px var(--success);
     }
 
-    /* Modern Cards */
+    /* Grid Cards */
     .grid-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -247,8 +238,6 @@
       border-radius: 14px;
       padding: 24px;
       transition: transform 0.2s ease, border-color 0.2s ease;
-      position: relative;
-      overflow: hidden;
     }
 
     .feature-card:hover {
@@ -270,7 +259,7 @@
       margin: 0;
     }
 
-    /* Alert / Notice */
+    /* Alerts */
     .banner {
       border-radius: 12px;
       padding: 18px 22px;
@@ -293,7 +282,7 @@
       color: #c7d2fe;
     }
 
-    /* Sleek Tables */
+    /* Table */
     .table-container {
       overflow-x: auto;
       background: var(--bg-surface);
@@ -365,7 +354,6 @@
       padding: 6px 14px;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
 
     .code-tab.active {
@@ -381,9 +369,6 @@
       padding: 6px 14px;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s;
-      font-family: var(--font-body);
-      font-weight: 500;
     }
 
     .copy-btn:hover {
@@ -407,17 +392,14 @@
       background: rgba(255, 255, 255, 0.06);
       border-radius: 6px;
       color: var(--accent);
-      border: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     pre code {
       padding: 0;
       background: transparent;
       color: inherit;
-      border: none;
     }
 
-    /* Badges */
     .badge-method {
       display: inline-block;
       font-weight: 700;
@@ -427,7 +409,6 @@
       background: var(--primary);
       color: #ffffff;
       margin-right: 8px;
-      letter-spacing: 0.05em;
     }
 
     .badge-req {
@@ -450,7 +431,7 @@
       border-radius: 6px;
     }
 
-    /* Interactive HMAC Box */
+    /* Sandbox */
     .tool-box {
       background: var(--bg-surface);
       border: 1px solid var(--border);
@@ -483,7 +464,6 @@
       background: var(--code-bg);
       color: #f8fafc;
       outline: none;
-      transition: border-color 0.2s;
     }
 
     .form-group input:focus {
@@ -499,7 +479,6 @@
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
-      transition: background 0.2s;
       box-shadow: 0 4px 14px var(--primary-glow);
     }
 
@@ -519,11 +498,6 @@
       color: #94a3b8;
     }
 
-    .result-display strong {
-      color: #f1f5f9;
-    }
-
-    /* Mobile Backdrop */
     .backdrop {
       display: none;
       position: fixed;
@@ -588,9 +562,9 @@
     <div class="nav-group">
       <div class="nav-label">Integration</div>
       <a href="#create-order" class="nav-item">Create Order API</a>
-      <a href="#signature" class="nav-item">HMAC Webhooks</a>
-      <a href="#playground" class="nav-item">Signature Tester</a>
-      <a href="#code-examples" class="nav-item">Code SDKs</a>
+      <a href="#signature" class="nav-item">JSON HMAC Verification</a>
+      <a href="#playground" class="nav-item">Signature Sandbox</a>
+      <a href="#code-examples" class="nav-item">Order API Code</a>
     </div>
   </aside>
 
@@ -600,47 +574,45 @@
     <!-- Overview -->
     <section id="overview" class="doc-section">
       <div class="status-badge">API Status: Operational</div>
-      <h2>Direct-to-Bank UPI Gateway</h2>
+      <h2>Direct UPI Payment Gateway</h2>
       <p>
-        UPay is a zero-commission, non-custodial UPI checkout bridge. Customer payments flow directly into your verified 
-        Paytm Business VPA via dynamic UPI intents without intermediary escrow holds.
+        UPay is a zero-commission, direct-to-account UPI payment bridge. Payments settle straight to your Paytm Business merchant VPA with zero escrow custody risk.
       </p>
 
       <div class="grid-cards">
         <div class="feature-card">
           <h4>0% Gateway Fees</h4>
-          <p>Completely free of third-party processing deductions. All settled funds stay 100% yours.</p>
+          <p>Zero processing fees. 100% of received payments remain directly in your merchant bank account.</p>
         </div>
         <div class="feature-card">
-          <h4>Zero Custody Escrow</h4>
-          <p>Settlement happens directly between the customer’s UPI app and your merchant bank account.</p>
+          <h4>Zero Custody</h4>
+          <p>Instant UPI settlement without intermediate third-party account holding.</p>
         </div>
         <div class="feature-card">
-          <h4>Instant Webhook Verification</h4>
-          <p>Real-time POST callbacks secured with cryptographically verified HMAC-SHA256 signatures.</p>
+          <h4>HMAC-SHA256 Webhooks</h4>
+          <p>Tamper-proof signature calculated directly across the raw stringified payload object.</p>
         </div>
       </div>
     </section>
 
-    <!-- Quickstart / Onboarding -->
+    <!-- Merchant Onboarding -->
     <section id="quickstart" class="doc-section">
       <h2>Merchant Onboarding</h2>
-      <p>Follow these steps to generate your merchant authentication credentials:</p>
+      <p>To begin processing payments, grab your credentials from the merchant console:</p>
 
       <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px;">
         <ol style="margin-left: 20px; color: #cbd5e1; font-size: 0.95rem; line-height: 2;">
           <li>
-            <strong>Register Merchant Account:</strong> Access your portal at 
+            <strong>Register Merchant Account:</strong> Sign in at 
             <a href="https://www.u-pay-seven.vercel.app/user/login" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">
               u-pay-seven.vercel.app/user/login
-            </a> 
-            and complete Google or email authentication.
+            </a>.
           </li>
           <li>
-            <strong>Link Paytm Business:</strong> Add your verified Paytm Business Merchant VPA (UPI ID) and Merchant Identifier (<code>MID</code>).
+            <strong>Link Paytm Business:</strong> Configure your verified Paytm Business UPI ID and Merchant Identifier (<code>MID</code>).
           </li>
           <li>
-            <strong>Retrieve Credentials:</strong> Under the <strong>API</strong> section, copy your production <code>Secret Key</code> and <code>MID</code>.
+            <strong>Copy API Secret:</strong> Under the <strong>API</strong> tab, copy your secret key (passed as <code>api</code> in order creation).
           </li>
         </ol>
       </div>
@@ -649,26 +621,24 @@
     <!-- Webhook Configuration -->
     <section id="webhook-config" class="doc-section">
       <h2>Webhook Configuration</h2>
-      <p>
-        Set up delivery endpoints in your dashboard under <strong>Webhook Handlers</strong> to process instant transaction confirmations.
-      </p>
+      <p>Configure your webhook endpoints in the dashboard under <strong>Webhook Handlers</strong>:</p>
 
       <div class="table-container">
         <table>
           <thead>
             <tr>
-              <th>Field</th>
-              <th>Destination &amp; Behavior</th>
+              <th>Configuration</th>
+              <th>Description</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><strong>Success Callback URL</strong></td>
-              <td>Your backend server listener. UPay triggers a secure HTTP POST with payment details immediately upon successful settlement.</td>
+              <td>Your backend server webhook endpoint. Receives POST callbacks containing the transaction payload and signature.</td>
             </tr>
             <tr>
               <td><strong>User Redirect URL</strong></td>
-              <td>Browser redirection target where the buyer is returned after completing payment. If left blank, UPay shows its default success page.</td>
+              <td>Browser redirect URL after user completes payment. (Optional: falls back to default receipt screen if empty).</td>
             </tr>
           </tbody>
         </table>
@@ -677,8 +647,7 @@
       <div class="banner warning">
         <span style="font-size: 1.25rem;">⚠️</span>
         <div>
-          <strong>Server Requirement:</strong> Your callback URL must resolve over <strong>HTTPS</strong> and acknowledge payload delivery by returning an immediate 
-          <code>200 OK</code> within <strong>3.0 seconds</strong>.
+          <strong>Server Requirement:</strong> Your callback URL must use <strong>HTTPS</strong> and respond with <code>200 OK</code> within <strong>3 seconds</strong> to acknowledge receipt.
         </div>
       </div>
     </section>
@@ -686,7 +655,7 @@
     <!-- Create Order API -->
     <section id="create-order" class="doc-section">
       <h2>Create Order API</h2>
-      <p>Generate a dynamic payment transaction session and retrieve checkout URLs.</p>
+      <p>Create a dynamic transaction token and fetch the payment checkout link.</p>
 
       <p><span class="badge-method">POST</span> <code>https://www.u-pay-seven.vercel.app/api/create-order</code></p>
 
@@ -706,7 +675,7 @@
               <td><code>api</code></td>
               <td>String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Your Merchant Secret Key from the dashboard.</td>
+              <td>Your secret API key.</td>
             </tr>
             <tr>
               <td><code>MID</code></td>
@@ -718,34 +687,34 @@
               <td><code>amount</code></td>
               <td>Number / String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Order amount in INR (e.g. <code>2399.00</code>).</td>
+              <td>Transaction amount in INR.</td>
             </tr>
             <tr>
               <td><code>customerEmail</code></td>
               <td>String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Buyer email for payment verification and receipts.</td>
+              <td>Customer email address.</td>
             </tr>
             <tr>
               <td><code>customerName</code></td>
               <td>String</td>
               <td><span class="badge-opt">Optional</span></td>
-              <td>Customer full name.</td>
+              <td>Customer display name.</td>
             </tr>
             <tr>
               <td><code>customerMobile</code></td>
               <td>String</td>
               <td><span class="badge-opt">Optional</span></td>
-              <td>10-digit customer mobile number.</td>
+              <td>10-digit customer phone number.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3>Response Payload</h3>
+      <h3>Example Response</h3>
       <div class="code-wrapper">
         <div class="code-header">
-          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">200 OK — application/json</span>
+          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">JSON 200 OK</span>
           <button class="copy-btn" onclick="copySnippet(this)">Copy</button>
         </div>
         <pre><code>{
@@ -756,39 +725,37 @@
   "timestamp": 1740000000000
 }</code></pre>
       </div>
-      <p>Redirect the buyer to the generated <code>link</code> to present the dynamic QR code and auto-detect installed UPI apps (GPay, PhonePe, Paytm, BHIM).</p>
     </section>
 
     <!-- HMAC Verification -->
     <section id="signature" class="doc-section">
       <h2>HMAC Signature Verification</h2>
-      <p>When a transaction settles, UPay issues an asynchronous webhook to your configured listener:</p>
+      <p>When an order completes, UPay dispatches a POST callback containing payment confirmation details:</p>
 
       <div class="code-wrapper">
         <div class="code-header">
-          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">Webhook Callback Body</span>
+          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">Incoming Webhook Payload</span>
         </div>
         <pre><code>{
   "ORDERID": "ORDER_67A419B8E3D",
-  "amount": 2399.00,
+  "amount": 2399,
   "UTR": "738273824123",
   "status": "SUCCESS",
-  "signature": "c044d03df6da5cb676e279bc8d6268846c4f74d08ec4f5d609204bf235e165fa"
+  "signature": "3fd5b3539bc7aef66f4db9b977bc698bb2c222ce045b13697e84bf9cb83bf2ee"
 }</code></pre>
       </div>
 
       <div class="banner info">
         <span style="font-size: 1.25rem;">💡</span>
         <div>
-          <strong>Verification Format:</strong> Concatenate the string 
-          <code>ORDERID|amount|UTR|status</code> using pipe separators, then hash it using <strong>HMAC-SHA256</strong> with your <code>Secret Key</code>.
+          <strong>Signature Calculation Rule:</strong> The signature is calculated by taking <code>JSON.stringify()</code> of the payment details (keys: <code>ORDERID</code>, <code>amount</code>, <code>UTR</code>, <code>status</code>) and hashing it using <strong>HMAC-SHA256</strong> with your <code>Secret Key</code>.
         </div>
       </div>
 
-      <h3>Node.js / Express Implementation</h3>
+      <h3>Node.js Backend Verification</h3>
       <div class="code-wrapper">
         <div class="code-header">
-          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">server.js</span>
+          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">express-webhook.js</span>
           <button class="copy-btn" onclick="copySnippet(this)">Copy</button>
         </div>
         <pre><code>const express = require('express');
@@ -799,39 +766,44 @@ app.use(express.json());
 
 app.post('/api/webhook', (req, res) => {
   const { ORDERID, amount, UTR, status, signature } = req.body;
-  const secretKey = process.env.UPAY_SECRET_KEY;
+  const secretKey = process.env.UPAY_SECRET_KEY; // Your API secret key
 
-  // 1. Build canonical pipe-separated string
-  const payload = `${ORDERID}|${amount}|${UTR}|${status}`;
+  // Re-create the exact stringified object
+  const payment_info = JSON.stringify({
+    ORDERID,
+    amount,
+    UTR,
+    status
+  });
 
-  // 2. Compute expected HMAC-SHA256 hash
+  // Calculate HMAC-SHA256 signature
   const expectedSignature = crypto
-    .createHmac('sha256', secretKey)
-    .update(payload)
-    .digest('hex');
+    .createHmac("sha256", secretKey)
+    .update(payment_info)
+    .digest("hex");
 
-  // 3. Timing-safe constant-time comparison
+  // Constant-time comparison
   const isValid = crypto.timingSafeEqual(
     Buffer.from(signature, 'hex'),
     Buffer.from(expectedSignature, 'hex')
   );
 
   if (!isValid) {
-    return res.status(400).send("Signature mismatch: unauthorized request");
+    return res.status(400).send("Signature verification failed!");
   }
 
-  // 4. Fulfill order in your database
-  console.log(`Payment confirmed for Order ${ORDERID} via UTR ${UTR}`);
+  // Fulfill order in your database
+  console.log(`Payment confirmed for Order ${ORDERID} with UTR ${UTR}`);
 
   res.status(200).json({ received: true });
 });</code></pre>
       </div>
     </section>
 
-    <!-- Interactive Tool -->
+    <!-- Interactive HMAC Sandbox -->
     <section id="playground" class="doc-section">
-      <h2>Interactive HMAC Sandbox</h2>
-      <p>Test payload signing directly against your secret key in real time:</p>
+      <h2>Interactive Signature Sandbox</h2>
+      <p>Test the HMAC signature generator directly against your payload:</p>
 
       <div class="tool-box">
         <div class="form-group">
@@ -844,7 +816,7 @@ app.post('/api/webhook', (req, res) => {
         </div>
         <div class="form-group">
           <label>Amount</label>
-          <input type="text" id="tool-amount" value="2399.00">
+          <input type="text" id="tool-amount" value="2399">
         </div>
         <div class="form-group">
           <label>UTR</label>
@@ -855,17 +827,17 @@ app.post('/api/webhook', (req, res) => {
           <input type="text" id="tool-status" value="SUCCESS" readonly>
         </div>
 
-        <button class="calc-btn" onclick="calculateHMAC()">Generate Signature</button>
+        <button class="calc-btn" onclick="calculateHMAC()">Generate HMAC Signature</button>
 
         <div class="result-display" id="tool-result">
-          Click "Generate Signature" to evaluate hash.
+          Click "Generate HMAC Signature" to compute hash.
         </div>
       </div>
     </section>
 
     <!-- Multi-Language Code SDKs -->
     <section id="code-examples" class="doc-section">
-      <h2>Order Creation Snippets</h2>
+      <h2>Create Order Code Examples</h2>
 
       <div class="code-wrapper">
         <div class="code-header">
@@ -882,7 +854,7 @@ app.post('/api/webhook', (req, res) => {
   -d '{
     "api": "YOUR_SECRET_KEY",
     "MID": "YOUR_MID",
-    "amount": 2399.00,
+    "amount": 2399,
     "customerName": "Rahul Sharma",
     "customerEmail": "customer@example.com",
     "customerMobile": "9876543210"
@@ -893,7 +865,7 @@ app.post('/api/webhook', (req, res) => {
   </main>
 
   <script>
-    // Responsive Mobile Nav
+    // Responsive Mobile Drawer
     const menuBtn = document.getElementById('menu-btn');
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('backdrop');
@@ -922,7 +894,7 @@ app.post('/api/webhook', (req, res) => {
   -d '{
     "api": "YOUR_SECRET_KEY",
     "MID": "YOUR_MID",
-    "amount": 2399.00,
+    "amount": 2399,
     "customerName": "Rahul Sharma",
     "customerEmail": "customer@example.com",
     "customerMobile": "9876543210"
@@ -933,7 +905,7 @@ async function createPaymentOrder() {
   const payload = {
     api: process.env.UPAY_SECRET_KEY,
     MID: process.env.UPAY_MID,
-    amount: 2399.00,
+    amount: 2399,
     customerName: "Rahul Sharma",
     customerEmail: "customer@example.com",
     customerMobile: "9876543210"
@@ -941,7 +913,7 @@ async function createPaymentOrder() {
 
   const { data } = await axios.post('https://www.u-pay-seven.vercel.app/api/create-order', payload);
   if (data.status) {
-    console.log("Redirect customer to checkout:", data.link);
+    console.log("Direct user to checkout link:", data.link);
   }
 }
 
@@ -953,7 +925,7 @@ url = "https://www.u-pay-seven.vercel.app/api/create-order"
 payload = {
     "api": os.getenv("UPAY_SECRET_KEY"),
     "MID": os.getenv("UPAY_MID"),
-    "amount": 2399.00,
+    "amount": 2399,
     "customerName": "Rahul Sharma",
     "customerEmail": "customer@example.com",
     "customerMobile": "9876543210"
@@ -961,7 +933,7 @@ payload = {
 
 response = requests.post(url, json=payload).json()
 if response.get("status"):
-    print("Redirect customer to checkout:", response.get("link"))`
+    print("Direct user to checkout link:", response.get("link"))`
     };
 
     let activeLang = 'curl';
@@ -994,14 +966,25 @@ if response.get("status"):
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    // Exact JSON stringify HMAC Calculator matching your backend
     async function calculateHMAC() {
       const key = document.getElementById('tool-key').value.trim();
-      const order = document.getElementById('tool-order').value.trim();
-      const amount = document.getElementById('tool-amount').value.trim();
-      const utr = document.getElementById('tool-utr').value.trim();
+      const ORDERID = document.getElementById('tool-order').value.trim();
+      const rawAmount = document.getElementById('tool-amount').value.trim();
+      const UTR = document.getElementById('tool-utr').value.trim();
       const status = document.getElementById('tool-status').value.trim();
 
-      const payload = `${order}|${amount}|${utr}|${status}`;
+      // Parse amount as number if numeric, else keep as string
+      const amount = isNaN(rawAmount) ? rawAmount : Number(rawAmount);
+
+      // Exact representation: JSON.stringify
+      const payment_info = JSON.stringify({
+        ORDERID,
+        amount,
+        UTR,
+        status
+      });
+
       const enc = new TextEncoder();
 
       try {
@@ -1016,15 +999,15 @@ if response.get("status"):
         const signatureBuffer = await window.crypto.subtle.sign(
           "HMAC",
           cryptoKey,
-          enc.encode(payload)
+          enc.encode(payment_info)
         );
 
         const hashArray = Array.from(new Uint8Array(signatureBuffer));
         const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         document.getElementById('tool-result').innerHTML = `
-          <div style="margin-bottom: 8px;"><strong>Raw Concatenated String:</strong></div>
-          <code style="display:block; padding:8px 12px; margin-bottom:12px; word-break:break-all;">${escapeHtml(payload)}</code>
+          <div style="margin-bottom: 8px;"><strong>Stringified Payload (payment_info):</strong></div>
+          <code style="display:block; padding:8px 12px; margin-bottom:12px; word-break:break-all;">${escapeHtml(payment_info)}</code>
           <div style="margin-bottom: 8px;"><strong>Calculated HMAC-SHA256:</strong></div>
           <code style="color:var(--accent); display:block; padding:8px 12px; word-break:break-all;">${hex}</code>
         `;
