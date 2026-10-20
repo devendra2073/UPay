@@ -3,1049 +3,853 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UPay Gateway — Developer Documentation & API Reference</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Inter & JetBrains Mono Fonts -->
+  <title>UPay Gateway — Developer Documentation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <!-- FontAwesome for standard developer icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-subtle: #eef2ff;
+      --secondary: #06b6d4;
+      --bg-dark: #0f172a;
+      --bg-canvas: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --code-bg: #090d16;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
-    ::-webkit-scrollbar-track {
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 290px;
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .brand {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .brand-text h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .brand-text span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .nav-group {
+      padding: 20px 16px 8px;
+    }
+
+    .nav-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      padding-left: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+      margin-bottom: 3px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    main.content {
+      margin-left: 290px;
+      flex: 1;
+      padding: 48px 60px 100px;
+      max-width: 1080px;
+    }
+
+    .doc-section {
+      margin-bottom: 56px;
+      scroll-margin-top: 40px;
+    }
+
+    h2 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 28px 0 12px;
+      color: var(--text-main);
+    }
+
+    p {
+      color: #334155;
+      font-size: 0.96rem;
+      margin-bottom: 16px;
+    }
+
+    /* Feature Cards */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .feature-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--primary);
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Notice & Alert Banners */
+    .banner {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .banner.warning {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      color: #92400e;
+    }
+
+    .banner.info {
+      background: var(--primary-subtle);
+      border: 1px solid #e0e7ff;
+      color: #3730a3;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 12px 18px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      background: var(--code-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+
+    .code-header {
+      background: #151d2f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 18px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .code-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .code-tab {
       background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(156, 163, 175, 0.4);
-      border-radius: 9999px;
+
+    .code-tab.active {
+      background: #1e293b;
+      color: #f8fafc;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(156, 163, 175, 0.7);
+
+    .copy-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
     }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
+
+    .copy-btn:hover {
+      background: #334155;
     }
-    .dark .glass-card {
-      background: rgba(17, 24, 39, 0.85);
-      backdrop-filter: blur(12px);
+
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      line-height: 1.55;
     }
-    .code-syntax {
-      counter-reset: line;
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      padding: 2px 6px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      color: #0f172a;
     }
-    html {
-      scroll-behavior: smooth;
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    /* Badges */
+    .badge-method {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #10b981;
+      color: #ffffff;
+      margin-right: 8px;
+    }
+
+    .badge-req {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+
+    .badge-opt {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+
+    /* Interactive HMAC Tool */
+    .tool-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 9px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #f8fafc;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    .calc-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+
+    .calc-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .result-display {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f1f5f9;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      word-break: break-all;
+    }
+
+    @media (max-width: 900px) {
+      aside.sidebar {
+        display: none;
+      }
+      main.content {
+        margin-left: 0;
+        padding: 28px 20px;
+      }
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased font-sans transition-colors duration-200">
+<body>
 
-  <!-- TOP NAVBAR -->
-  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/90 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Logo & Brand -->
-      <div class="flex items-center space-x-4">
-        <button id="mobile-menu-btn" class="md:hidden text-slate-600 hover:text-slate-900 focus:outline-none p-2 rounded-lg hover:bg-slate-100">
-          <i class="fa-solid fa-bars text-lg"></i>
-        </button>
-        <a href="#overview" class="flex items-center space-x-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-            <i class="fa-solid fa-bolt text-lg"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-1.5">
-              <span class="font-extrabold text-xl tracking-tight text-slate-900">UPay</span>
-              <span class="text-xs bg-brand-50 text-brand-700 font-semibold px-2 py-0.5 rounded-full border border-brand-200">Docs v1.0</span>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <!-- Quick Search Bar -->
-      <div class="hidden sm:flex items-center flex-1 max-w-md mx-8">
-        <div class="relative w-full">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-          <input type="text" id="docSearch" placeholder="Search API endpoints, webhooks, HMAC verification..." 
-            class="w-full pl-10 pr-12 py-2 bg-slate-100/90 border border-transparent focus:border-brand-500 focus:bg-white text-sm rounded-xl outline-none transition-all placeholder:text-slate-400">
-          <kbd class="absolute right-3 top-2.5 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-200 rounded border border-slate-300">Ctrl K</kbd>
-        </div>
-      </div>
-
-      <!-- CTA Links -->
-      <div class="flex items-center space-x-3">
-        <a href="https://u-pay-seven.vercel.app/login" target="_blank" rel="noopener noreferrer" 
-          class="hidden sm:inline-flex items-center space-x-1.5 text-xs font-semibold px-3.5 py-2 text-slate-700 hover:text-brand-600 rounded-lg hover:bg-slate-100 transition">
-          <span>Portal Login</span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-        </a>
-        <a href="https://u-pay-seven.vercel.app" target="_blank" rel="noopener noreferrer" 
-          class="inline-flex items-center space-x-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-sm shadow-brand-500/30 transition">
-          <i class="fa-solid fa-rocket"></i>
-          <span>Get Free API Key</span>
-        </a>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">U</div>
+      <div class="brand-text">
+        <h1>UPay Gateway</h1>
+        <span>Direct UPI Merchant Rail</span>
       </div>
     </div>
-  </header>
+    <div class="nav-group">
+      <div class="nav-label">Getting Started</div>
+      <a href="#overview" class="nav-item">Overview &amp; Features</a>
+      <a href="#quickstart" class="nav-item">Onboarding Setup</a>
+      <a href="#webhook-config" class="nav-item">Webhook Configuration</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Integration</div>
+      <a href="#create-order" class="nav-item">Create Order API</a>
+      <a href="#signature" class="nav-item">HMAC Verification</a>
+      <a href="#playground" class="nav-item">HMAC Calculator</a>
+      <a href="#code-examples" class="nav-item">Code SDKs</a>
+    </div>
+  </aside>
 
-  <!-- MAIN WRAPPER -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex">
-    
-    <!-- LEFT SIDEBAR -->
-    <aside id="sidebar" class="hidden md:block w-64 shrink-0 pr-6 sticky top-24 h-[calc(100vh-7rem)] overflow-y-auto">
-      <nav class="space-y-6 text-sm">
-        <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Getting Started</h3>
-          <ul class="space-y-1">
-            <li>
-              <a href="#overview" class="nav-link block px-3 py-1.5 rounded-lg font-medium text-brand-600 bg-brand-50 hover:bg-brand-50">
-                <i class="fa-solid fa-circle-info w-5 text-brand-600 text-xs"></i> Overview & Architecture
-              </a>
-            </li>
-            <li>
-              <a href="#quickstart" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-bolt-lightning w-5 text-xs text-slate-400"></i> 2-Minute Quickstart
-              </a>
-            </li>
-            <li>
-              <a href="#step-auth" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-user-shield w-5 text-xs text-slate-400"></i> Step 1: Merchant Auth
-              </a>
-            </li>
-            <li>
-              <a href="#step-keys" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-key w-5 text-xs text-slate-400"></i> Step 2: Keys & Webhook URL
-              </a>
-            </li>
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Overview -->
+    <section id="overview" class="doc-section">
+      <h2>UPay UPI Payment Gateway</h2>
+      <p>
+        UPay is a zero-fee, developer-friendly UPI checkout bridge. Customer payments go straight into your verified 
+        Paytm Business VPA without third-party intermediary holding funds.
+      </p>
+
+      <div class="grid-cards">
+        <div class="feature-card">
+          <h4>0% Commission</h4>
+          <p>Completely free of gateway fees. All settled funds stay 100% yours.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Zero Custody Risk</h4>
+          <p>Money settles directly from the customer’s UPI app into your Paytm Business account.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Instant Webhooks</h4>
+          <p>Real-time POST callbacks secured with tamper-proof HMAC-SHA256 signatures.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quickstart / Onboarding -->
+    <section id="quickstart" class="doc-section">
+      <h2>Merchant Onboarding</h2>
+      <p>Follow these steps to activate your merchant account and grab your credentials:</p>
+
+      <ol style="margin-left: 20px; color: #334155; font-size: 0.95rem; line-height: 1.8;">
+        <li>
+          <strong>Create Account:</strong> Head to 
+          <a href="https://www.u-pay-seven.vercel.app/user/login" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+            https://www.u-pay-seven.vercel.app/user/login
+          </a> 
+          and sign in using your Email or Google OAuth.
+        </li>
+        <li>
+          <strong>Connect Paytm Business:</strong> Provide your Paytm Business Merchant UPI ID and Merchant Identifier (MID).
+        </li>
+        <li>
+          <strong>Obtain API Credentials:</strong> Switch to the <strong>API</strong> tab in your dashboard and copy your:
+          <ul style="margin-top: 6px; margin-bottom: 6px; list-style-type: square; margin-left: 20px;">
+            <li><code>Secret Key</code> (API Key)</li>
+            <li><code>Merchant Identifier (MID)</code></li>
           </ul>
-        </div>
+        </li>
+      </ol>
+    </section>
 
+    <!-- Webhook Configuration -->
+    <section id="webhook-config" class="doc-section">
+      <h2>Webhook Configuration</h2>
+      <p>
+        In your dashboard under <strong>Webhook Handlers</strong>, configure the URLs where our systems send real-time transaction updates and redirect buyers.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Success Callback URL</strong></td>
+              <td>Your backend webhook listener. UPay fires an HTTP POST request to this URL as soon as the customer finishes payment.</td>
+            </tr>
+            <tr>
+              <td><strong>User Redirect URL</strong></td>
+              <td>Where the user's browser is forwarded after completing payment. If left blank, users go to our default success screen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="banner warning">
+        <span>⚠️</span>
         <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">API Integration</h3>
-          <ul class="space-y-1">
-            <li>
-              <a href="#step-create-order" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-cart-plus w-5 text-xs text-slate-400"></i> Create Order Endpoint
-              </a>
-            </li>
-            <li>
-              <a href="#step-checkout" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-qrcode w-5 text-xs text-slate-400"></i> Hosted Checkout Flow
-              </a>
-            </li>
-            <li>
-              <a href="#step-webhooks" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-satellite-dish w-5 text-xs text-slate-400"></i> Webhooks & Callbacks
-              </a>
-            </li>
-            <li>
-              <a href="#hmac-signature" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-shield-halved w-5 text-xs text-slate-400"></i> HMAC-SHA256 Verification
-              </a>
-            </li>
-          </ul>
+          <strong>Server Requirement:</strong> Your callback endpoint must support <strong>HTTPS</strong> and return an immediate 
+          <code>200 OK</code> response within <strong>3 seconds</strong> to acknowledge delivery.
         </div>
+      </div>
+    </section>
 
-        <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Tools & Dashboard</h3>
-          <ul class="space-y-1">
-            <li>
-              <a href="#interactive-tester" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-flask w-5 text-xs text-slate-400"></i> Signature Tester Tool
-              </a>
-            </li>
-            <li>
-              <a href="#merchant-portal" class="nav-link block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                <i class="fa-solid fa-table-columns w-5 text-xs text-slate-400"></i> Real-time Ledger & Insights
-              </a>
-            </li>
-          </ul>
+    <!-- Create Order API -->
+    <section id="create-order" class="doc-section">
+      <h2>Create Order API</h2>
+      <p>Initialize a dynamic UPI transaction and fetch a payment page link.</p>
+
+      <p><span class="badge-method">POST</span> <code>https://www.u-pay-seven.vercel.app/api/create-order</code></p>
+
+      <h3>Request Body</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>api</code></td>
+              <td>String</td>
+              <td><span class="badge-req">Required</span></td>
+              <td>Your API Secret Key from the API panel.</td>
+            </tr>
+            <tr>
+              <td><code>MID</code></td>
+              <td>String</td>
+              <td><span class="badge-req">Required</span></td>
+              <td>Your Merchant Identifier (MID).</td>
+            </tr>
+            <tr>
+              <td><code>amount</code></td>
+              <td>Number/String</td>
+              <td><span class="badge-req">Required</span></td>
+              <td>Transaction amount in INR (e.g. <code>2399.00</code>).</td>
+            </tr>
+            <tr>
+              <td><code>customerName</code></td>
+              <td>String</td>
+              <td><span class="badge-opt">Optional</span></td>
+              <td>Customer's display name.</td>
+            </tr>
+            <tr>
+              <td><code>customerEmail</code></td>
+              <td>String</td>
+              <td><span class="badge-req">Required</span></td>
+              <td>Email address for payment receipt.</td>
+            </tr>
+            <tr>
+              <td><code>customerMobile</code></td>
+              <td>String</td>
+              <td><span class="badge-opt">Optional</span></td>
+              <td>Customer's 10-digit mobile number.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Example Response</h3>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span style="color:#94a3b8; font-size:0.8rem; font-weight:600;">JSON 200 OK</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentNode.nextElementSibling.innerText)">Copy</button>
         </div>
-      </nav>
-    </aside>
-
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 max-w-4xl min-w-0 pb-24">
-      
-      <!-- HERO / OVERVIEW -->
-      <section id="overview" class="pt-2 mb-16">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-4 border border-emerald-200">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Zero PG Commission • Direct Settlement to Paytm Business</span>
-        </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
-          UPay Payment Gateway Integration
-        </h1>
-        <p class="text-base sm:text-lg text-slate-600 leading-relaxed mb-6">
-          The developer-friendly, zero-cost UPI Payment Gateway. Accept instant UPI payments from <strong class="text-slate-900">GPay, PhonePe, Paytm, and BHIM</strong> directly into your own Paytm Business merchant account with instant webhook notifications signed via HMAC-SHA256.
-        </p>
-
-        <!-- Highlights Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
-              <i class="fa-solid fa-percent"></i>
-            </div>
-            <h4 class="font-bold text-slate-900 text-sm mb-1">0% Gateway Fee</h4>
-            <p class="text-xs text-slate-500 leading-relaxed">No 2-3% platform cuts or hidden transactional costs. Completely free.</p>
-          </div>
-          
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-3">
-              <i class="fa-solid fa-building-columns"></i>
-            </div>
-            <h4 class="font-bold text-slate-900 text-sm mb-1">Direct Settlement</h4>
-            <p class="text-xs text-slate-500 leading-relaxed">Money lands right in your bank account linked to your Paytm Business account.</p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
-              <i class="fa-solid fa-fingerprint"></i>
-            </div>
-            <h4 class="font-bold text-slate-900 text-sm mb-1">HMAC Integrity</h4>
-            <p class="text-xs text-slate-500 leading-relaxed">Cryptographically signed webhook payloads prevent tampering and spoofing.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ARCHITECTURE FLOW -->
-      <section id="quickstart" class="mb-16">
-        <h2 class="text-2xl font-bold text-slate-900 tracking-tight mb-3">Payment Architecture Lifecycle</h2>
-        <p class="text-sm text-slate-600 mb-6">Here is how the end-to-end checkout and verification loop functions:</p>
-
-        <!-- Visual Flow Diagram -->
-        <div class="p-6 rounded-2xl bg-slate-900 text-slate-200 shadow-lg mb-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-            
-            <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60 flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-brand-600/30 text-brand-400 flex items-center justify-center font-mono font-bold text-sm mb-2">1</div>
-              <h5 class="text-xs font-semibold text-white mb-1">Create Order</h5>
-              <p class="text-[11px] text-slate-400">Your server calls <code class="text-indigo-300">/create-order</code> with customer details & amount.</p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60 flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-brand-600/30 text-brand-400 flex items-center justify-center font-mono font-bold text-sm mb-2">2</div>
-              <h5 class="text-xs font-semibold text-white mb-1">Customer Pays</h5>
-              <p class="text-[11px] text-slate-400">Customer scans dynamic QR or taps UPI app (GPay/Paytm/PhonePe).</p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60 flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-brand-600/30 text-brand-400 flex items-center justify-center font-mono font-bold text-sm mb-2">3</div>
-              <h5 class="text-xs font-semibold text-white mb-1">Webhook Dispatch</h5>
-              <p class="text-[11px] text-slate-400">UPay server dispatches signed POST payload + UTR to your callback URL.</p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60 flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-brand-600/30 text-brand-400 flex items-center justify-center font-mono font-bold text-sm mb-2">4</div>
-              <h5 class="text-xs font-semibold text-white mb-1">User Redirect</h5>
-              <p class="text-[11px] text-slate-400">Customer is automatically navigated to your configured redirect URL.</p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- STEP 1: AUTHENTICATION -->
-      <section id="step-auth" class="mb-16">
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-sm flex items-center justify-center">1</span>
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Merchant Setup & Authentication</h2>
-        </div>
-        <p class="text-slate-600 text-sm mb-4 leading-relaxed">
-          Before initiating payments, you need an active merchant account linked to your Paytm Business account.
-        </p>
-        
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6 space-y-4">
-          <div class="flex items-start space-x-3.5">
-            <i class="fa-solid fa-check text-brand-600 mt-1"></i>
-            <div>
-              <h4 class="font-semibold text-sm text-slate-900">Sign Up / Login</h4>
-              <p class="text-xs text-slate-600 mt-0.5">Visit <a href="https://u-pay-seven.vercel.app/login" target="_blank" class="text-brand-600 underline font-medium">https://u-pay-seven.vercel.app/login</a>. You can register via your official work email or single-click <strong>Sign in with Google</strong>.</p>
-            </div>
-          </div>
-          <div class="flex items-start space-x-3.5">
-            <i class="fa-solid fa-check text-brand-600 mt-1"></i>
-            <div>
-              <h4 class="font-semibold text-sm text-slate-900">Link Paytm Business Details</h4>
-              <p class="text-xs text-slate-600 mt-0.5">Under Settings/Profile, configure your registered Paytm UPI ID and Paytm Merchant Identifier (MID). This guarantees all incoming customer settlements route directly to your bank.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- STEP 2: KEYS & WEBHOOK CONFIGURATION -->
-      <section id="step-keys" class="mb-16">
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-sm flex items-center justify-center">2</span>
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">API Keys & Webhook Handlers</h2>
-        </div>
-        <p class="text-slate-600 text-sm mb-4 leading-relaxed">
-          Navigate to the <span class="px-2 py-0.5 bg-slate-100 font-mono text-xs rounded border border-slate-200 text-slate-800">API</span> tab in your UPay merchant console to retrieve your developer credentials.
-        </p>
-
-        <!-- Simulated Dashboard Screen preview -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 mb-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Secret Key (API Key)</span>
-              <div class="flex items-center justify-between">
-                <code class="text-xs font-mono text-slate-800 truncate mr-2" id="sampleKey">346285818f3c7de3f3eb309317aeca83</code>
-                <button onclick="copyToClipboard('sampleKey', this)" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center space-x-1 shrink-0 px-2 py-1 rounded bg-brand-50 hover:bg-brand-100 transition">
-                  <i class="fa-regular fa-copy"></i>
-                  <span>Copy</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Merchant Identifier (MID)</span>
-              <div class="flex items-center justify-between">
-                <code class="text-xs font-mono text-slate-800" id="sampleMid">K1A2G23H</code>
-                <button onclick="copyToClipboard('sampleMid', this)" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center space-x-1 shrink-0 px-2 py-1 rounded bg-brand-50 hover:bg-brand-100 transition">
-                  <i class="fa-regular fa-copy"></i>
-                  <span>Copy</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="border-t border-slate-100 pt-4">
-            <h4 class="font-bold text-sm text-slate-900 mb-2">Configure URL Endpoints</h4>
-            <div class="space-y-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">SUCCESS CALLBACK URL</label>
-                <input readonly value="https://api.yourdomain.com/v1/payment/callback" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-700 select-all">
-                <p class="text-[11px] text-slate-500 mt-1">UPay hits this server-to-server POST endpoint immediately upon transaction success.</p>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">USER REDIRECT URL</label>
-                <input readonly value="https://yourdomain.com/checkout/success" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-700 select-all">
-                <p class="text-[11px] text-slate-500 mt-1">Where the user is automatically navigated after finishing payment on the hosted page.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Alert Box -->
-          <div class="flex items-start space-x-3 p-3.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs">
-            <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
-            <div>
-              <strong class="font-semibold">Endpoint SLA Requirement:</strong> Your webhook handler must support HTTPS and return an immediate <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold text-amber-900">200 OK</code> response within <strong>3 seconds</strong> to acknowledge receipt.
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- STEP 3: CREATE ORDER API -->
-      <section id="step-create-order" class="mb-16">
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-sm flex items-center justify-center">3</span>
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Create Order Endpoint</h2>
-        </div>
-        <p class="text-slate-600 text-sm mb-4 leading-relaxed">
-          Initiate a new payment transaction from your backend. Call this endpoint when the customer is ready to checkout.
-        </p>
-
-        <!-- Method Badge & URL -->
-        <div class="flex flex-wrap items-center gap-2 p-3 bg-slate-900 text-slate-200 rounded-xl font-mono text-xs mb-6">
-          <span class="px-2.5 py-1 bg-emerald-600 text-white font-bold rounded-lg text-[11px]">POST</span>
-          <span class="text-slate-300">https://www.u-pay-seven.vercel.app/api/create-order</span>
-          <button onclick="copySnippet('https://www.u-pay-seven.vercel.app/api/create-order', this)" class="ml-auto text-slate-400 hover:text-white text-xs">
-            <i class="fa-regular fa-copy"></i>
-          </button>
-        </div>
-
-        <!-- Request Parameters Table -->
-        <h4 class="font-bold text-sm text-slate-900 mb-3">Request Payload Parameters (JSON)</h4>
-        <div class="overflow-x-auto border border-slate-200 rounded-xl mb-6">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-100/70 border-b border-slate-200 text-slate-700">
-              <tr>
-                <th class="p-3 font-semibold">Field</th>
-                <th class="p-3 font-semibold">Type</th>
-                <th class="p-3 font-semibold">Required</th>
-                <th class="p-3 font-semibold">Description</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 font-sans">
-              <tr>
-                <td class="p-3 font-mono font-semibold text-brand-600">api</td>
-                <td class="p-3 text-slate-500 font-mono">string</td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-red-50 text-red-600 rounded font-semibold text-[10px]">YES</span></td>
-                <td class="p-3 text-slate-600">Your UPay Secret API Key from dashboard</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-mono font-semibold text-brand-600">MID</td>
-                <td class="p-3 text-slate-500 font-mono">string</td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-red-50 text-red-600 rounded font-semibold text-[10px]">YES</span></td>
-                <td class="p-3 text-slate-600">Your unique Merchant Identifier</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-mono font-semibold text-brand-600">amount</td>
-                <td class="p-3 text-slate-500 font-mono">number / string</td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-red-50 text-red-600 rounded font-semibold text-[10px]">YES</span></td>
-                <td class="p-3 text-slate-600">Transaction amount in INR (e.g. 299.00)</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-mono font-semibold text-brand-600">customerName</td>
-                <td class="p-3 text-slate-500 font-mono">string</td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-red-50 text-red-600 rounded font-semibold text-[10px]">YES</span></td>
-                <td class="p-3 text-slate-600">Customer's full name</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-mono font-semibold text-brand-600">customerEmail</td>
-                <td class="p-3 text-slate-500 font-mono">string</td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-red-50 text-red-600 rounded font-semibold text-[10px]">YES</span></td>
-                <td class="p-3 text-slate-600">Email address where confirmation receipt is emailed</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-mono font-semibold text-brand-600">customerMobile</td>
-                <td class="p-3 text-slate-500 font-mono">string</td>
-                <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-semibold text-[10px]">OPTIONAL</span></td>
-                <td class="p-3 text-slate-600">10-digit Indian mobile number</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Multi-language Code Example Tabs -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden mb-6">
-          <div class="flex items-center justify-between border-b border-slate-800 px-4 py-2 bg-slate-950">
-            <div class="flex space-x-2 text-xs font-medium" id="codeLangTabs">
-              <button onclick="switchTab('curl')" class="lang-tab px-3 py-1 rounded-md text-white bg-slate-800" data-lang="curl">cURL</button>
-              <button onclick="switchTab('node')" class="lang-tab px-3 py-1 rounded-md text-slate-400 hover:text-white" data-lang="node">Node.js</button>
-              <button onclick="switchTab('python')" class="lang-tab px-3 py-1 rounded-md text-slate-400 hover:text-white" data-lang="python">Python</button>
-              <button onclick="switchTab('php')" class="lang-tab px-3 py-1 rounded-md text-slate-400 hover:text-white" data-lang="php">PHP</button>
-            </div>
-            <button onclick="copyActiveCodeBlock()" class="text-xs text-slate-400 hover:text-white flex items-center space-x-1">
-              <i class="fa-regular fa-copy"></i>
-              <span id="copyCodeText">Copy snippet</span>
-            </button>
-          </div>
-
-          <!-- Tab Contents -->
-          <div class="p-4 overflow-x-auto text-xs font-mono leading-relaxed">
-            
-            <!-- cURL -->
-            <pre id="code-curl" class="text-slate-300"><code>curl -X POST https://www.u-pay-seven.vercel.app/api/create-order \
-  -H "Content-Type: application/json" \
-  -d '{
-    "api": "346285818f3c7de3f3eb309317aeca83",
-    "MID": "K1A2G23H",
-    "amount": "499.00",
-    "customerName": "Rahul Verma",
-    "customerEmail": "rahul.verma@example.com",
-    "customerMobile": "9876543210"
-  }'</code></pre>
-
-            <!-- Node.js -->
-            <pre id="code-node" class="hidden text-slate-300"><code>// npm install axios
-import axios from 'axios';
-
-async function createUPayOrder() {
-  try {
-    const response = await axios.post('https://www.u-pay-seven.vercel.app/api/create-order', {
-      api: process.env.UPAY_SECRET_KEY,
-      MID: process.env.UPAY_MID,
-      amount: "499.00",
-      customerName: "Rahul Verma",
-      customerEmail: "rahul.verma@example.com",
-      customerMobile: "9876543210"
-    });
-
-    console.log("Order Created:", response.data);
-    // Redirect user to response.data.link
-    return response.data.link;
-  } catch (error) {
-    console.error("Order creation failed:", error.response?.data || error.message);
-  }
-}</code></pre>
-
-            <!-- Python -->
-            <pre id="code-python" class="hidden text-slate-300"><code># pip install requests
-import requests
-import os
-
-url = "https://www.u-pay-seven.vercel.app/api/create-order"
-payload = {
-    "api": os.getenv("UPAY_SECRET_KEY"),
-    "MID": os.getenv("UPAY_MID"),
-    "amount": "499.00",
-    "customerName": "Rahul Verma",
-    "customerEmail": "rahul.verma@example.com",
-    "customerMobile": "9876543210"
-}
-
-response = requests.post(url, json=payload)
-data = response.json()
-
-if data.get("status"):
-    payment_link = data["link"]
-    print("Directing customer to:", payment_link)
-else:
-    print("Error:", data.get("message"))</code></pre>
-
-            <!-- PHP -->
-            <pre id="code-php" class="hidden text-slate-300"><code>&lt;?php
-$payload = [
-    "api" => getenv('UPAY_SECRET_KEY'),
-    "MID" => getenv('UPAY_MID'),
-    "amount" => "499.00",
-    "customerName" => "Rahul Verma",
-    "customerEmail" => "rahul.verma@example.com",
-    "customerMobile" => "9876543210"
-];
-
-$ch = curl_init('https://www.u-pay-seven.vercel.app/api/create-order');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-$response = curl_exec($ch);
-curl_close($ch);
-
-$result = json_decode($response, true);
-if ($result['status']) {
-    header("Location: " . $result['link']);
-    exit();
-}
-?&gt;</code></pre>
-          </div>
-        </div>
-
-        <!-- Sample JSON Response -->
-        <h4 class="font-bold text-sm text-slate-900 mb-2">Success Response (200 OK)</h4>
-        <div class="rounded-xl bg-slate-900 p-4 font-mono text-xs text-slate-300 overflow-x-auto border border-slate-800">
-          <pre><code>{
+        <pre><code>{
   "status": true,
-  "order": "ORDER1792418067158483",
+  "order": "ORDER_67A419B8E3D",
   "message": "Order Created",
-  "link": "https://u-pay-seven.vercel.app/pay/ORDER1792418067158483",
-  "timestamp": 1718291029410
+  "link": "https://www.u-pay-seven.vercel.app/pay/ORDER_67A419B8E3D",
+  "timestamp": 1740000000000
 }</code></pre>
+      </div>
+      <p>Redirect your user to the returned <code>link</code> to show the dynamic QR code and UPI application buttons (GPay, PhonePe, Paytm, BHIM).</p>
+    </section>
+
+    <!-- HMAC Verification -->
+    <section id="signature" class="doc-section">
+      <h2>HMAC Verification &amp; Webhook Handling</h2>
+      <p>When an order completes, UPay issues a POST request to your <code>Success Callback URL</code>:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span style="color:#94a3b8; font-size:0.8rem; font-weight:600;">Incoming Webhook Payload</span>
         </div>
-      </section>
-
-      <!-- STEP 4: CHECKOUT FLOW & REDIRECTION -->
-      <section id="step-checkout" class="mb-16">
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-sm flex items-center justify-center">4</span>
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Customer Checkout & UPI Experience</h2>
-        </div>
-        <p class="text-slate-600 text-sm mb-6 leading-relaxed">
-          Redirect the customer's browser window to the returned <code class="text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded text-xs">link</code>.
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <div class="space-y-4 text-xs text-slate-600">
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <h5 class="font-bold text-slate-900 text-sm mb-1.5 flex items-center space-x-2">
-                <i class="fa-solid fa-mobile-screen text-brand-600"></i>
-                <span>One-Tap UPI Intent Apps</span>
-              </h5>
-              <p>On mobile phones, users can directly tap on preferred UPI apps: <strong>Google Pay, PhonePe, Paytm, and BHIM</strong>.</p>
-            </div>
-
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <h5 class="font-bold text-slate-900 text-sm mb-1.5 flex items-center space-x-2">
-                <i class="fa-solid fa-qrcode text-brand-600"></i>
-                <span>Dynamic QR Code</span>
-              </h5>
-              <p>On desktop devices, a high-resolution dynamic QR code is generated. Customers can scan with any banking or UPI app, or tap "Save QR to Gallery".</p>
-            </div>
-
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <h5 class="font-bold text-slate-900 text-sm mb-1.5 flex items-center space-x-2">
-                <i class="fa-solid fa-envelope-circle-check text-brand-600"></i>
-                <span>Instant Customer Email Receipt</span>
-              </h5>
-              <p>Once settled, UPay automatically sends an order receipt email to <code class="text-slate-800">customerEmail</code>.</p>
-            </div>
-          </div>
-
-          <!-- UI Mockup of the Payment Gateway -->
-          <div class="border border-slate-200 bg-white rounded-3xl p-5 shadow-md flex flex-col items-center max-w-xs mx-auto">
-            <div class="text-[10px] tracking-wider text-slate-400 font-bold uppercase mb-1">UPAY GATEWAY</div>
-            <div class="text-[11px] font-mono text-slate-500 mb-3">ID: #ORDER1792418067158483</div>
-            
-            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-brand-600 font-bold text-sm mb-2">
-              UPI
-            </div>
-            <div class="text-xs font-semibold text-slate-700">Payment Request</div>
-            <div class="text-2xl font-black text-slate-900 mb-3">₹499.00</div>
-
-            <!-- Stylized QR Placeholder -->
-            <div class="w-36 h-36 bg-slate-900 rounded-2xl p-2.5 flex items-center justify-center shadow-inner mb-3">
-              <div class="w-full h-full bg-white rounded-xl p-1.5 flex items-center justify-center">
-                <i class="fa-solid fa-qrcode text-6xl text-slate-800"></i>
-              </div>
-            </div>
-
-            <div class="w-full space-y-1.5">
-              <div class="flex justify-between items-center bg-slate-50 border border-slate-200 rounded-lg p-2 text-[10px] font-medium text-slate-700">
-                <span class="flex items-center space-x-1"><i class="fa-brands fa-google text-blue-500"></i> <span>GPay</span></span>
-                <span class="text-slate-400">Supported</span>
-              </div>
-              <div class="flex justify-between items-center bg-slate-50 border border-slate-200 rounded-lg p-2 text-[10px] font-medium text-slate-700">
-                <span class="flex items-center space-x-1"><i class="fa-solid fa-wallet text-indigo-500"></i> <span>PhonePe</span></span>
-                <span class="text-slate-400">Supported</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- STEP 5: WEBHOOK & HMAC VERIFICATION -->
-      <section id="step-webhooks" class="mb-16">
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-sm flex items-center justify-center">5</span>
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Webhook Notification & HMAC Signature</h2>
-        </div>
-        <p class="text-slate-600 text-sm mb-4 leading-relaxed">
-          As soon as the payment hits your merchant UPI rail, the UPay engine triggers a POST request to your <strong>Success Callback URL</strong>.
-        </p>
-
-        <!-- Webhook POST Payload Schema -->
-        <h4 class="font-bold text-sm text-slate-900 mb-2">Webhook JSON Body:</h4>
-        <div class="rounded-xl bg-slate-900 p-4 font-mono text-xs text-slate-300 overflow-x-auto border border-slate-800 mb-6">
-          <pre><code>{
-  "ORDERID": "Ord1212212",
+        <pre><code>{
+  "ORDERID": "ORDER_67A419B8E3D",
   "amount": 2399.00,
-  "UTR": "738273824",
+  "UTR": "738273824123",
   "status": "SUCCESS",
-  "signature": "a3b5c7...64-char-hex-hmac-sha256-string..."
+  "signature": "c044d03df6da5cb676e279bc8d6268846c4f74d08ec4f5d609204bf235e165fa"
 }</code></pre>
+      </div>
+
+      <div class="banner info">
+        <span>💡</span>
+        <div>
+          <strong>Signature String Construction:</strong> To verify integrity, concatenate 
+          <code>ORDERID|amount|UTR|status</code> and hash it using <strong>HMAC-SHA256</strong> with your <code>Secret Key</code>.
         </div>
+      </div>
 
-        <div id="hmac-signature" class="mb-6">
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Tamper-Proof Verification Logic</h3>
-          <p class="text-xs text-slate-600 mb-4 leading-relaxed">
-            To guarantee that the request genuinely came from UPay and was not spoofed by an attacker, UPay signs the stringified transaction data:
-            <code class="bg-slate-100 text-slate-800 px-1 py-0.5 rounded font-mono text-[11px] block mt-1">{"ORDERID":"...","amount":...,"UTR":"...","status":"SUCCESS"}</code>
-            using your <strong class="text-slate-900">API Secret Key</strong> as the HMAC-SHA256 secret.
-          </p>
+      <h3>Node.js Verification Snippet</h3>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span style="color:#94a3b8; font-size:0.8rem; font-weight:600;">express-webhook.js</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentNode.nextElementSibling.innerText)">Copy</button>
+        </div>
+        <pre><code>const crypto = require('crypto');
 
-          <!-- Code for Node.js & Python Verification -->
-          <div class="space-y-4">
-            <!-- Node.js Verification -->
-            <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900">
-              <div class="bg-slate-950 px-4 py-2 border-b border-slate-800 flex justify-between items-center text-xs text-slate-300">
-                <span class="font-mono flex items-center space-x-1.5">
-                  <i class="fa-brands fa-node-js text-emerald-400"></i>
-                  <span>Node.js / Express Webhook Handler</span>
-                </span>
-                <button onclick="copySnippet('node-verify-code', this)" class="hover:text-white"><i class="fa-regular fa-copy"></i> Copy</button>
-              </div>
-              <pre id="node-verify-code" class="p-4 font-mono text-xs text-slate-300 overflow-x-auto"><code>const express = require('express');
-const crypto = require('crypto');
-const app = express();
-
-app.use(express.json());
-
-app.post('/api/payment/callback', (req, res) => {
+app.post('/api/webhook', (req, res) => {
   const { ORDERID, amount, UTR, status, signature } = req.body;
-  const SECRET_KEY = process.env.UPAY_SECRET_KEY;
+  const secretKey = process.env.UPAY_SECRET_KEY;
 
-  // 1. Construct the payload structure to verify
-  const dataToSign = JSON.stringify({
-    ORDERID,
-    amount,
-    UTR,
-    status
-  });
+  // Construct canonical payload string
+  const payload = `${ORDERID}|${amount}|${UTR}|${status}`;
 
-  // 2. Generate expected HMAC SHA256 hex string
+  // Compute expected HMAC SHA256 hex string
   const expectedSignature = crypto
-    .createHmac('sha256', SECRET_KEY)
-    .update(dataToSign)
+    .createHmac('sha256', secretKey)
+    .update(payload)
     .digest('hex');
 
-  // 3. Constant-time comparison to prevent timing attacks
+  // Secure constant-time comparison
   const isValid = crypto.timingSafeEqual(
-    Buffer.from(signature || '', 'hex'),
+    Buffer.from(signature, 'hex'),
     Buffer.from(expectedSignature, 'hex')
   );
 
   if (!isValid) {
-    console.error("Tampered webhook signature detected!");
-    return res.status(401).json({ message: "Invalid Signature" });
+    return res.status(400).send("Signature Mismatch — Tampering Detected");
   }
 
-  // 4. Signature verified! Fulfill customer order in database
-  console.log(`Payment confirmed for Order ${ORDERID}, Bank UTR: ${UTR}`);
-  // db.orders.update({ id: ORDERID }, { status: 'PAID', utr: UTR });
+  // Fulfill user's order in your database
+  console.log(`Payment confirmed for Order ${ORDERID} via UTR ${UTR}`);
 
-  // 5. Must return 200 OK within 3 seconds
-  return res.status(200).json({ status: "ACK" });
+  res.status(200).json({ received: true });
 });</code></pre>
-            </div>
+      </div>
+    </section>
 
-            <!-- Python Verification -->
-            <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900">
-              <div class="bg-slate-950 px-4 py-2 border-b border-slate-800 flex justify-between items-center text-xs text-slate-300">
-                <span class="font-mono flex items-center space-x-1.5">
-                  <i class="fa-brands fa-python text-yellow-400"></i>
-                  <span>Python / Flask / FastAPI Verification</span>
-                </span>
-                <button onclick="copySnippet('python-verify-code', this)" class="hover:text-white"><i class="fa-regular fa-copy"></i> Copy</button>
-              </div>
-              <pre id="python-verify-code" class="p-4 font-mono text-xs text-slate-300 overflow-x-auto"><code>import hmac
-import hashlib
-import json
-import os
-from flask import Flask, request, jsonify
+    <!-- Interactive Tool -->
+    <section id="playground" class="doc-section">
+      <h2>Interactive Signature Tester</h2>
+      <p>Test the HMAC signature generator directly in your browser:</p>
 
-app = Flask(__name__)
-
-@app.route('/api/payment/callback', methods=['POST'])
-def upay_webhook():
-    payload = request.json
-    received_signature = payload.get('signature', '')
-    secret_key = os.getenv("UPAY_SECRET_KEY")
-
-    # Reconstruct data dictionary identical to UPay
-    data = {
-        "ORDERID": payload.get("ORDERID"),
-        "amount": payload.get("amount"),
-        "UTR": payload.get("UTR"),
-        "status": payload.get("status")
-    }
-
-    raw_string = json.dumps(data, separators=(',', ':'))
-    computed_signature = hmac.new(
-        secret_key.encode('utf-8'),
-        raw_string.encode('utf-8'),
-        hashlib.sha256
-    ).hexdigest()
-
-    if not hmac.compare_digest(received_signature, computed_signature):
-        return jsonify({"message": "Invalid HMAC signature"}), 400
-
-    # Process order fulfillment logic here
-    print(f"Verified payment for Order {data['ORDERID']} with UTR {data['UTR']}")
-    return jsonify({"status": "SUCCESS"}), 200</code></pre>
-            </div>
-
-          </div>
+      <div class="tool-box">
+        <div class="form-group">
+          <label>Secret Key (API Key)</label>
+          <input type="text" id="tool-key" value="346285818f3c7de3f3eb309317aeca83">
         </div>
-      </section>
-
-      <!-- INTERACTIVE HMAC SIGNATURE TESTER TOOL -->
-      <section id="interactive-tester" class="mb-16">
-        <div class="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-indigo-500/20">
-          <div class="flex items-center space-x-2.5 mb-2">
-            <span class="w-8 h-8 rounded-lg bg-brand-500/30 text-brand-300 flex items-center justify-center text-sm">
-              <i class="fa-solid fa-calculator"></i>
-            </span>
-            <h3 class="text-lg font-bold">Interactive HMAC-SHA256 Signature Playground</h3>
-          </div>
-          <p class="text-xs text-slate-300 mb-6">
-            Test and verify your HMAC computation in real-time directly inside this documentation page before writing backend code.
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label class="block text-[11px] font-mono text-indigo-300 mb-1">SECRET KEY (API KEY)</label>
-              <input type="text" id="testSecret" value="346285818f3c7de3f3eb309317aeca83" 
-                class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-brand-500">
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-mono text-indigo-300 mb-1">ORDER ID</label>
-              <input type="text" id="testOrderId" value="Ord1212212" 
-                class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-brand-500">
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-mono text-indigo-300 mb-1">AMOUNT (INR)</label>
-              <input type="number" id="testAmount" value="2399.00" step="0.01" 
-                class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-brand-500">
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-mono text-indigo-300 mb-1">UTR NUMBER</label>
-              <input type="text" id="testUtr" value="738273824" 
-                class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-brand-500">
-            </div>
-          </div>
-
-          <button onclick="calculateLiveHmac()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 active:scale-[0.99] font-medium text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-lock"></i>
-            <span>Compute HMAC-SHA256 Signature</span>
-          </button>
-
-          <!-- Computed Output Display -->
-          <div class="mt-4 p-3 bg-black/50 border border-slate-800 rounded-xl">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[10px] text-slate-400 font-mono uppercase">Calculated Hex Signature:</span>
-              <span id="calcIndicator" class="text-[10px] text-emerald-400 font-mono hidden"><i class="fa-solid fa-check"></i> Live Computed</span>
-            </div>
-            <div id="outputSignature" class="text-xs font-mono text-brand-300 break-all select-all">
-              Click compute to generate cryptographic hash...
-            </div>
-          </div>
+        <div class="form-group">
+          <label>ORDERID</label>
+          <input type="text" id="tool-order" value="ORDER_67A419B8E3D">
         </div>
-      </section>
-
-      <!-- STEP 6: REALTIME DASHBOARD & LEDGER -->
-      <section id="merchant-portal" class="mb-12">
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-sm flex items-center justify-center">6</span>
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Merchant Console & Transaction Ledger</h2>
+        <div class="form-group">
+          <label>Amount</label>
+          <input type="text" id="tool-amount" value="2399.00">
         </div>
-        <p class="text-slate-600 text-sm mb-6 leading-relaxed">
-          Monitor your transactions, check UTR records, and track real-time settlements from your UPay portal.
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-            <div class="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
-              <span>Overview</span>
-              <i class="fa-solid fa-chart-line text-brand-600"></i>
-            </div>
-            <div class="text-xl font-bold text-slate-900 mb-1">Live Settlement</div>
-            <p class="text-xs text-slate-500">Instant visibility on your total processing volume and high-throughput UPI node status.</p>
-          </div>
-
-          <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-            <div class="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
-              <span>Ledger</span>
-              <i class="fa-solid fa-receipt text-brand-600"></i>
-            </div>
-            <div class="text-xl font-bold text-slate-900 mb-1">UTR Search</div>
-            <p class="text-xs text-slate-500">Search and filter every incoming deposit by 12-digit UPI reference number (UTR).</p>
-          </div>
-
-          <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-            <div class="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
-              <span>Security</span>
-              <i class="fa-solid fa-shield-cat text-brand-600"></i>
-            </div>
-            <div class="text-xl font-bold text-slate-900 mb-1">Risk Free</div>
-            <p class="text-xs text-slate-500">Zero custody risk. Funds never pool in an intermediary wallet—they settle straight to Paytm Business.</p>
-          </div>
+        <div class="form-group">
+          <label>UTR</label>
+          <input type="text" id="tool-utr" value="738273824123">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <input type="text" id="tool-status" value="SUCCESS" readonly>
         </div>
 
-        <!-- Help & Support Callout -->
-        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h4 class="font-bold text-slate-900 text-sm">Need integration assistance?</h4>
-            <p class="text-xs text-slate-600 mt-1">Our developer community and integration team are ready to help you wire your stack.</p>
-          </div>
-          <a href="https://u-pay-seven.vercel.app/login" target="_blank" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold whitespace-nowrap shadow-sm">
-            Go to Merchant Portal
-          </a>
+        <button class="calc-btn" onclick="calculateHMAC()">Generate HMAC Signature</button>
+
+        <div class="result-display" id="tool-result">
+          Click "Generate HMAC Signature" to compute hash.
         </div>
-      </section>
+      </div>
+    </section>
 
-    </main>
-  </div>
+    <!-- Multi-Language Code SDKs -->
+    <section id="code-examples" class="doc-section">
+      <h2>Order Creation Code Examples</h2>
 
-  <!-- FLOATING TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center space-x-2 z-50">
-    <i class="fa-solid fa-check text-emerald-400"></i>
-    <span id="toastMessage">Copied to clipboard</span>
-  </div>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchTab(this, 'curl')">cURL</button>
+            <button class="code-tab" onclick="switchTab(this, 'node')">Node.js</button>
+            <button class="code-tab" onclick="switchTab(this, 'python')">Python</button>
+          </div>
+          <button class="copy-btn" onclick="copyCurrentSnippet()">Copy Code</button>
+        </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+        <pre id="snippet-box"><code>curl -X POST https://www.u-pay-seven.vercel.app/api/create-order \
+  -H "Content-Type: application/json" \
+  -d '{
+    "api": "YOUR_SECRET_KEY",
+    "MID": "YOUR_MID",
+    "amount": 2399.00,
+    "customerName": "Rahul Sharma",
+    "customerEmail": "customer@example.com",
+    "customerMobile": "9876543210"
+  }'</code></pre>
+      </div>
+    </section>
+
+  </main>
+
   <script>
-    // Tab Switching Logic for Code Blocks
-    function switchTab(lang) {
-      const tabs = document.querySelectorAll('.lang-tab');
-      tabs.forEach(tab => {
-        if (tab.getAttribute('data-lang') === lang) {
-          tab.classList.remove('text-slate-400');
-          tab.classList.add('text-white', 'bg-slate-800');
-        } else {
-          tab.classList.add('text-slate-400');
-          tab.classList.remove('text-white', 'bg-slate-800');
-        }
-      });
+    const snippets = {
+      curl: `curl -X POST https://www.u-pay-seven.vercel.app/api/create-order \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "api": "YOUR_SECRET_KEY",
+    "MID": "YOUR_MID",
+    "amount": 2399.00,
+    "customerName": "Rahul Sharma",
+    "customerEmail": "customer@example.com",
+    "customerMobile": "9876543210"
+  }'`,
+      node: `const axios = require('axios');
 
-      // Show hide code pre blocks
-      const languages = ['curl', 'node', 'python', 'php'];
-      languages.forEach(l => {
-        const el = document.getElementById(`code-${l}`);
-        if (el) {
-          if (l === lang) {
-            el.classList.remove('hidden');
-          } else {
-            el.classList.add('hidden');
-          }
-        }
-      });
+async function createPaymentOrder() {
+  const payload = {
+    api: process.env.UPAY_SECRET_KEY,
+    MID: process.env.UPAY_MID,
+    amount: 2399.00,
+    customerName: "Rahul Sharma",
+    customerEmail: "customer@example.com",
+    customerMobile: "9876543210"
+  };
+
+  const { data } = await axios.post('https://www.u-pay-seven.vercel.app/api/create-order', payload);
+  if (data.status) {
+    console.log("Direct user to:", data.link);
+  }
+}
+createPaymentOrder();`,
+      python: `import requests
+
+url = "https://www.u-pay-seven.vercel.app/api/create-order"
+payload = {
+    "api": "YOUR_SECRET_KEY",
+    "MID": "YOUR_MID",
+    "amount": 2399.00,
+    "customerName": "Rahul Sharma",
+    "customerEmail": "customer@example.com",
+    "customerMobile": "9876543210"
+}
+
+response = requests.post(url, json=payload).json()
+if response.get("status"):
+    print("Redirect customer to:", response.get("link"))`
+    };
+
+    let activeLang = 'curl';
+
+    function switchTab(btn, lang) {
+      document.querySelectorAll('.code-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeLang = lang;
+      document.getElementById('snippet-box').innerHTML = `<code>${escapeHtml(snippets[lang])}</code>`;
     }
 
-    // Copy helper with visual toast
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      const toastMessage = document.getElementById('toastMessage');
-      toastMessage.innerText = msg;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 2500);
+    function copyCurrentSnippet() {
+      navigator.clipboard.writeText(snippets[activeLang]);
     }
 
-    function copyToClipboard(elementId, btn) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      const text = el.innerText || el.textContent;
-
-      const dummy = document.createElement("textarea");
-      document.body.appendChild(dummy);
-      dummy.value = text.trim();
-      dummy.select();
-      document.execCommand("copy");
-      document.body.removeChild(dummy);
-
-      showToast("Copied to clipboard!");
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    function copySnippet(textOrId, btn) {
-      let text = textOrId;
-      const elem = document.getElementById(textOrId);
-      if (elem) {
-        text = elem.innerText || elem.textContent;
-      }
-      const dummy = document.createElement("textarea");
-      document.body.appendChild(dummy);
-      dummy.value = text.trim();
-      dummy.select();
-      document.execCommand("copy");
-      document.body.removeChild(dummy);
+    async function calculateHMAC() {
+      const key = document.getElementById('tool-key').value;
+      const order = document.getElementById('tool-order').value;
+      const amount = document.getElementById('tool-amount').value;
+      const utr = document.getElementById('tool-utr').value;
+      const status = document.getElementById('tool-status').value;
 
-      showToast("Copied code snippet!");
-    }
-
-    function copyActiveCodeBlock() {
-      const activeTab = document.querySelector('.lang-tab.bg-slate-800');
-      if (!activeTab) return;
-      const lang = activeTab.getAttribute('data-lang');
-      const activeCode = document.getElementById(`code-${lang}`);
-      if (activeCode) {
-        copySnippet(activeCode.innerText);
-      }
-    }
-
-    // Native Web Crypto API HMAC-SHA256 calculation for interactive tool
-    async function calculateLiveHmac() {
-      const secret = document.getElementById('testSecret').value.trim();
-      const orderId = document.getElementById('testOrderId').value.trim();
-      const amount = parseFloat(document.getElementById('testAmount').value);
-      const utr = document.getElementById('testUtr').value.trim();
-      const status = "SUCCESS";
-
-      // Reconstruct payload object matching doc spec
-      const payloadObj = {
-        ORDERID: orderId,
-        amount: amount,
-        UTR: utr,
-        status: status
-      };
-
-      const messageStr = JSON.stringify(payloadObj);
+      const payload = `${order}|${amount}|${utr}|${status}`;
       const enc = new TextEncoder();
 
       try {
-        const key = await window.crypto.subtle.importKey(
+        const cryptoKey = await window.crypto.subtle.importKey(
           "raw",
-          enc.encode(secret),
-          { name: "HMAC", hash: { name: "SHA-256" } },
+          enc.encode(key),
+          { name: "HMAC", hash: "SHA-256" },
           false,
           ["sign"]
         );
 
         const signatureBuffer = await window.crypto.subtle.sign(
           "HMAC",
-          key,
-          enc.encode(messageStr)
+          cryptoKey,
+          enc.encode(payload)
         );
 
         const hashArray = Array.from(new Uint8Array(signatureBuffer));
-        const hexSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-        const outputEl = document.getElementById('outputSignature');
-        outputEl.innerText = hexSignature;
-        
-        const calcIndicator = document.getElementById('calcIndicator');
-        calcIndicator.classList.remove('hidden');
-        showToast("Signature computed successfully!");
+        document.getElementById('tool-result').innerHTML = `
+          <strong>Payload:</strong> <code>${payload}</code><br><br>
+          <strong>Computed SHA256 HMAC:</strong><br>
+          <span style="color:#4f46e5; font-weight:600;">${hex}</span>
+        `;
       } catch (err) {
-        console.error(err);
-        document.getElementById('outputSignature').innerText = "Error calculating signature.";
+        document.getElementById('tool-result').innerText = "Error generating signature: " + err.message;
       }
     }
-
-    // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const sidebar = document.getElementById('sidebar');
-    if (mobileMenuBtn && sidebar) {
-      mobileMenuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('hidden');
-        sidebar.classList.toggle('fixed');
-        sidebar.classList.toggle('inset-0');
-        sidebar.classList.toggle('z-40');
-        sidebar.classList.toggle('bg-white');
-        sidebar.classList.toggle('p-6');
-      });
-    }
-
-    // Quick filter navigation items
-    const docSearch = document.getElementById('docSearch');
-    if (docSearch) {
-      docSearch.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const links = document.querySelectorAll('#sidebar .nav-link');
-        links.forEach(link => {
-          const text = link.textContent.toLowerCase();
-          if (text.includes(query)) {
-            link.parentElement.style.display = 'block';
-          } else {
-            link.parentElement.style.display = 'none';
-          }
-        });
-      });
-    }
-
-    // Run initial signature computation on page load
-    window.onload = function() {
-      calculateLiveHmac();
-    };
   </script>
 </body>
 </html>
