@@ -277,7 +277,7 @@ if(!clientInfo) return res.send("Client Data not availble");
 const amount=order.amount;
 const utr=order.utr;
 const payment_date=order.paymentDate.toLocaleString();
-  const created_at=order.createdAt.toLocaleString();
+  const created_at=order.created_at.toLocaleString();
 const customerName=order.customerName;
 const timezone=clientInfo.location.timezone;                                     const customerEmail=order.customerEmail;
                                       const customerPhone=order.customerPhone;
@@ -298,7 +298,7 @@ const timezone=clientInfo.location.timezone;                                    
                                       const zip=clientInfo.location.zip;
                                       const lat=clientInfo.location.latitude;
                                       const longt=clientInfo.location.longitude;
-                                    res.render("transactioninfo",{amount,utr,payment_date,customerName,customerEmail,customerPhone,timezone,merchant,upi,ip,deviceType,deviceBrand,deviceModel,osName,osVersion,browserName,browserVersion,isp,country,region,zip,city,lat,longt})
+                                    res.render("transactioninfo",{amount,utr,payment_date,created_at,customerName,customerEmail,customerPhone,timezone,merchant,upi,ip,deviceType,deviceBrand,deviceModel,osName,osVersion,browserName,browserVersion,isp,country,region,zip,city,lat,longt})
                                       
                                       
                                       
