@@ -3,26 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UPay Gateway — Developer Documentation</title>
+  <title>UPay Gateway — Modern Developer Documentation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --primary-subtle: #eef2ff;
-      --secondary: #06b6d4;
-      --bg-dark: #0f172a;
-      --bg-canvas: #f8fafc;
-      --card-bg: #ffffff;
-      --border: #e2e8f0;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --code-bg: #090d16;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.18);
+      --accent: #06b6d4;
+      --bg-body: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #182234;
+      --bg-card-hover: #1e293b;
+      --border: #26334d;
+      --border-subtle: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #030712;
       --success: #10b981;
       --warning: #f59e0b;
-      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
 
@@ -32,19 +35,56 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: var(--font-body);
-      background-color: var(--bg-canvas);
+      background-color: var(--bg-body);
       color: var(--text-main);
-      line-height: 1.6;
+      line-height: 1.65;
       display: flex;
       min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 60%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+    }
+
+    /* Mobile Header */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 200;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* Sidebar Navigation */
     aside.sidebar {
       width: 290px;
-      background: #ffffff;
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(16px);
       border-right: 1px solid var(--border);
       position: fixed;
       top: 0;
@@ -53,7 +93,8 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      z-index: 100;
+      z-index: 150;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .brand {
@@ -65,27 +106,32 @@
     }
 
     .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-weight: 800;
-      font-size: 1.1rem;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 15px var(--primary-glow);
     }
 
     .brand-text h1 {
-      font-size: 1.1rem;
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
       font-weight: 700;
-      color: var(--text-main);
+      letter-spacing: -0.02em;
+      color: #fff;
     }
 
     .brand-text span {
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: var(--accent);
+      font-weight: 500;
       display: block;
     }
 
@@ -106,115 +152,154 @@
     .nav-item {
       display: flex;
       align-items: center;
-      padding: 8px 12px;
-      font-size: 0.9rem;
+      padding: 9px 12px;
+      font-size: 0.88rem;
       font-weight: 500;
-      color: var(--text-muted);
+      color: #cbd5e1;
       text-decoration: none;
       border-radius: 8px;
-      transition: all 0.15s ease;
-      margin-bottom: 3px;
+      transition: all 0.2s ease;
+      margin-bottom: 4px;
     }
 
     .nav-item:hover, .nav-item.active {
-      background: var(--primary-subtle);
-      color: var(--primary);
-      font-weight: 600;
+      background: var(--bg-card);
+      color: #ffffff;
+      border-left: 3px solid var(--primary);
+      padding-left: 9px;
     }
 
     /* Main Content */
     main.content {
       margin-left: 290px;
       flex: 1;
-      padding: 48px 60px 100px;
-      max-width: 1080px;
+      padding: 56px 64px 120px;
+      max-width: 1020px;
     }
 
     .doc-section {
-      margin-bottom: 56px;
-      scroll-margin-top: 40px;
+      margin-bottom: 64px;
+      scroll-margin-top: 50px;
     }
 
     h2 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
       margin-bottom: 16px;
-      color: var(--text-main);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     h3 {
+      font-family: var(--font-heading);
       font-size: 1.25rem;
-      font-weight: 700;
-      margin: 28px 0 12px;
-      color: var(--text-main);
+      font-weight: 600;
+      margin: 32px 0 14px;
+      color: #f1f5f9;
     }
 
     p {
-      color: #334155;
-      font-size: 0.96rem;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      margin-bottom: 18px;
+      line-height: 1.7;
+    }
+
+    /* Highlights & Hero Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
       margin-bottom: 16px;
     }
 
-    /* Feature Cards */
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* Modern Cards */
     .grid-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin: 24px 0;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin: 28px 0;
     }
 
     .feature-card {
-      background: var(--card-bg);
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      border-radius: 14px;
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
     }
 
     .feature-card h4 {
-      font-size: 1rem;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 6px;
-      color: var(--primary);
+      margin-bottom: 8px;
+      color: #fff;
     }
 
     .feature-card p {
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
       margin: 0;
     }
 
-    /* Notice & Alert Banners */
+    /* Alert / Notice */
     .banner {
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin: 20px 0;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 24px 0;
       display: flex;
-      gap: 14px;
+      gap: 16px;
       font-size: 0.92rem;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .banner.warning {
-      background: #fffbeb;
-      border: 1px solid #fef3c7;
-      color: #92400e;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
     }
 
     .banner.info {
-      background: var(--primary-subtle);
-      border: 1px solid #e0e7ff;
-      color: #3730a3;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: #c7d2fe;
     }
 
-    /* Tables */
+    /* Sleek Tables */
     .table-container {
       overflow-x: auto;
-      background: #ffffff;
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      margin: 20px 0;
+      border-radius: 14px;
+      margin: 24px 0;
     }
 
     table {
@@ -225,20 +310,21 @@
     }
 
     th {
-      background: #f8fafc;
-      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 14px 20px;
       font-weight: 600;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border);
       text-transform: uppercase;
       font-size: 0.75rem;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
     }
 
     td {
-      padding: 14px 18px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
+      color: #cbd5e1;
     }
 
     tr:last-child td {
@@ -248,81 +334,87 @@
     /* Code Blocks */
     .code-wrapper {
       background: var(--code-bg);
-      border-radius: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
       overflow: hidden;
-      margin: 20px 0;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      margin: 24px 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
 
     .code-header {
-      background: #151d2f;
+      background: rgba(255, 255, 255, 0.03);
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 10px 18px;
-      border-bottom: 1px solid #1e293b;
+      border-bottom: 1px solid var(--border);
     }
 
     .code-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .code-tab {
       background: transparent;
       border: none;
-      color: #94a3b8;
+      color: var(--text-muted);
       font-family: var(--font-body);
       font-size: 0.82rem;
       font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
     }
 
     .code-tab.active {
-      background: #1e293b;
-      color: #f8fafc;
+      background: var(--border);
+      color: #fff;
     }
 
     .copy-btn {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
       color: #e2e8f0;
       font-size: 0.78rem;
-      padding: 5px 10px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: all 0.2s;
+      font-family: var(--font-body);
+      font-weight: 500;
     }
 
     .copy-btn:hover {
-      background: #334155;
+      background: var(--border);
+      color: #fff;
     }
 
     pre {
-      padding: 20px;
+      padding: 22px;
       overflow-x: auto;
       font-family: var(--font-mono);
       font-size: 0.88rem;
       color: #e2e8f0;
-      line-height: 1.55;
+      line-height: 1.6;
     }
 
     code {
       font-family: var(--font-mono);
-      font-size: 0.86rem;
-      padding: 2px 6px;
-      background: #e2e8f0;
-      border-radius: 4px;
-      color: #0f172a;
+      font-size: 0.85rem;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      color: var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     pre code {
       padding: 0;
       background: transparent;
       color: inherit;
+      border: none;
     }
 
     /* Badges */
@@ -330,42 +422,45 @@
       display: inline-block;
       font-weight: 700;
       font-size: 0.75rem;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
-      background: #10b981;
+      background: var(--primary);
       color: #ffffff;
       margin-right: 8px;
+      letter-spacing: 0.05em;
     }
 
     .badge-req {
       font-size: 0.72rem;
-      padding: 2px 6px;
-      background: #fee2e2;
-      color: #b91c1c;
+      padding: 3px 8px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #f87171;
       font-weight: 600;
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
     .badge-opt {
       font-size: 0.72rem;
-      padding: 2px 6px;
-      background: #f1f5f9;
-      color: #64748b;
+      padding: 3px 8px;
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
       font-weight: 600;
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
-    /* Interactive HMAC Tool */
+    /* Interactive HMAC Box */
     .tool-box {
-      background: #ffffff;
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      margin: 20px 0;
+      border-radius: 14px;
+      padding: 28px;
+      margin: 24px 0;
     }
 
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .form-group label {
@@ -373,34 +468,39 @@
       font-size: 0.82rem;
       font-weight: 600;
       margin-bottom: 6px;
-      color: var(--text-main);
+      color: #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .form-group input {
       width: 100%;
-      padding: 9px 12px;
+      padding: 10px 14px;
       font-family: var(--font-mono);
-      font-size: 0.86rem;
+      font-size: 0.88rem;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      background: #f8fafc;
+      border-radius: 8px;
+      background: var(--code-bg);
+      color: #f8fafc;
       outline: none;
+      transition: border-color 0.2s;
     }
 
     .form-group input:focus {
       border-color: var(--primary);
-      background: #ffffff;
     }
 
     .calc-btn {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
+      padding: 12px 22px;
+      border-radius: 8px;
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 4px 14px var(--primary-glow);
     }
 
     .calc-btn:hover {
@@ -408,30 +508,70 @@
     }
 
     .result-display {
-      margin-top: 16px;
-      padding: 12px;
-      background: #f1f5f9;
-      border-radius: 6px;
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       font-family: var(--font-mono);
-      font-size: 0.84rem;
+      font-size: 0.85rem;
       word-break: break-all;
+      color: #94a3b8;
+    }
+
+    .result-display strong {
+      color: #f1f5f9;
+    }
+
+    /* Mobile Backdrop */
+    .backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 140;
     }
 
     @media (max-width: 900px) {
+      .mobile-header {
+        display: flex;
+      }
       aside.sidebar {
-        display: none;
+        transform: translateX(-100%);
+        top: 64px;
+      }
+      aside.sidebar.open {
+        transform: translateX(0);
+      }
+      .backdrop.open {
+        display: block;
       }
       main.content {
         margin-left: 0;
-        padding: 28px 20px;
+        padding: 94px 20px 80px;
+      }
+      h2 {
+        font-size: 1.6rem;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- Mobile Top Bar -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="brand-icon" style="width: 32px; height: 32px; font-size: 1rem;">U</div>
+      <span style="font-weight: 700; font-family: var(--font-heading); color: #fff;">UPay Docs</span>
+    </div>
+    <button class="menu-toggle" id="menu-btn" aria-label="Toggle navigation">☰</button>
+  </header>
+
+  <div class="backdrop" id="backdrop"></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="brand-icon">U</div>
       <div class="brand-text">
@@ -441,15 +581,15 @@
     </div>
     <div class="nav-group">
       <div class="nav-label">Getting Started</div>
-      <a href="#overview" class="nav-item">Overview &amp; Features</a>
-      <a href="#quickstart" class="nav-item">Onboarding Setup</a>
+      <a href="#overview" class="nav-item">Overview &amp; Architecture</a>
+      <a href="#quickstart" class="nav-item">Merchant Onboarding</a>
       <a href="#webhook-config" class="nav-item">Webhook Configuration</a>
     </div>
     <div class="nav-group">
       <div class="nav-label">Integration</div>
       <a href="#create-order" class="nav-item">Create Order API</a>
-      <a href="#signature" class="nav-item">HMAC Verification</a>
-      <a href="#playground" class="nav-item">HMAC Calculator</a>
+      <a href="#signature" class="nav-item">HMAC Webhooks</a>
+      <a href="#playground" class="nav-item">Signature Tester</a>
       <a href="#code-examples" class="nav-item">Code SDKs</a>
     </div>
   </aside>
@@ -459,24 +599,25 @@
 
     <!-- Overview -->
     <section id="overview" class="doc-section">
-      <h2>UPay UPI Payment Gateway</h2>
+      <div class="status-badge">API Status: Operational</div>
+      <h2>Direct-to-Bank UPI Gateway</h2>
       <p>
-        UPay is a zero-fee, developer-friendly UPI checkout bridge. Customer payments go straight into your verified 
-        Paytm Business VPA without third-party intermediary holding funds.
+        UPay is a zero-commission, non-custodial UPI checkout bridge. Customer payments flow directly into your verified 
+        Paytm Business VPA via dynamic UPI intents without intermediary escrow holds.
       </p>
 
       <div class="grid-cards">
         <div class="feature-card">
-          <h4>0% Commission</h4>
-          <p>Completely free of gateway fees. All settled funds stay 100% yours.</p>
+          <h4>0% Gateway Fees</h4>
+          <p>Completely free of third-party processing deductions. All settled funds stay 100% yours.</p>
         </div>
         <div class="feature-card">
-          <h4>Zero Custody Risk</h4>
-          <p>Money settles directly from the customer’s UPI app into your Paytm Business account.</p>
+          <h4>Zero Custody Escrow</h4>
+          <p>Settlement happens directly between the customer’s UPI app and your merchant bank account.</p>
         </div>
         <div class="feature-card">
-          <h4>Instant Webhooks</h4>
-          <p>Real-time POST callbacks secured with tamper-proof HMAC-SHA256 signatures.</p>
+          <h4>Instant Webhook Verification</h4>
+          <p>Real-time POST callbacks secured with cryptographically verified HMAC-SHA256 signatures.</p>
         </div>
       </div>
     </section>
@@ -484,34 +625,32 @@
     <!-- Quickstart / Onboarding -->
     <section id="quickstart" class="doc-section">
       <h2>Merchant Onboarding</h2>
-      <p>Follow these steps to activate your merchant account and grab your credentials:</p>
+      <p>Follow these steps to generate your merchant authentication credentials:</p>
 
-      <ol style="margin-left: 20px; color: #334155; font-size: 0.95rem; line-height: 1.8;">
-        <li>
-          <strong>Create Account:</strong> Head to 
-          <a href="https://www.u-pay-seven.vercel.app/user/login" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">
-            https://www.u-pay-seven.vercel.app/user/login
-          </a> 
-          and sign in using your Email or Google OAuth.
-        </li>
-        <li>
-          <strong>Connect Paytm Business:</strong> Provide your Paytm Business Merchant UPI ID and Merchant Identifier (MID).
-        </li>
-        <li>
-          <strong>Obtain API Credentials:</strong> Switch to the <strong>API</strong> tab in your dashboard and copy your:
-          <ul style="margin-top: 6px; margin-bottom: 6px; list-style-type: square; margin-left: 20px;">
-            <li><code>Secret Key</code> (API Key)</li>
-            <li><code>Merchant Identifier (MID)</code></li>
-          </ul>
-        </li>
-      </ol>
+      <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px;">
+        <ol style="margin-left: 20px; color: #cbd5e1; font-size: 0.95rem; line-height: 2;">
+          <li>
+            <strong>Register Merchant Account:</strong> Access your portal at 
+            <a href="https://www.u-pay-seven.vercel.app/user/login" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">
+              u-pay-seven.vercel.app/user/login
+            </a> 
+            and complete Google or email authentication.
+          </li>
+          <li>
+            <strong>Link Paytm Business:</strong> Add your verified Paytm Business Merchant VPA (UPI ID) and Merchant Identifier (<code>MID</code>).
+          </li>
+          <li>
+            <strong>Retrieve Credentials:</strong> Under the <strong>API</strong> section, copy your production <code>Secret Key</code> and <code>MID</code>.
+          </li>
+        </ol>
+      </div>
     </section>
 
     <!-- Webhook Configuration -->
     <section id="webhook-config" class="doc-section">
       <h2>Webhook Configuration</h2>
       <p>
-        In your dashboard under <strong>Webhook Handlers</strong>, configure the URLs where our systems send real-time transaction updates and redirect buyers.
+        Set up delivery endpoints in your dashboard under <strong>Webhook Handlers</strong> to process instant transaction confirmations.
       </p>
 
       <div class="table-container">
@@ -519,27 +658,27 @@
           <thead>
             <tr>
               <th>Field</th>
-              <th>Description</th>
+              <th>Destination &amp; Behavior</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><strong>Success Callback URL</strong></td>
-              <td>Your backend webhook listener. UPay fires an HTTP POST request to this URL as soon as the customer finishes payment.</td>
+              <td>Your backend server listener. UPay triggers a secure HTTP POST with payment details immediately upon successful settlement.</td>
             </tr>
             <tr>
               <td><strong>User Redirect URL</strong></td>
-              <td>Where the user's browser is forwarded after completing payment. If left blank, users go to our default success screen.</td>
+              <td>Browser redirection target where the buyer is returned after completing payment. If left blank, UPay shows its default success page.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="banner warning">
-        <span>⚠️</span>
+        <span style="font-size: 1.25rem;">⚠️</span>
         <div>
-          <strong>Server Requirement:</strong> Your callback endpoint must support <strong>HTTPS</strong> and return an immediate 
-          <code>200 OK</code> response within <strong>3 seconds</strong> to acknowledge delivery.
+          <strong>Server Requirement:</strong> Your callback URL must resolve over <strong>HTTPS</strong> and acknowledge payload delivery by returning an immediate 
+          <code>200 OK</code> within <strong>3.0 seconds</strong>.
         </div>
       </div>
     </section>
@@ -547,7 +686,7 @@
     <!-- Create Order API -->
     <section id="create-order" class="doc-section">
       <h2>Create Order API</h2>
-      <p>Initialize a dynamic UPI transaction and fetch a payment page link.</p>
+      <p>Generate a dynamic payment transaction session and retrieve checkout URLs.</p>
 
       <p><span class="badge-method">POST</span> <code>https://www.u-pay-seven.vercel.app/api/create-order</code></p>
 
@@ -567,47 +706,47 @@
               <td><code>api</code></td>
               <td>String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Your API Secret Key from the API panel.</td>
+              <td>Your Merchant Secret Key from the dashboard.</td>
             </tr>
             <tr>
               <td><code>MID</code></td>
               <td>String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Your Merchant Identifier (MID).</td>
+              <td>Your Paytm Merchant Identifier.</td>
             </tr>
             <tr>
               <td><code>amount</code></td>
-              <td>Number/String</td>
+              <td>Number / String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Transaction amount in INR (e.g. <code>2399.00</code>).</td>
-            </tr>
-            <tr>
-              <td><code>customerName</code></td>
-              <td>String</td>
-              <td><span class="badge-opt">Optional</span></td>
-              <td>Customer's display name.</td>
+              <td>Order amount in INR (e.g. <code>2399.00</code>).</td>
             </tr>
             <tr>
               <td><code>customerEmail</code></td>
               <td>String</td>
               <td><span class="badge-req">Required</span></td>
-              <td>Email address for payment receipt.</td>
+              <td>Buyer email for payment verification and receipts.</td>
+            </tr>
+            <tr>
+              <td><code>customerName</code></td>
+              <td>String</td>
+              <td><span class="badge-opt">Optional</span></td>
+              <td>Customer full name.</td>
             </tr>
             <tr>
               <td><code>customerMobile</code></td>
               <td>String</td>
               <td><span class="badge-opt">Optional</span></td>
-              <td>Customer's 10-digit mobile number.</td>
+              <td>10-digit customer mobile number.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3>Example Response</h3>
+      <h3>Response Payload</h3>
       <div class="code-wrapper">
         <div class="code-header">
-          <span style="color:#94a3b8; font-size:0.8rem; font-weight:600;">JSON 200 OK</span>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentNode.nextElementSibling.innerText)">Copy</button>
+          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">200 OK — application/json</span>
+          <button class="copy-btn" onclick="copySnippet(this)">Copy</button>
         </div>
         <pre><code>{
   "status": true,
@@ -617,17 +756,17 @@
   "timestamp": 1740000000000
 }</code></pre>
       </div>
-      <p>Redirect your user to the returned <code>link</code> to show the dynamic QR code and UPI application buttons (GPay, PhonePe, Paytm, BHIM).</p>
+      <p>Redirect the buyer to the generated <code>link</code> to present the dynamic QR code and auto-detect installed UPI apps (GPay, PhonePe, Paytm, BHIM).</p>
     </section>
 
     <!-- HMAC Verification -->
     <section id="signature" class="doc-section">
-      <h2>HMAC Verification &amp; Webhook Handling</h2>
-      <p>When an order completes, UPay issues a POST request to your <code>Success Callback URL</code>:</p>
+      <h2>HMAC Signature Verification</h2>
+      <p>When a transaction settles, UPay issues an asynchronous webhook to your configured listener:</p>
 
       <div class="code-wrapper">
         <div class="code-header">
-          <span style="color:#94a3b8; font-size:0.8rem; font-weight:600;">Incoming Webhook Payload</span>
+          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">Webhook Callback Body</span>
         </div>
         <pre><code>{
   "ORDERID": "ORDER_67A419B8E3D",
@@ -639,45 +778,49 @@
       </div>
 
       <div class="banner info">
-        <span>💡</span>
+        <span style="font-size: 1.25rem;">💡</span>
         <div>
-          <strong>Signature String Construction:</strong> To verify integrity, concatenate 
-          <code>ORDERID|amount|UTR|status</code> and hash it using <strong>HMAC-SHA256</strong> with your <code>Secret Key</code>.
+          <strong>Verification Format:</strong> Concatenate the string 
+          <code>ORDERID|amount|UTR|status</code> using pipe separators, then hash it using <strong>HMAC-SHA256</strong> with your <code>Secret Key</code>.
         </div>
       </div>
 
-      <h3>Node.js Verification Snippet</h3>
+      <h3>Node.js / Express Implementation</h3>
       <div class="code-wrapper">
         <div class="code-header">
-          <span style="color:#94a3b8; font-size:0.8rem; font-weight:600;">express-webhook.js</span>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentNode.nextElementSibling.innerText)">Copy</button>
+          <span style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">server.js</span>
+          <button class="copy-btn" onclick="copySnippet(this)">Copy</button>
         </div>
-        <pre><code>const crypto = require('crypto');
+        <pre><code>const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+app.use(express.json());
 
 app.post('/api/webhook', (req, res) => {
   const { ORDERID, amount, UTR, status, signature } = req.body;
   const secretKey = process.env.UPAY_SECRET_KEY;
 
-  // Construct canonical payload string
+  // 1. Build canonical pipe-separated string
   const payload = `${ORDERID}|${amount}|${UTR}|${status}`;
 
-  // Compute expected HMAC SHA256 hex string
+  // 2. Compute expected HMAC-SHA256 hash
   const expectedSignature = crypto
     .createHmac('sha256', secretKey)
     .update(payload)
     .digest('hex');
 
-  // Secure constant-time comparison
+  // 3. Timing-safe constant-time comparison
   const isValid = crypto.timingSafeEqual(
     Buffer.from(signature, 'hex'),
     Buffer.from(expectedSignature, 'hex')
   );
 
   if (!isValid) {
-    return res.status(400).send("Signature Mismatch — Tampering Detected");
+    return res.status(400).send("Signature mismatch: unauthorized request");
   }
 
-  // Fulfill user's order in your database
+  // 4. Fulfill order in your database
   console.log(`Payment confirmed for Order ${ORDERID} via UTR ${UTR}`);
 
   res.status(200).json({ received: true });
@@ -687,8 +830,8 @@ app.post('/api/webhook', (req, res) => {
 
     <!-- Interactive Tool -->
     <section id="playground" class="doc-section">
-      <h2>Interactive Signature Tester</h2>
-      <p>Test the HMAC signature generator directly in your browser:</p>
+      <h2>Interactive HMAC Sandbox</h2>
+      <p>Test payload signing directly against your secret key in real time:</p>
 
       <div class="tool-box">
         <div class="form-group">
@@ -712,17 +855,17 @@ app.post('/api/webhook', (req, res) => {
           <input type="text" id="tool-status" value="SUCCESS" readonly>
         </div>
 
-        <button class="calc-btn" onclick="calculateHMAC()">Generate HMAC Signature</button>
+        <button class="calc-btn" onclick="calculateHMAC()">Generate Signature</button>
 
         <div class="result-display" id="tool-result">
-          Click "Generate HMAC Signature" to compute hash.
+          Click "Generate Signature" to evaluate hash.
         </div>
       </div>
     </section>
 
     <!-- Multi-Language Code SDKs -->
     <section id="code-examples" class="doc-section">
-      <h2>Order Creation Code Examples</h2>
+      <h2>Order Creation Snippets</h2>
 
       <div class="code-wrapper">
         <div class="code-header">
@@ -731,7 +874,7 @@ app.post('/api/webhook', (req, res) => {
             <button class="code-tab" onclick="switchTab(this, 'node')">Node.js</button>
             <button class="code-tab" onclick="switchTab(this, 'python')">Python</button>
           </div>
-          <button class="copy-btn" onclick="copyCurrentSnippet()">Copy Code</button>
+          <button class="copy-btn" onclick="copyCurrentSnippet(this)">Copy</button>
         </div>
 
         <pre id="snippet-box"><code>curl -X POST https://www.u-pay-seven.vercel.app/api/create-order \
@@ -750,6 +893,29 @@ app.post('/api/webhook', (req, res) => {
   </main>
 
   <script>
+    // Responsive Mobile Nav
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('backdrop');
+
+    menuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('open');
+    });
+
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('open');
+    });
+
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+      });
+    });
+
+    // Snippets Definition
     const snippets = {
       curl: `curl -X POST https://www.u-pay-seven.vercel.app/api/create-order \\
   -H "Content-Type: application/json" \\
@@ -775,16 +941,18 @@ async function createPaymentOrder() {
 
   const { data } = await axios.post('https://www.u-pay-seven.vercel.app/api/create-order', payload);
   if (data.status) {
-    console.log("Direct user to:", data.link);
+    console.log("Redirect customer to checkout:", data.link);
   }
 }
+
 createPaymentOrder();`,
-      python: `import requests
+      python: `import os
+import requests
 
 url = "https://www.u-pay-seven.vercel.app/api/create-order"
 payload = {
-    "api": "YOUR_SECRET_KEY",
-    "MID": "YOUR_MID",
+    "api": os.getenv("UPAY_SECRET_KEY"),
+    "MID": os.getenv("UPAY_MID"),
     "amount": 2399.00,
     "customerName": "Rahul Sharma",
     "customerEmail": "customer@example.com",
@@ -793,7 +961,7 @@ payload = {
 
 response = requests.post(url, json=payload).json()
 if response.get("status"):
-    print("Redirect customer to:", response.get("link"))`
+    print("Redirect customer to checkout:", response.get("link"))`
     };
 
     let activeLang = 'curl';
@@ -805,8 +973,21 @@ if response.get("status"):
       document.getElementById('snippet-box').innerHTML = `<code>${escapeHtml(snippets[lang])}</code>`;
     }
 
-    function copyCurrentSnippet() {
-      navigator.clipboard.writeText(snippets[activeLang]);
+    function copySnippet(btn) {
+      const code = btn.closest('.code-wrapper').querySelector('pre code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => btn.innerText = originalText, 2000);
+      });
+    }
+
+    function copyCurrentSnippet(btn) {
+      navigator.clipboard.writeText(snippets[activeLang]).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => btn.innerText = originalText, 2000);
+      });
     }
 
     function escapeHtml(str) {
@@ -814,11 +995,11 @@ if response.get("status"):
     }
 
     async function calculateHMAC() {
-      const key = document.getElementById('tool-key').value;
-      const order = document.getElementById('tool-order').value;
-      const amount = document.getElementById('tool-amount').value;
-      const utr = document.getElementById('tool-utr').value;
-      const status = document.getElementById('tool-status').value;
+      const key = document.getElementById('tool-key').value.trim();
+      const order = document.getElementById('tool-order').value.trim();
+      const amount = document.getElementById('tool-amount').value.trim();
+      const utr = document.getElementById('tool-utr').value.trim();
+      const status = document.getElementById('tool-status').value.trim();
 
       const payload = `${order}|${amount}|${utr}|${status}`;
       const enc = new TextEncoder();
@@ -842,12 +1023,13 @@ if response.get("status"):
         const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         document.getElementById('tool-result').innerHTML = `
-          <strong>Payload:</strong> <code>${payload}</code><br><br>
-          <strong>Computed SHA256 HMAC:</strong><br>
-          <span style="color:#4f46e5; font-weight:600;">${hex}</span>
+          <div style="margin-bottom: 8px;"><strong>Raw Concatenated String:</strong></div>
+          <code style="display:block; padding:8px 12px; margin-bottom:12px; word-break:break-all;">${escapeHtml(payload)}</code>
+          <div style="margin-bottom: 8px;"><strong>Calculated HMAC-SHA256:</strong></div>
+          <code style="color:var(--accent); display:block; padding:8px 12px; word-break:break-all;">${hex}</code>
         `;
       } catch (err) {
-        document.getElementById('tool-result').innerText = "Error generating signature: " + err.message;
+        document.getElementById('tool-result').innerText = "Calculation error: " + err.message;
       }
     }
   </script>
