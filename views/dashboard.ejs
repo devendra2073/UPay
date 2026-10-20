@@ -690,7 +690,7 @@
                 }
 
                 container.innerHTML = this.state.transactions.map(tx => `
-                    <div href="/dashboard/transaction/${tx.upaytr ||000}" target="_blank" class="flex items-center justify-between py-3.5 hover:bg-slate-50/60 px-3 rounded-xl transition-colors">
+                    <div onclick="openNewWindow('${tx.upaytr||0}')" class="flex items-center justify-between py-3.5 hover:bg-slate-50/60 px-3 rounded-xl transition-colors">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${tx.amount > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -770,6 +770,15 @@
                     }
                 }).showToast();
             },
+
+
+function openNewWindow(upaytr) {
+  window.open(
+    `/dashboard/transaction/${upaytr}`,
+    "Transaction Details",
+    "width=600,height=400,scrollbars=yes,resizable=yes"
+  );
+}
 
             copy(text) {
                 navigator.clipboard.writeText(text);
