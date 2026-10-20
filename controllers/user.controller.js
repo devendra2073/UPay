@@ -298,7 +298,7 @@ const timezone=clientInfo.location.timezone;                                    
                                       const zip=clientInfo.location.zip;
                                       const lat=clientInfo.location.latitude;
                                       const longt=clientInfo.location.longitude;
-                                    res.render("transactioninfo",{amount,utr,payment_date,created_at,customerName,customerEmail,customerPhone,timezone,merchant,upi,ip,deviceType,deviceBrand,deviceModel,osName,osVersion,browserName,browserVersion,isp,country,region,upaytr,zip,city,lat,longt})
+                                    res.render("transactioninfo",{amount,"order":order.order,utr,payment_date,created_at,customerName,customerEmail,customerPhone,timezone,merchant,upi,ip,deviceType,deviceBrand,deviceModel,osName,osVersion,browserName,browserVersion,isp,country,region,upaytr,zip,city,lat,longt})
                                       
                                       
                                       
