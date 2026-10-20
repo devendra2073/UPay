@@ -772,13 +772,7 @@
             },
 
 
-function openNewWindow(upaytr) {
-  window.open(
-    `/dashboard/transaction/${upaytr}`,
-    "Transaction Details",
-    "width=600,height=400,scrollbars=yes,resizable=yes"
-  );
-}
+
 
             copy(text) {
                 navigator.clipboard.writeText(text);
@@ -798,6 +792,13 @@ function openNewWindow(upaytr) {
                 }, { passive: false });
             }
         };
+function openNewWindow(upaytr) {
+  window.open(
+    `/dashboard/transaction/${upaytr}`,
+    "Transaction Details",
+    "width=600,height=400,scrollbars=yes,resizable=yes"
+  );
+}
 
         function openpop() {
             if (typeof UPayDeposit !== 'undefined') {
