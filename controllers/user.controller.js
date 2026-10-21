@@ -282,7 +282,7 @@ const customerName=order.customerName;
 const timezone=clientInfo.location.timezone;                                     const customerEmail=order.customerEmail;
                                       const customerPhone=order.customerPhone;
                                       const merchant=order.company;
-                                      const upi=order.paytm.upi;
+                                      const upi=order.paytm.UPI;
                                       const ip=clientInfo.ip;
                                       const deviceType=clientInfo.device.type
                                       const deviceModel=clientInfo.device.model;
