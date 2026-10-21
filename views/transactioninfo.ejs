@@ -409,11 +409,11 @@
 
             <!-- Coordinate float badge -->
             <div class="absolute bottom-2 left-2 text-[10px] font-mono text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800" id="val-map-coords">
-              0.0000° N, 0.0000° E
+              <%=lat%>° N, <%=longt%>° E
             </div>
             
             <!-- Google Maps External Link button -->
-            <a id="link-external-map" href="#" target="_blank" rel="noopener noreferrer" class="absolute bottom-2 right-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 bg-slate-900/90 hover:bg-slate-800 px-2 py-0.5 rounded border border-slate-800 flex items-center gap-1 transition-colors">
+            <a id="link-external-map" href="https://www.google.com/maps/search/?api=1&query=<%=lat%>,<%=longt%>" target="_blank" rel="noopener noreferrer" class="absolute bottom-2 right-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 bg-slate-900/90 hover:bg-slate-800 px-2 py-0.5 rounded border border-slate-800 flex items-center gap-1 transition-colors">
               Open Map <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
             </a>
           </div>
