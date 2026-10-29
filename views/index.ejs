@@ -385,8 +385,8 @@
                     ios: `phonepe://pay?${commonParams}`
                 },
                 paytm: {
-                    android: `<%= typeof paytmUri !== 'undefined' ? paytmUri : '' %>` || `intent://pay?${commonParams}#Intent;scheme=upi;package=net.one97.paytm;end`,
-                    ios: `paytmmp://pay?${commonParams}`
+                    android: `<%= typeof paytmUri !== 'undefined' ? paytmUri : '' %>` || `paytmmp://cash_wallet?${commonParams}&featuretype=money_transfer`,
+                    ios: `paytmmp://cash_wallet?${commonParams}&featuretype=money_transfer`
                 },
                 bhim: {
                     android: `<%= typeof bhimUri !== 'undefined' ? bhimUri : '' %>` || `intent://pay?${commonParams}#Intent;scheme=upi;package=in.org.npci.upiapp;end`,
