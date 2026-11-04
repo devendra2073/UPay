@@ -32,6 +32,7 @@ const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=
     paytm:paytmdata
   })
   await pay.save()
+  console.log(pay)
   res.json({status:true,order,message:"Order Created",link:"https://u-pay-seven.vercel.app/pay/"+order,timestamp:Date.now()})
 }
 
