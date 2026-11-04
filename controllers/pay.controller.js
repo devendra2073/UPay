@@ -139,8 +139,9 @@ export const paymentStatus = async (req, res) => {
             UTR: info.BANKTXNID,
             status: "SUCCESS"
           })
+        console.log(api)
         const signature=crypto.createHmac("sha256",api).update(payment_info).digest("hex");
-        
+        console.log(signature);
         fetch(dbresp.callback, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
