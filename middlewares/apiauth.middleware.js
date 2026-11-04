@@ -8,6 +8,7 @@ const apiAuth=async(req,res,next)=>{
   if(!usr) return res.json({status:false,message:"Account not found"})
   if(!customerName || !customerEmail || !customerMobile){return res.json({status:false,message:"Customer details missing"})}
   req.customer={customerName,customerEmail,customerMobile}
+    console.log(req.customer)
   req.user=usr
   req.mode="PORTAL"
 
