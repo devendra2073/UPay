@@ -26,8 +26,8 @@ const logo=pic?pic:`https://ui-avatars.com/api/?background=random&size=128&name=
     redirect,
     callback,
     customerName,
+    customerPhone:customerMobile,
     customerEmail,
-    customerMobile,
     upaytr,
     paytm:paytmdata
   })
