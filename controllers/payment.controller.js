@@ -90,7 +90,7 @@ const createOrder = async (req, res) => {
     const intent = `upi://pay?${commonParams}`;
     const qrDataUrl = await QRCode.toDataURL(intent, { width: 280, margin: 2 });
 
-    const hostUrl = req.headers.origin || `${req.protocol}://${req.get("host") || "u-pay-seven.vercel.app"}`;
+    const hostUrl = "https://www.u-pay-seven.vercel.app"
 
     return res.json({
       status: true,
