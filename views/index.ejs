@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <%- include('partials/seo', {
-        pageTitle: `Pay ₹${Number(amount).toLocaleString('en-IN')} to ${company} | UPay PhonePe Secure UPI Checkout`,
-        pageDesc: `Complete your instant UPI payment of ₹${Number(amount).toLocaleString('en-IN')} to ${company} (Order #${tid}). 256-bit encrypted QR & 1-tap PhonePe, GPay, Paytm checkout.`,
+        pageTitle: `Pay ₹${Number(amount).toLocaleString('en-IN')} to ${company} | UPay 2.0 Secure UPI Checkout`,
+        pageDesc: `Complete your instant UPI payment of ₹${Number(amount).toLocaleString('en-IN')} to ${company} (Order #${tid}) via UPay 2.0 256-bit encrypted QR.`,
         canonicalUrl: `https://u-pay-seven.vercel.app/pay/${tid}`
     }) %>
     <!-- Minimal Animated Money Loader (No Voice Announcement!) -->
@@ -18,7 +18,8 @@
     <%
       const cfg = typeof checkoutConfig !== 'undefined' ? checkoutConfig : {};
       const cTheme = cfg.customTheme || { primary: '#5f259f', secondary: '#7c3aed', surface: '#ffffff', background: '#f5f0ff', text: '#0f172a', radius: '24px' };
-      const initTheme = typeof selectedTheme !== 'undefined' ? selectedTheme : (cfg.defaultTheme || 'phonepe');
+      const rawTheme = typeof selectedTheme !== 'undefined' ? selectedTheme : (cfg.defaultTheme || 'upay2');
+      const initTheme = rawTheme === 'phonepe' ? 'upay2' : rawTheme;
     %>
 
     <style>
@@ -84,10 +85,6 @@
             border: 1px solid color-mix(in srgb, var(--theme-primary) 22%, transparent);
         }
 
-        .stage-transition {
-            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
         .scan-laser {
             position: absolute;
             left: 12px;
@@ -127,7 +124,7 @@
 <body class="flex flex-col items-center justify-center min-h-screen p-3 sm:p-5 lg:p-8 relative overflow-x-hidden">
 
     <!-- ================================================================= -->
-    <!-- TOP FLOATING PHONEPE TOOLBAR: THEME SWITCHER (7 THEMES) + LANG    -->
+    <!-- TOP FLOATING UPay 2.0 TOOLBAR: THEME SWITCHER (7 THEMES) + LANG   -->
     <!-- ================================================================= -->
     <div class="w-full max-w-4xl mb-3 flex flex-wrap items-center justify-between gap-2 z-20 px-1">
         <!-- Brand & Security Pill -->
@@ -137,18 +134,18 @@
             </div>
             <div>
                 <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-extrabold tracking-tight">UPay</span>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/15 text-emerald-600 border border-emerald-500/25">PhonePe Verified</span>
+                    <span class="text-xs font-extrabold tracking-tight">UPay 2.0</span>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/15 text-emerald-600 border border-emerald-500/25">Verified Gateway</span>
                 </div>
-                <p class="text-[10px] opacity-65"><%=cfg.tagline || '100% Safe & Instant UPI Checkout'%></p>
+                <p class="text-[10px] opacity-65"><%= (cfg.tagline || 'UPay 2.0 • 100% Safe & Instant UPI Checkout').replace(/PhonePe/gi, 'UPay 2.0') %></p>
             </div>
         </div>
 
         <!-- Theme Bar (7 Presets + Customizer Button) & Language Selector -->
-        <div class="flex flex-wrap items-center gap-1.5 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-black/5 shadow-xs">
+        <div class="flex flex-wrap items-center gap-1.5 bg-white/85 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-black/5 shadow-xs">
             <% if (cfg.allowCustomerThemeChange !== false) { %>
             <div class="flex items-center gap-1 pr-1.5 border-r border-slate-200" title="Switch Payment Page Theme">
-                <button type="button" onclick="CheckoutApp.applyTheme('phonepe')" class="w-5 h-5 rounded-full bg-[#5f259f] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="PhonePe Royal Purple"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('upay2')" class="w-5 h-5 rounded-full bg-[#5f259f] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="UPay 2.0 Royal Purple"></button>
                 <button type="button" onclick="CheckoutApp.applyTheme('midnight')" class="w-5 h-5 rounded-full bg-[#0f172a] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Midnight Dark"></button>
                 <button type="button" onclick="CheckoutApp.applyTheme('emerald')" class="w-5 h-5 rounded-full bg-[#059669] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Emerald Mint"></button>
                 <button type="button" onclick="CheckoutApp.applyTheme('gold')" class="w-5 h-5 rounded-full bg-[#d97706] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Royal Gold"></button>
@@ -174,11 +171,11 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MAIN PHONEPE CHECKOUT CARD                                        -->
+    <!-- MAIN UPay 2.0 CHECKOUT CARD                                       -->
     <!-- ================================================================= -->
     <main class="w-full max-w-4xl theme-card overflow-hidden relative z-10">
 
-        <!-- PhonePe Style Top Merchant Header Banner -->
+        <!-- UPay 2.0 Top Merchant Header Banner -->
         <div class="theme-header-banner p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
                 <div class="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
@@ -189,7 +186,7 @@
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white"><%=company%></h1>
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-[10px] font-extrabold border border-emerald-300/30">
-                            ✓ Verified Merchant
+                            ✓ UPay 2.0 Verified
                         </span>
                     </div>
                     <p class="text-xs text-white/80 font-mono mt-0.5">Order ID: #<%=tid%> • Payer: <span id="header-payer-name" class="font-bold text-white"><%=customerName%></span></p>
@@ -208,7 +205,7 @@
             </div>
         </div>
 
-        <!-- Expandable Price & Multi-Currency Transparency Breakdown Bar (Customer Feature #10) -->
+        <!-- Expandable Price & Multi-Currency Transparency Breakdown Bar -->
         <div id="price-breakdown-drawer" class="hidden bg-slate-900 text-slate-200 px-6 py-3.5 text-xs border-b border-slate-800">
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div>
@@ -237,14 +234,14 @@
         <!-- 2-Column Checkout Body -->
         <div class="grid grid-cols-1 lg:grid-cols-12">
 
-            <!-- LEFT COLUMN: QR SCANNER + 1-TAP UPI APPS + COPY VPA (7 COLS) -->
+            <!-- LEFT COLUMN: QR SCANNER + SUPPORTED UPI APP LOGOS + DISPUTE/UTR (7 COLS) -->
             <div class="lg:col-span-7 p-5 sm:p-7 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200/60">
 
                 <!-- Top Status & Timer Pill -->
                 <div class="flex items-center justify-between gap-2 mb-5">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold theme-badge-soft">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span data-i18n="scanPrompt">Scan QR or Tap Any UPI App</span>
+                        <span data-i18n="scanPrompt">Scan QR with Any UPI App to Pay</span>
                     </span>
 
                     <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200/70 text-xs font-extrabold">
@@ -259,7 +256,7 @@
                     <div class="theme-qr-frame relative transform hover:scale-[1.01] transition duration-300">
                         <div class="bg-white p-3.5 rounded-2xl relative overflow-hidden">
                             <div class="scan-laser"></div>
-                            <img id="qr-image" src="<%=obj%>" alt="PhonePe & UPI Dynamic QR Code" class="w-48 h-48 sm:w-52 sm:h-52 object-contain mx-auto" crossorigin="anonymous">
+                            <img id="qr-image" src="<%=obj%>" alt="UPay 2.0 Dynamic UPI QR Code" class="w-48 h-48 sm:w-52 sm:h-52 object-contain mx-auto" crossorigin="anonymous">
                         </div>
                     </div>
 
@@ -278,53 +275,47 @@
                     </div>
                 </div>
 
-                <!-- 1-Tap Direct UPI App Launcher Grid (Customer Feature #6) -->
-                <div class="mt-6">
-                    <div class="flex items-center justify-between mb-2.5">
-                        <span data-i18n="payWithApp" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">1-Tap Instant UPI App Launch</span>
-                        <span class="text-[10px] font-bold text-emerald-600">0% Surcharge</span>
-                    </div>
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                        <a id="app-phonepe" href="phonepe://pay?<%=upiParams%>" class="p-2.5 rounded-2xl border border-purple-200 bg-purple-50/60 hover:bg-purple-100 flex flex-col items-center gap-1 text-center transition">
-                            <span class="w-7 h-7 rounded-xl bg-[#5f259f] text-white font-black text-xs flex items-center justify-center">Pe</span>
-                            <span class="text-[10px] font-extrabold text-slate-800">PhonePe</span>
-                        </a>
-                        <a id="app-gpay" href="tez://upi/pay?<%=upiParams%>" class="p-2.5 rounded-2xl border border-blue-200 bg-blue-50/50 hover:bg-blue-100 flex flex-col items-center gap-1 text-center transition">
-                            <span class="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center">G</span>
-                            <span class="text-[10px] font-extrabold text-slate-800">GPay</span>
-                        </a>
-                        <a id="app-paytm" href="paytmmp://pay?<%=upiParams%>" class="p-2.5 rounded-2xl border border-sky-200 bg-sky-50/50 hover:bg-sky-100 flex flex-col items-center gap-1 text-center transition">
-                            <span class="w-7 h-7 rounded-xl bg-sky-500 text-white font-black text-xs flex items-center justify-center">P</span>
-                            <span class="text-[10px] font-extrabold text-slate-800">Paytm</span>
-                        </a>
-                        <a id="app-bhim" href="bhim://pay?<%=upiParams%>" class="p-2.5 rounded-2xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100 flex flex-col items-center gap-1 text-center transition">
-                            <span class="w-7 h-7 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center">B</span>
-                            <span class="text-[10px] font-extrabold text-slate-800">BHIM</span>
-                        </a>
-                        <a id="app-cred" href="credpay://upi/pay?<%=upiParams%>" class="p-2.5 rounded-2xl border border-slate-300 bg-slate-100/70 hover:bg-slate-200 flex flex-col items-center gap-1 text-center transition">
-                            <span class="w-7 h-7 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center">C</span>
-                            <span class="text-[10px] font-extrabold text-slate-800">CRED</span>
-                        </a>
-                        <a id="app-any" href="<%=intent%>" class="p-2.5 rounded-2xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 flex flex-col items-center gap-1 text-center transition">
-                            <span class="w-7 h-7 rounded-xl bg-amber-500 text-white font-black text-xs flex items-center justify-center">UPI</span>
-                            <span class="text-[10px] font-extrabold text-slate-800">Any App</span>
-                        </a>
+                <!-- Supported UPI Apps Small Logos Strip (No Intent Launch Buttons) -->
+                <div class="mt-6 pt-4 border-t border-slate-200/60 text-center">
+                    <span data-i18n="supportedApps" class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block mb-2.5">Supported UPI Applications</span>
+                    <div class="flex flex-wrap items-center justify-center gap-2.5">
+                        <!-- GPay Small Logo Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                            <span class="text-[11px] font-extrabold text-slate-700">GPay</span>
+                        </div>
+                        <!-- PhonePe Small Logo Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
+                            <span class="w-4 h-4 rounded-md bg-[#5f259f] text-white text-[9px] font-black flex items-center justify-center shrink-0">पे</span>
+                            <span class="text-[11px] font-extrabold text-slate-700">PhonePe</span>
+                        </div>
+                        <!-- Paytm Small Logo Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
+                            <span class="w-4 h-4 rounded-md bg-[#00baf2] text-white text-[9px] font-black flex items-center justify-center shrink-0">P</span>
+                            <span class="text-[11px] font-extrabold text-slate-700">Paytm</span>
+                        </div>
+                        <!-- BHIM Small Logo Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
+                            <span class="w-4 h-4 rounded-md bg-emerald-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">B</span>
+                            <span class="text-[11px] font-extrabold text-slate-700">BHIM</span>
+                        </div>
+                        <!-- CRED / Amazon Pay Small Logo Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
+                            <span class="w-4 h-4 rounded-md bg-amber-500 text-white text-[9px] font-black flex items-center justify-center shrink-0">A</span>
+                            <span class="text-[11px] font-extrabold text-slate-700">Amazon Pay</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Manual 12-Digit UTR Instant Verification Bar (Customer Feature #7) -->
-                <div class="mt-6 pt-4 border-t border-slate-200/70">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-[11px] font-extrabold text-slate-600">Already Paid? Submit 12-Digit Bank UTR for Instant Check</label>
-                        <span class="text-[10px] font-mono text-slate-400">Zero Reload</span>
+                <!-- Raise Dispute / Submit UTR with Screenshot Callout -->
+                <div class="mt-6 pt-4 border-t border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-extrabold text-slate-700">Paid but waiting for confirmation?</p>
+                        <p class="text-[11px] text-slate-500">Upload your payment screenshot, 12-digit UTR & query for Admin verification.</p>
                     </div>
-                    <form onsubmit="CheckoutApp.submitUtr(event)" class="flex gap-2">
-                        <input type="text" id="manual-utr-input" maxlength="12" pattern="\d{12}" placeholder="Enter 12-digit UPI Ref / UTR No."
-                            class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/80 text-xs font-mono font-bold text-slate-900 outline-none focus:border-[#5f259f]">
-                        <button type="submit" class="theme-btn-primary px-4 py-2.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">
-                            Verify UTR
-                        </button>
-                    </form>
+                    <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', true)" class="theme-btn-primary px-4 py-2.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">
+                        Upload Screenshot & UTR
+                    </button>
                 </div>
             </div>
 
@@ -332,19 +323,19 @@
             <div class="lg:col-span-5 p-5 sm:p-7 bg-slate-50/60 flex flex-col justify-between space-y-5">
 
                 <div class="space-y-5">
-                    <!-- 1. Promo Code / Discount Coupon Widget (Customer Feature #3) -->
+                    <!-- 1. Promo Code / Discount Coupon Widget -->
                     <% if (cfg.enableCoupons !== false) { %>
                     <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2.5">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
                                 <span>🏷️ Apply Promo / Offer Code</span>
                             </span>
-                            <button type="button" onclick="CheckoutApp.quickFillCoupon('PHONEPE10')" class="text-[10px] font-extrabold text-[#5f259f] hover:underline cursor-pointer">
-                                Try PHONEPE10
+                            <button type="button" onclick="CheckoutApp.quickFillCoupon('UPAY10')" class="text-[10px] font-extrabold text-[#5f259f] hover:underline cursor-pointer">
+                                Try UPAY10
                             </button>
                         </div>
                         <form onsubmit="CheckoutApp.applyPromo(event)" class="flex gap-2">
-                            <input type="text" id="coupon-input" value="<%=couponCode || ''%>" placeholder="e.g. PHONEPE10 or UPAY20"
+                            <input type="text" id="coupon-input" value="<%=couponCode || ''%>" placeholder="e.g. UPAY10 or UPAY20"
                                 class="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs font-extrabold uppercase mono text-slate-900 outline-none focus:border-[#5f259f]">
                             <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold cursor-pointer">
                                 Apply
@@ -356,7 +347,7 @@
                     </div>
                     <% } %>
 
-                    <!-- 2. Add Gratitude Tip / Support Widget (Customer Feature #4) -->
+                    <!-- 2. Add Gratitude Tip / Support Widget -->
                     <% if (cfg.enableTips !== false) { %>
                     <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2.5">
                         <div class="flex items-center justify-between">
@@ -374,7 +365,7 @@
                     </div>
                     <% } %>
 
-                    <!-- 3. Split Bill Calculator Widget (Customer Feature #5) -->
+                    <!-- 3. Split Bill Calculator Widget -->
                     <% if (cfg.enableSplitBill !== false) { %>
                     <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2.5">
                         <div class="flex items-center justify-between">
@@ -391,7 +382,7 @@
                     </div>
                     <% } %>
 
-                    <!-- 4. Payer Info, Custom Note & Email Receipt Card (Customer Feature #9) -->
+                    <!-- 4. Payer Info, Custom Note & Email Receipt Card -->
                     <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-extrabold text-slate-800">📩 Payer Details & Digital Receipt</span>
@@ -410,18 +401,18 @@
                     </div>
                 </div>
 
-                <!-- Bottom Action Bar: Receipt Download, Rating & Dispute Help (Customer Feature #12) -->
+                <!-- Bottom Action Bar: Receipt Download, Rating & Dispute Help -->
                 <div class="pt-4 border-t border-slate-200/80 space-y-2.5">
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" onclick="CheckoutApp.toggleModal('feedback-modal', true)" class="py-2.5 px-3 rounded-xl bg-white border border-slate-200 hover:border-purple-300 text-slate-700 text-[11px] font-extrabold transition cursor-pointer flex items-center justify-center gap-1">
                             <span>⭐ Rate Checkout</span>
                         </button>
                         <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', true)" class="py-2.5 px-3 rounded-xl bg-white border border-slate-200 hover:border-rose-300 text-slate-700 text-[11px] font-extrabold transition cursor-pointer flex items-center justify-center gap-1">
-                            <span>🛡️ Report Issue</span>
+                            <span>🛡️ Raise Dispute</span>
                         </button>
                     </div>
                     <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold px-1">
-                        <span>🔒 PCI-DSS & NPCI UPI 2.0 Compliant</span>
+                        <span>🔒 UPay 2.0 • 256-Bit Encrypted</span>
                         <button type="button" onclick="CheckoutApp.downloadReceiptSummary()" class="text-[#5f259f] font-extrabold hover:underline cursor-pointer">Download Summary</button>
                     </div>
                 </div>
@@ -430,7 +421,7 @@
         </div>
 
         <!-- ============================================================= -->
-        <!-- OVERLAYS: SUCCESS / TIMEOUT (ZERO RELOAD) / FAILED            -->
+        <!-- OVERLAYS: SUCCESS / TIMEOUT (ONLY WHEN TIMER EXPIRES)         -->
         <!-- ============================================================= -->
         <div id="popup-overlay" class="hidden absolute inset-0 bg-slate-950/75 backdrop-blur-md z-50 flex items-center justify-center p-5" role="dialog" aria-modal="true">
 
@@ -442,45 +433,33 @@
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-900">Payment Successful!</h3>
                 <p class="text-3xl font-black text-slate-900 mt-2 tabular-nums">&#8377;<span id="success-amount">0.00</span></p>
-                <p class="text-slate-500 text-xs mt-2">Verified by PhonePe UPI Node. Redirecting to <%=company%>…</p>
+                <p class="text-slate-500 text-xs mt-2">Verified by UPay 2.0 Node. Redirecting to <%=company%>…</p>
                 <p class="text-slate-600 text-xs mt-3 bg-slate-100 py-1.5 px-3 rounded-xl inline-block"><b>UTR:</b> <span id="utr" class="mono font-bold"></span></p>
                 <div id="redirect-bar" class="redirect-bar mt-5"><span></span></div>
             </div>
 
-            <!-- Timeout Popup (Zero Page Reload - Calls API to Extend!) -->
+            <!-- Timeout Popup (Shown ONLY when the 5-minute countdown expires) -->
             <div id="timeout-popup" class="hidden popup-in bg-white rounded-3xl p-7 text-center w-full max-w-sm shadow-2xl text-slate-900">
                 <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-2xl font-black">
                     ⏳
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-900">QR Session Timed Out</h3>
-                <p class="text-slate-500 text-xs mt-2">Click below to generate a fresh QR code and extend your session by 5 minutes without reloading the page.</p>
+                <p class="text-slate-500 text-xs mt-2">The 5-minute countdown has ended. Click below to generate a fresh QR code and extend your session without reloading the page.</p>
                 <button type="button" onclick="CheckoutApp.refreshQrSession()" class="mt-5 w-full py-3.5 theme-btn-primary rounded-2xl font-extrabold text-xs cursor-pointer">
                     Generate Fresh QR (No Reload)
-                </button>
-            </div>
-
-            <!-- Failed Popup (Zero Page Reload Retry) -->
-            <div id="failed-popup" class="hidden popup-in bg-white rounded-3xl p-7 text-center w-full max-w-sm shadow-2xl text-slate-900">
-                <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-2xl font-black">
-                    !
-                </div>
-                <h3 class="text-xl font-extrabold text-slate-900">Payment Not Completed</h3>
-                <p id="failed-message" class="text-slate-500 text-xs mt-2">Transaction was declined or cancelled.</p>
-                <button type="button" onclick="CheckoutApp.refreshQrSession()" class="mt-5 w-full py-3.5 bg-slate-900 text-white rounded-2xl font-extrabold text-xs cursor-pointer">
-                    Retry with Fresh QR
                 </button>
             </div>
         </div>
     </main>
 
     <!-- ================================================================= -->
-    <!-- MODAL 1: CUSTOM THEME STUDIO DRAWER (Customer Feature #2)         -->
+    <!-- MODAL 1: CUSTOM THEME STUDIO DRAWER                               -->
     <!-- ================================================================= -->
     <div id="custom-theme-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 popup-in">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#5f259f]">Live Theme Customizer</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#5f259f]">UPay 2.0 Theme Customizer</span>
                     <h3 class="text-base font-extrabold">Customize Payment Page Theme</h3>
                 </div>
                 <button type="button" onclick="CheckoutApp.toggleModal('custom-theme-modal', false)" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold cursor-pointer">&times;</button>
@@ -511,15 +490,15 @@
                     <label class="font-bold text-slate-600 block mb-1">Corner Roundness</label>
                     <select id="user-color-radius" onchange="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 px-2 font-bold">
                         <option value="14px">Sharp (14px)</option>
-                        <option value="24px" selected>PhonePe (24px)</option>
+                        <option value="24px" selected>UPay 2.0 (24px)</option>
                         <option value="34px">Super Rounded (34px)</option>
                     </select>
                 </div>
             </div>
 
             <div class="flex gap-2 pt-2">
-                <button type="button" onclick="CheckoutApp.applyTheme('phonepe'); CheckoutApp.toggleModal('custom-theme-modal', false)" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs cursor-pointer">
-                    Reset to PhonePe
+                <button type="button" onclick="CheckoutApp.applyTheme('upay2'); CheckoutApp.toggleModal('custom-theme-modal', false)" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs cursor-pointer">
+                    Reset to Default
                 </button>
                 <button type="button" onclick="CheckoutApp.saveCustomTheme()" class="flex-1 py-3 rounded-xl theme-btn-primary font-extrabold text-xs cursor-pointer">
                     Save My Theme
@@ -529,7 +508,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL 2: EDIT PAYER DETAILS & CUSTOM NOTE (Customer Feature #9)   -->
+    <!-- MODAL 2: EDIT PAYER DETAILS & CUSTOM NOTE                         -->
     <!-- ================================================================= -->
     <div id="payer-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 popup-in">
@@ -562,12 +541,12 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL 3: RATE CHECKOUT EXPERIENCE (Customer Feature #12a)         -->
+    <!-- MODAL 3: RATE CHECKOUT EXPERIENCE                                 -->
     <!-- ================================================================= -->
     <div id="feedback-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 popup-in text-center">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-base font-extrabold">Rate Checkout Experience</h3>
+                <h3 class="text-base font-extrabold">Rate UPay 2.0 Checkout</h3>
                 <button type="button" onclick="CheckoutApp.toggleModal('feedback-modal', false)" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold cursor-pointer">&times;</button>
             </div>
             <div class="flex justify-center gap-2 text-2xl py-2" id="star-selector">
@@ -575,7 +554,7 @@
                 <button type="button" onclick="CheckoutApp.setRating(<%=s%>)" data-star="<%=s%>" class="star-btn text-amber-400 hover:scale-125 transition cursor-pointer">★</button>
                 <% }) %>
             </div>
-            <input type="text" id="feedback-comment" placeholder="What did you like about UPay Checkout?" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold">
+            <input type="text" id="feedback-comment" placeholder="What did you like about UPay 2.0?" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold">
             <button type="button" onclick="CheckoutApp.submitFeedback()" class="w-full py-3 rounded-xl theme-btn-primary font-extrabold text-xs cursor-pointer">
                 Submit Rating
             </button>
@@ -583,28 +562,38 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL 4: REPORT ISSUE / DISPUTE TICKET (Customer Feature #12b)    -->
+    <!-- MODAL 4: RAISE DISPUTE WITH SCREENSHOT + UTR + QUERY              -->
     <!-- ================================================================= -->
     <div id="dispute-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 popup-in">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase text-rose-600">Merchant Resolution Desk</span>
-                    <h3 class="text-base font-extrabold">Report Payment Issue / Dispute</h3>
+                    <span class="text-[10px] font-extrabold uppercase text-rose-600">Manual Admin Verification Desk</span>
+                    <h3 class="text-base font-extrabold">Raise Dispute / Submit Payment Proof</h3>
                 </div>
                 <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', false)" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold cursor-pointer">&times;</button>
             </div>
             <form onsubmit="CheckoutApp.submitDispute(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="font-bold text-slate-600">12-Digit Bank UTR (If money was deducted)</label>
-                    <input type="text" id="dispute-utr" placeholder="Optional 12-digit UTR" class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 mono font-semibold">
+                    <label class="font-bold text-slate-600">12-Digit Bank UTR / UPI Reference Number *</label>
+                    <input type="text" id="dispute-utr" required maxlength="12" pattern="\d{12}" placeholder="Enter 12-digit numeric UTR (e.g. 412890123456)" class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 mono font-semibold">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-600">Describe Issue</label>
-                    <textarea id="dispute-reason" required rows="3" placeholder="e.g. Amount debited from PhonePe but order still showing pending..." class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold"></textarea>
+                    <label class="font-bold text-slate-600">Upload Payment Screenshot *</label>
+                    <input type="file" id="dispute-screenshot-file" accept="image/*" required onchange="CheckoutApp.previewDisputeScreenshot(event)" class="w-full mt-1 px-3 py-2 rounded-xl border border-dashed border-purple-300 bg-purple-50/40 text-xs font-semibold cursor-pointer">
+                    <div id="dispute-screenshot-preview-wrap" class="hidden mt-2 p-2 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                        <img id="dispute-screenshot-preview" src="" alt="Screenshot Preview" class="max-h-32 mx-auto rounded-lg object-contain">
+                    </div>
                 </div>
+                <div>
+                    <label class="font-bold text-slate-600">Your Query / Issue Details *</label>
+                    <textarea id="dispute-reason" required rows="3" placeholder="Describe your query (e.g. Paid via UPI app, amount deducted, please verify attached screenshot and UTR)..." class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold"></textarea>
+                </div>
+                <p class="text-[11px] text-slate-500 bg-amber-50 border border-amber-200/70 p-2.5 rounded-xl">
+                    Note: Disputes are reviewed manually by the Merchant Admin before settlement approval.
+                </p>
                 <button type="submit" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs cursor-pointer">
-                    Submit Priority Ticket
+                    Submit Screenshot, UTR & Query to Admin
                 </button>
             </form>
         </div>
@@ -612,7 +601,7 @@
 
     <script>
         const THEME_PRESETS = {
-            phonepe: {
+            upay2: {
                 primary: '#5f259f',
                 secondary: '#7c3aed',
                 bg: 'radial-gradient(circle at top center, #ede9fe 0%, #f5f0ff 55%, #f8fafc 100%)',
@@ -681,21 +670,21 @@
         const I18N_DICT = {
             en: {
                 totalPayable: "Total Payable",
-                scanPrompt: "Scan QR or Tap Any UPI App",
+                scanPrompt: "Scan QR with Any UPI App to Pay",
                 downloadQr: "Save QR",
-                payWithApp: "1-Tap Instant UPI App Launch"
+                supportedApps: "Supported UPI Applications"
             },
             hi: {
                 totalPayable: "कुल देय राशि",
-                scanPrompt: "QR स्कैन करें या किसी भी UPI ऐप पर टैप करें",
+                scanPrompt: "भुगतान करने के लिए किसी भी UPI ऐप से QR स्कैन करें",
                 downloadQr: "QR सेव करें",
-                payWithApp: "1-टैप में UPI ऐप से भुगतान करें"
+                supportedApps: "समर्थित UPI ऐप्स"
             },
             hinglish: {
                 totalPayable: "Total Payable Amount",
-                scanPrompt: "QR Scan karein ya UPI App tap karein",
+                scanPrompt: "Kisi bhi UPI App se QR Scan karke Pay karein",
                 downloadQr: "Download QR",
-                payWithApp: "Direct UPI App se Pay karein"
+                supportedApps: "Supported UPI Apps"
             }
         };
 
@@ -712,11 +701,11 @@
                 pollTimer: null,
                 countdownTimer: null,
                 rating: 5,
-                currentTheme: "<%=initTheme%>"
+                currentTheme: "<%=initTheme%>",
+                disputeScreenshotBase64: ""
             },
 
             init() {
-                // Restore saved theme or merchant default theme
                 let savedTheme = this.state.currentTheme;
                 try {
                     const localTheme = localStorage.getItem('upay_checkout_theme');
@@ -735,7 +724,8 @@
             },
 
             applyTheme(themeKey, persist = true) {
-                const t = THEME_PRESETS[themeKey] || THEME_PRESETS.phonepe;
+                const normalizedKey = themeKey === 'phonepe' ? 'upay2' : themeKey;
+                const t = THEME_PRESETS[normalizedKey] || THEME_PRESETS.upay2;
                 const root = document.documentElement;
                 root.style.setProperty('--theme-primary', t.primary);
                 root.style.setProperty('--theme-secondary', t.secondary);
@@ -744,16 +734,16 @@
                 root.style.setProperty('--theme-text', t.text);
                 root.style.setProperty('--theme-radius', t.radius || '24px');
 
-                this.state.currentTheme = themeKey;
+                this.state.currentTheme = normalizedKey;
                 if (persist) {
-                    try { localStorage.setItem('upay_checkout_theme', themeKey); } catch (e) {}
+                    try { localStorage.setItem('upay_checkout_theme', normalizedKey); } catch (e) {}
                     fetch(`/pay/api/${this.state.tid}/theme`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ theme: themeKey }),
+                        body: JSON.stringify({ theme: normalizedKey }),
                         silent: true
                     }).catch(() => {});
-                    this.toast(`Theme switched to ${themeKey.toUpperCase()}`);
+                    this.toast(`Theme switched to ${normalizedKey.toUpperCase()}`);
                 }
             },
 
@@ -819,15 +809,6 @@
                 }
                 if (data.qrDataUrl) {
                     document.getElementById('qr-image').src = data.qrDataUrl;
-                }
-                if (data.upiParams) {
-                    const p = data.upiParams;
-                    document.getElementById('app-phonepe').href = `phonepe://pay?${p}`;
-                    document.getElementById('app-gpay').href = `tez://upi/pay?${p}`;
-                    document.getElementById('app-paytm').href = `paytmmp://pay?${p}`;
-                    document.getElementById('app-bhim').href = `bhim://pay?${p}`;
-                    document.getElementById('app-cred').href = `credpay://upi/pay?${p}`;
-                    document.getElementById('app-any').href = `upi://pay?${p}`;
                 }
             },
 
@@ -896,24 +877,47 @@
             shareSplitBill() {
                 const n = Number(document.getElementById('split-slider')?.value || 2);
                 const share = (this.state.amount / n).toFixed(2);
-                const text = `Hey! Let's split the ₹${this.state.amount} payment to <%=company%> (${n} ways = ₹${share} each). Pay securely via UPay: ${window.location.href}`;
+                const text = `Hey! Let's split the ₹${this.state.amount} payment to <%=company%> (${n} ways = ₹${share} each). Pay securely via UPay 2.0: ${window.location.href}`;
                 this.copyText(text, `Split Bill summary (₹${share}/person) copied!`);
             },
 
-            async submitUtr(e) {
+            previewDisputeScreenshot(event) {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.state.disputeScreenshotBase64 = e.target.result;
+                    const img = document.getElementById('dispute-screenshot-preview');
+                    const wrap = document.getElementById('dispute-screenshot-preview-wrap');
+                    if (img && wrap) {
+                        img.src = e.target.result;
+                        wrap.classList.remove('hidden');
+                    }
+                };
+                reader.readAsDataURL(file);
+            },
+
+            async submitDispute(e) {
                 e.preventDefault();
-                const utr = document.getElementById('manual-utr-input').value;
-                const res = await fetch(`/pay/api/${this.state.tid}/verify-utr`, {
+                const utr = document.getElementById('dispute-utr').value.trim();
+                const reason = document.getElementById('dispute-reason').value.trim();
+                const screenshot = this.state.disputeScreenshotBase64;
+                if (!/^\d{12}$/.test(utr)) {
+                    return this.toast('Please enter a valid 12-digit numeric UTR', true);
+                }
+                if (!screenshot) {
+                    return this.toast('Please upload your payment screenshot', true);
+                }
+
+                const res = await fetch(`/pay/api/${this.state.tid}/dispute`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ utr })
+                    body: JSON.stringify({ utr, reason, screenshot })
                 });
                 const data = await res.json();
                 if (data.status) {
+                    this.toggleModal('dispute-modal', false);
                     this.toast(data.message);
-                    if (data.state === 'SUCCESS') {
-                        this.handlePaymentVerified(data.utr);
-                    }
                 } else {
                     this.toast(data.message, true);
                 }
@@ -985,28 +989,10 @@
                 this.toast(data.message || 'Feedback submitted!');
             },
 
-            async submitDispute(e) {
-                e.preventDefault();
-                const utr = document.getElementById('dispute-utr').value;
-                const reason = document.getElementById('dispute-reason').value;
-                const res = await fetch(`/pay/api/${this.state.tid}/dispute`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ utr, reason })
-                });
-                const data = await res.json();
-                if (data.status) {
-                    this.toggleModal('dispute-modal', false);
-                    this.toast(data.message);
-                } else {
-                    this.toast(data.message, true);
-                }
-            },
-
             downloadReceiptSummary() {
                 const receiptText = [
                     "==========================================",
-                    "       UPAY PHONEPE VERIFIED SUMMARY      ",
+                    "        UPAY 2.0 VERIFIED SUMMARY         ",
                     "==========================================",
                     `Merchant     : <%=company%>`,
                     `Order ID     : #${this.state.tid}`,
@@ -1019,7 +1005,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `UPay_Order_${this.state.tid}.txt`;
+                a.download = `UPay2_Order_${this.state.tid}.txt`;
                 a.click();
                 URL.revokeObjectURL(url);
                 this.toast('Order Summary Downloaded!');
@@ -1048,7 +1034,7 @@
             },
 
             showPopup(type) {
-                ['timeout-popup', 'success-popup', 'failed-popup'].forEach(id => {
+                ['timeout-popup', 'success-popup'].forEach(id => {
                     document.getElementById(id)?.classList.add('hidden');
                 });
                 document.getElementById('popup-overlay').classList.remove('hidden');
@@ -1060,7 +1046,6 @@
                 this.stopPolling();
                 document.getElementById('utr').innerText = utr || 'VERIFIED';
                 this.showPopup('success');
-                // Voice announcement intentionally removed per user request
                 setTimeout(() => {
                     location.href = "<%=redirect%>";
                 }, 3400);
@@ -1090,7 +1075,7 @@
 
             async downloadQR() {
                 const img = document.getElementById('qr-image');
-                const fileName = `UPay_QR_${this.state.tid}.png`;
+                const fileName = `UPay2_QR_${this.state.tid}.png`;
                 try {
                     const response = await fetch(img.src, { silent: true });
                     const blob = await response.blob();
@@ -1111,8 +1096,9 @@
                 }
             },
 
+            // Continuous Polling until Countdown Timer Expires (Never expires QR on Invalid Order ID)
             async checkPaymentStatus() {
-                if (this.state.isPollingStopped) return;
+                if (this.state.isPollingStopped || this.state.timeInSeconds <= 0) return;
                 try {
                     const response = await fetch(`/pay/status/${this.state.tid}`, { silent: true });
                     const data = await response.json();
@@ -1121,15 +1107,11 @@
                         this.handlePaymentVerified(data.utr);
                         return;
                     }
-                    if (data.state === "FAILED") {
-                        this.stopPolling();
-                        document.getElementById("failed-message").innerText = data.message || "Payment was rejected or cancelled.";
-                        this.showPopup("failed");
-                        return;
-                    }
+                    // For any other state (including PENDING or Invalid Order ID from Paytm),
+                    // continue polling silently until timeInSeconds reaches 0.
                 } catch (e) {}
 
-                if (!this.state.isPollingStopped) {
+                if (!this.state.isPollingStopped && this.state.timeInSeconds > 0) {
                     this.state.pollTimer = setTimeout(() => this.checkPaymentStatus(), 3000);
                 }
             },

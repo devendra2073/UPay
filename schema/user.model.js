@@ -18,6 +18,7 @@ const paymentLinkSchema = new Schema({
   description: { type: String, default: "" },
   orderId: { type: String },
   url: { type: String },
+  redirect: { type: String, default: "/pay/thanks" },
   active: { type: Boolean, default: true },
   clicks: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
@@ -127,9 +128,9 @@ const userSchema = new Schema({
     fallbackUPI: String,
     autoFailover: { type: Boolean, default: true }
   },
-  // New Admin & Checkout Theme Configuration
+  // UPay 2.0 Admin & Checkout Theme Configuration
   checkoutConfig: {
-    defaultTheme: { type: String, default: "phonepe" },
+    defaultTheme: { type: String, default: "upay2" },
     allowCustomerThemeChange: { type: Boolean, default: true },
     allowCustomTheme: { type: Boolean, default: true },
     customTheme: {
@@ -140,7 +141,7 @@ const userSchema = new Schema({
       text: { type: String, default: "#0f172a" },
       radius: { type: String, default: "24px" }
     },
-    tagline: { type: String, default: "100% Safe & Instant UPI Checkout" },
+    tagline: { type: String, default: "UPay 2.0 • 100% Safe & Instant UPI Checkout" },
     enableTips: { type: Boolean, default: true },
     enableCoupons: { type: Boolean, default: true },
     enableSplitBill: { type: Boolean, default: true },
@@ -149,7 +150,6 @@ const userSchema = new Schema({
     supportEmail: { type: String, default: "" },
     supportWhatsapp: { type: String, default: "" }
   },
-  // Security & Operational Controls
   securityConfig: {
     maintenanceMode: { type: Boolean, default: false },
     ipWhitelist: { type: String, default: "" },
@@ -161,7 +161,7 @@ const userSchema = new Schema({
   coupons: {
     type: [couponSchema],
     default: [
-      { code: "PHONEPE10", type: "PERCENT", value: 10, minOrder: 50, maxDiscount: 200, active: true },
+      { code: "UPAY10", type: "PERCENT", value: 10, minOrder: 50, maxDiscount: 200, active: true },
       { code: "UPAYFLAT25", type: "FLAT", value: 25, minOrder: 100, maxDiscount: 25, active: true }
     ]
   },

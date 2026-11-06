@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%- include('partials/seo', {
-        pageTitle: 'UPay Business Login & Merchant Onboarding | PhonePe-Style UPI Gateway',
-        pageDesc: 'Sign in or create your UPay Business account to accept 0% fee instant UPI payments with dynamic QR codes, 7+ checkout themes, and signed HMAC webhooks.',
+        pageTitle: 'UPay 2.0 Business Login & Merchant Onboarding | Direct UPI Gateway',
+        pageDesc: 'Sign in or create your UPay 2.0 Business account to accept 0% fee instant UPI payments with dynamic QR codes, 7+ checkout themes, and signed HMAC webhooks.',
         canonicalUrl: 'https://u-pay-seven.vercel.app/user/login'
     }) %>
     <script src="/js/money-loader.js"></script>
@@ -36,8 +36,8 @@
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#5f259f] to-[#7c3aed] text-white font-black text-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-300">
                 &#8377;
             </div>
-            <span class="px-3 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase tracking-wider">PhonePe Business Rail</span>
-            <h1 class="text-2xl font-extrabold text-slate-900 mt-2" id="page-title">Welcome Back to UPay</h1>
+            <span class="px-3 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase tracking-wider">UPay 2.0 Business Rail</span>
+            <h1 class="text-2xl font-extrabold text-slate-900 mt-2" id="page-title">Welcome Back to UPay 2.0</h1>
             <p class="text-slate-500 text-xs font-medium mt-1" id="page-subtitle">Sign in to manage your UPI terminal, themes, and instant payouts.</p>
         </div>
 
@@ -64,7 +64,7 @@
                     <a href="/user/forgot-password" class="text-[#5f259f] font-extrabold hover:underline">Forgot password?</a>
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white font-extrabold py-3.5 rounded-xl hover:opacity-95 transition shadow-lg shadow-purple-200 active:scale-[0.98] flex items-center justify-center text-sm cursor-pointer">
-                    <span>Sign In to Merchant Hub</span>
+                    <span>Sign In to UPay 2.0 Hub</span>
                 </button>
             </form>
 
@@ -108,7 +108,7 @@
         </div>
 
         <p class="text-center mt-6 text-slate-600 text-xs font-semibold">
-            <span id="toggle-text">New to UPay Business?</span>
+            <span id="toggle-text">New to UPay 2.0?</span>
             <button id="toggle-btn" class="text-[#5f259f] font-extrabold hover:underline ml-1 cursor-pointer">Create Merchant Account</button>
         </p>
     </div>
@@ -147,12 +147,12 @@
             if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
 
             if (isLogin) {
-                pageTitle.innerText = "Welcome Back to UPay";
+                pageTitle.innerText = "Welcome Back to UPay 2.0";
                 pageSubtitle.innerText = "Sign in to manage your UPI terminal, themes, and instant payouts.";
-                toggleText.innerText = "New to UPay Business?";
+                toggleText.innerText = "New to UPay 2.0?";
                 toggleBtn.innerText = "Create Merchant Account";
             } else {
-                pageTitle.innerText = "Create Merchant Account";
+                pageTitle.innerText = "Create UPay 2.0 Account";
                 pageSubtitle.innerText = "Start accepting 0% fee direct-to-bank UPI payments in 60 seconds.";
                 toggleText.innerText = "Already registered?";
                 toggleBtn.innerText = "Sign in";

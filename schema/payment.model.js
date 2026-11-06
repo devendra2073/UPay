@@ -116,7 +116,7 @@ const paymentSchema = new Schema({
   },
   selectedTheme: {
     type: String,
-    default: "phonepe"
+    default: "upay2"
   },
   feedback: {
     rating: { type: Number, default: 0 },
@@ -125,7 +125,9 @@ const paymentSchema = new Schema({
   },
   dispute: {
     raised: { type: Boolean, default: false },
+    utr: { type: String, default: "" },
     reason: { type: String, default: "" },
+    screenshot: { type: String, default: "" },
     status: { type: String, enum: ["NONE", "OPEN", "RESOLVED", "REFUNDED", "REJECTED"], default: "NONE" },
     adminNote: { type: String, default: "" },
     createdAt: { type: Date }

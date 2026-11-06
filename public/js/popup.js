@@ -11,14 +11,14 @@ class UPayDeposit {
     this.overlay.innerHTML = `
       <div class="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden border border-purple-100 transform transition-all">
         <div class="bg-gradient-to-r from-[#5f259f] via-[#6d28d9] to-[#4c1d95] p-6 text-white relative">
-          <button id="close-upay" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition">
+          <button id="close-upay" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
           <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] uppercase tracking-widest font-bold mb-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            PhonePe Instant Collect
+            UPay 2.0 Instant Collect (Redirects to /pay/thanks)
           </div>
           <h2 class="text-xl font-extrabold tracking-tight">Create Collect Order / Add Liquidity</h2>
         </div>
@@ -54,7 +54,7 @@ class UPayDeposit {
           </div>
 
           <button id="upay-confirm" type="button" class="w-full bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white py-4 rounded-2xl font-extrabold text-sm shadow-lg shadow-purple-200 hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
-            <span>Generate Instant UPI Checkout</span>
+            <span>Generate UPay 2.0 Checkout</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
             </svg>
@@ -64,7 +64,7 @@ class UPayDeposit {
         <div id="upay-qr-stage" class="hidden p-6 text-center space-y-4">
           <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-            Order Ready — Scan or Share Link
+            UPay 2.0 Order Ready — Redirects to /pay/thanks
           </div>
           <div class="p-3 bg-white border-2 border-purple-100 rounded-2xl inline-block shadow-md">
             <img id="upay-modal-qr" src="" alt="UPI QR" class="w-44 h-44 mx-auto object-contain">
@@ -143,17 +143,17 @@ class UPayDeposit {
             }
           };
           if (window.Terminal) {
-            window.Terminal.notify("Order Created without Page Reload!");
+            window.Terminal.notify("Order Created (Redirects to /pay/thanks)!");
             window.Terminal.refreshHistory();
           }
         } else {
           if (window.Terminal) window.Terminal.notify(data.message || "Failed to create order", "warn");
           confirmBtn.disabled = false;
-          confirmBtn.innerHTML = `<span>Generate Instant UPI Checkout</span>`;
+          confirmBtn.innerHTML = `<span>Generate UPay 2.0 Checkout</span>`;
         }
       } catch (e) {
         confirmBtn.disabled = false;
-        confirmBtn.innerHTML = `<span>Generate Instant UPI Checkout</span>`;
+        confirmBtn.innerHTML = `<span>Generate UPay 2.0 Checkout</span>`;
       }
     };
   }

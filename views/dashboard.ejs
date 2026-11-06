@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <%- include('partials/seo', {
-        pageTitle: 'UPay Business Admin | PhonePe-Style UPI Merchant Dashboard & Theme Studio',
-        pageDesc: 'Manage instant UPI collections, customize checkout themes, create payment links, issue discount coupons, resolve disputes, and monitor real-time webhooks on UPay Business.',
+        pageTitle: 'UPay 2.0 Business Admin | UPI Merchant Dashboard & Theme Studio',
+        pageDesc: 'Manage instant UPI collections, customize checkout themes, create payment links, update merchant logo, resolve disputes with screenshots, and monitor webhooks on UPay 2.0.',
         canonicalUrl: 'https://u-pay-seven.vercel.app/user/dashboard',
         robotsMeta: 'noindex, nofollow'
     }) %>
@@ -120,29 +120,30 @@
       const cfg = user.checkoutConfig || {};
       const customTheme = cfg.customTheme || { primary: '#5f259f', secondary: '#7c3aed', surface: '#ffffff', background: '#f5f0ff', text: '#0f172a', radius: '24px' };
       const sec = user.securityConfig || { maintenanceMode: false, ipWhitelist: '', minOrderAmount: 1, maxOrderAmount: 100000, autoSettleEnabled: false, autoSettleThreshold: 5000 };
+      const curDefaultTheme = (cfg.defaultTheme === 'phonepe' || !cfg.defaultTheme) ? 'upay2' : cfg.defaultTheme;
     %>
 
     <div class="flex h-screen w-full">
 
-        <!-- PhonePe Business Desktop Sidebar -->
+        <!-- UPay 2.0 Desktop Sidebar -->
         <aside class="hidden lg:flex w-72 flex-col bg-white border-r border-purple-100 p-5 shrink-0">
-            <!-- PhonePe Brand Header -->
+            <!-- UPay 2.0 Brand Header -->
             <div class="flex items-center justify-between px-3 py-2 mb-6 rounded-2xl bg-purple-50/70 border border-purple-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-[#5f259f] flex items-center justify-center text-white font-black text-xl shadow-md shadow-purple-200">
-                        &#8377;
+                    <div class="w-10 h-10 rounded-2xl bg-[#5f259f] flex items-center justify-center text-white font-black text-xl shadow-md shadow-purple-200 overflow-hidden">
+                        <img id="sidebar-brand-logo" src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${encodeURIComponent(user.company || user.firstname)}&background=5f259f&color=fff&bold=true`%>" alt="Logo" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="text-base font-extrabold tracking-tight text-slate-900">UPay</span>
-                            <span class="text-[9px] uppercase font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-[#5f259f] text-white">Business</span>
+                            <span class="text-[9px] uppercase font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-[#5f259f] text-white">2.0</span>
                         </div>
                         <p class="text-[11px] font-semibold text-purple-700 truncate max-w-[140px]"><%=user.company || 'Merchant Hub'%></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Navigation Links (8 Dedicated Modules) -->
+            <!-- Navigation Links -->
             <nav class="flex-1 space-y-1 overflow-y-auto no-scrollbar pr-1">
                 <p class="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">Core Payments</p>
                 <button onclick="Terminal.nav('overview')" data-nav="overview" class="nav-link active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
@@ -158,7 +159,7 @@
                 </button>
                 <button onclick="Terminal.nav('links')" data-nav="links" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                    <span>Payment Links & QR</span>
+                    <span>Payment Links & Details</span>
                 </button>
                 <button onclick="Terminal.nav('settlements')" data-nav="settlements" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
@@ -183,17 +184,17 @@
                 </button>
                 <button onclick="Terminal.nav('disputes')" data-nav="disputes" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    <span>Refunds & Disputes</span>
+                    <span>Disputes & Screenshots</span>
                 </button>
 
-                <p class="px-3 pt-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">Developer & Security</p>
+                <p class="px-3 pt-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">Developer & Brand</p>
                 <button onclick="Terminal.nav('developer')" data-nav="developer" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                     <span>API, Webhooks & Security</span>
                 </button>
                 <button onclick="Terminal.nav('profile')" data-nav="profile" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
-                    <span>Merchant & UPI Rails</span>
+                    <span>Logo, Profile & UPI Rails</span>
                 </button>
             </nav>
 
@@ -209,7 +210,7 @@
         <!-- Main Workspace Scroller -->
         <main id="view-scroller" class="flex-1 overflow-y-auto no-scrollbar relative pb-28 lg:pb-12">
 
-            <!-- Sticky PhonePe Top Bar -->
+            <!-- Sticky UPay 2.0 Top Bar -->
             <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md px-5 lg:px-10 py-3.5 flex items-center justify-between border-b border-purple-100">
                 <div class="flex items-center gap-3">
                     <div class="lg:hidden w-9 h-9 rounded-xl bg-[#5f259f] text-white flex items-center justify-center font-black">
@@ -219,7 +220,7 @@
                         <h1 id="view-title" class="text-base font-extrabold text-slate-900 tracking-tight">Home & Analytics</h1>
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[11px] text-slate-500 font-semibold">MID: <span class="mono font-bold text-[#5f259f]"><%=user.MID%></span> • Zero-Reload API Active</span>
+                            <span class="text-[11px] text-slate-500 font-semibold">UPay 2.0 • MID: <span class="mono font-bold text-[#5f259f]"><%=user.MID%></span></span>
                         </div>
                     </div>
                 </div>
@@ -228,8 +229,8 @@
                     <button onclick="openpop()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5f259f] font-extrabold text-xs transition cursor-pointer">
                         <span>+ Quick Collect</span>
                     </button>
-                    <button onclick="Terminal.nav('themes')" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-200 text-slate-700 hover:border-[#5f259f] font-bold text-xs transition cursor-pointer">
-                        <span>🎨 Theme Studio</span>
+                    <button onclick="Terminal.nav('profile')" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-200 text-slate-700 hover:border-[#5f259f] font-bold text-xs transition cursor-pointer">
+                        <span>🖼️ Change Logo</span>
                     </button>
                     <button onclick="Terminal.refreshAll(this)" title="Sync Dashboard Data" class="p-2.5 rounded-xl bg-white border border-purple-100 text-slate-600 hover:text-[#5f259f] transition cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -251,14 +252,14 @@
                 <section id="view-overview" class="tab-pane active space-y-6">
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                        <!-- PhonePe Purple Hero Settlement Card -->
+                        <!-- UPay 2.0 Purple Hero Settlement Card -->
                         <div class="lg:col-span-7 pp-hero-banner rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden flex flex-col justify-between">
                             <div class="absolute -right-10 -bottom-10 w-52 h-52 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
                             <div class="relative z-10">
                                 <div class="flex items-center justify-between">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-[11px] font-extrabold uppercase tracking-wider">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                        PhonePe Business Wallet
+                                        UPay 2.0 Merchant Wallet
                                     </span>
                                     <button onclick="Terminal.refreshBalance(this)" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer" title="Sync Wallet">
                                         <svg id="balance-refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -272,7 +273,7 @@
                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-xs font-bold">
                                         &#9650; 0% Commission Direct UPI
                                     </span>
-                                    <span class="text-xs text-purple-200">• Active Theme: <strong id="badge-active-theme" class="uppercase text-white"><%=cfg.defaultTheme || 'phonepe'%></strong></span>
+                                    <span class="text-xs text-purple-200">• Active Theme: <strong id="badge-active-theme" class="uppercase text-white"><%=curDefaultTheme%></strong></span>
                                 </div>
                             </div>
 
@@ -288,16 +289,15 @@
 
                         <!-- Right Quick Rail & KPI Grid -->
                         <div class="lg:col-span-5 space-y-4">
-                            <!-- UPI Rail Card (Opens Embedded Tab without Page Reload!) -->
                             <div class="pp-card p-5 flex items-center justify-between cursor-pointer" onclick="Terminal.nav('profile'); Terminal.subProfile('paytm')">
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] font-extrabold text-[#5f259f] uppercase tracking-wider">Active UPI Merchant Rail</span>
+                                        <span class="text-[10px] font-extrabold text-[#5f259f] uppercase tracking-wider">Active UPay 2.0 UPI Rail</span>
                                         <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold <%=user.paytm?.UPI ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'%>">
                                             <%=user.paytm?.UPI ? 'VERIFIED' : 'SETUP NEEDED'%>
                                         </span>
                                     </div>
-                                    <h4 class="text-sm font-extrabold text-slate-900" id="overview-upi-display"><%=user.paytm?.UPI || 'Click to link Paytm Business UPI'%></h4>
+                                    <h4 class="text-sm font-extrabold text-slate-900" id="overview-upi-display"><%=user.paytm?.UPI || 'Click to link Merchant UPI'%></h4>
                                     <p class="mono text-xs text-slate-500">MID: <%=user.paytm?.MID || 'Not Configured'%></p>
                                 </div>
                                 <div class="w-11 h-11 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#5f259f] font-extrabold">
@@ -310,7 +310,7 @@
                                 <div class="pp-card p-4">
                                     <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Conversion Rate</p>
                                     <p id="kpi-conversion" class="text-xl font-black text-emerald-600 mt-1">99.4%</p>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Direct Intent QR</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Dynamic QR Checkout</p>
                                 </div>
                                 <div class="pp-card p-4">
                                     <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Avg Order Ticket</p>
@@ -325,38 +325,38 @@
                                 <div class="pp-card p-4 cursor-pointer" onclick="Terminal.nav('links')">
                                     <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Payment Links</p>
                                     <p id="kpi-links-count" class="text-xl font-black text-slate-900 mt-1"><%=(user.paymentLinks || []).length%></p>
-                                    <p class="text-[11px] text-purple-600 font-semibold mt-0.5">Create Link &rarr;</p>
+                                    <p class="text-[11px] text-purple-600 font-semibold mt-0.5">Inspect Details &rarr;</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- PhonePe Quick Actions Grid -->
+                    <!-- UPay 2.0 Quick Actions Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                         <button onclick="openpop()" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
                             <div class="w-9 h-9 rounded-xl bg-purple-100 text-[#5f259f] flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">&#8377;</div>
                             <p class="text-xs font-extrabold text-slate-900">Quick Collect</p>
-                            <p class="text-[10px] text-slate-400">Generate dynamic QR</p>
+                            <p class="text-[10px] text-slate-400">Redirects /pay/thanks</p>
+                        </button>
+                        <button onclick="Terminal.nav('profile')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🖼️</div>
+                            <p class="text-xs font-extrabold text-slate-900">Change Logo</p>
+                            <p class="text-[10px] text-slate-400">Upload brand pic</p>
+                        </button>
+                        <button onclick="Terminal.nav('links')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🔗</div>
+                            <p class="text-xs font-extrabold text-slate-900">Payment Links</p>
+                            <p class="text-[10px] text-slate-400">View UTR & status</p>
                         </button>
                         <button onclick="Terminal.nav('themes')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
                             <div class="w-9 h-9 rounded-xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🎨</div>
                             <p class="text-xs font-extrabold text-slate-900">Theme Studio</p>
                             <p class="text-[10px] text-slate-400">7+ Themes & Custom</p>
                         </button>
-                        <button onclick="Terminal.nav('links')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🔗</div>
-                            <p class="text-xs font-extrabold text-slate-900">Payment Links</p>
-                            <p class="text-[10px] text-slate-400">Share on WhatsApp</p>
-                        </button>
-                        <button onclick="Terminal.nav('coupons')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🏷️</div>
-                            <p class="text-xs font-extrabold text-slate-900">Promo Codes</p>
-                            <p class="text-[10px] text-slate-400">Boost conversions</p>
-                        </button>
                         <button onclick="Terminal.nav('disputes')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
                             <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🛡️</div>
                             <p class="text-xs font-extrabold text-slate-900">Dispute Desk</p>
-                            <p class="text-[10px] text-slate-400">Refunds & UTR check</p>
+                            <p class="text-[10px] text-slate-400">Screenshots & UTRs</p>
                         </button>
                         <button onclick="Terminal.nav('developer')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
                             <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">⚡</div>
@@ -369,8 +369,8 @@
                     <div class="pp-card p-6">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
-                                <h3 class="text-sm font-extrabold text-slate-900">Settlement Volume & Velocity</h3>
-                                <p class="text-xs text-slate-400">Real-time UPI collection trend across PhonePe, GPay & Paytm</p>
+                                <h3 class="text-sm font-extrabold text-slate-900">UPay 2.0 Settlement Volume & Velocity</h3>
+                                <p class="text-xs text-slate-400">Real-time UPI collection trend across all supported UPI apps</p>
                             </div>
                             <div class="flex items-center gap-1.5 bg-purple-50 p-1 rounded-xl border border-purple-100">
                                 <button onclick="Terminal.loadAnalytics('7D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#5f259f] text-white cursor-pointer">7D</button>
@@ -392,7 +392,7 @@
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                             <div>
                                 <h3 class="text-lg font-extrabold text-slate-900">Smart Transaction Ledger</h3>
-                                <p class="text-xs text-slate-500">Click any transaction to open the slide-over Telemetry & Geo-Audit Drawer (zero popup windows)</p>
+                                <p class="text-xs text-slate-500">Click any transaction to open the slide-over Telemetry & Geo-Audit Drawer</p>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <select id="ledger-status-filter" onchange="Terminal.refreshHistory()" class="pp-input !w-auto !py-2 text-xs">
@@ -425,7 +425,7 @@
                     <div class="pp-card p-6 sm:p-8">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-purple-100">
                             <div>
-                                <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase tracking-wider">Checkout Experience Engine</span>
+                                <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase tracking-wider">UPay 2.0 Checkout Engine</span>
                                 <h3 class="text-xl font-extrabold text-slate-900 mt-2">Payment Page Theme Studio</h3>
                                 <p class="text-xs text-slate-500 mt-0.5">Choose from 7 curated checkout themes or design your own custom brand theme. Changes apply immediately without page reload.</p>
                             </div>
@@ -440,7 +440,7 @@
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5" id="admin-theme-grid">
                                 <%
                                   const themePresets = [
-                                    { id: 'phonepe', name: 'PhonePe Royal', colors: ['#5f259f', '#7c3aed', '#f5f0ff'], desc: 'Signature PhonePe Purple' },
+                                    { id: 'upay2', name: 'UPay 2.0 Royal', colors: ['#5f259f', '#7c3aed', '#f5f0ff'], desc: 'Signature UPay 2.0 Purple' },
                                     { id: 'midnight', name: 'Midnight Dark', colors: ['#0f172a', '#6366f1', '#1e293b'], desc: 'Obsidian Neo-Bank Dark' },
                                     { id: 'emerald', name: 'Emerald Mint', colors: ['#059669', '#10b981', '#ecfdf5'], desc: 'Fresh Fintech Green' },
                                     { id: 'gold', name: 'Royal Gold', colors: ['#b45309', '#f59e0b', '#fffbeb'], desc: 'Warm Luxury Amber' },
@@ -452,7 +452,7 @@
                                 %>
                                 <% themePresets.forEach(tp => { %>
                                 <div onclick="Terminal.selectAdminTheme('<%=tp.id%>')" data-theme-card="<%=tp.id%>"
-                                    class="theme-card-option p-4 rounded-2xl border-2 cursor-pointer transition-all <%=(cfg.defaultTheme || 'phonepe') === tp.id ? 'border-[#5f259f] bg-purple-50/50 shadow-md' : 'border-slate-200 hover:border-purple-300 bg-white'%>">
+                                    class="theme-card-option p-4 rounded-2xl border-2 cursor-pointer transition-all <%=curDefaultTheme === tp.id ? 'border-[#5f259f] bg-purple-50/50 shadow-md' : 'border-slate-200 hover:border-purple-300 bg-white'%>">
                                     <div class="flex items-center gap-1.5 mb-2.5">
                                         <span class="w-5 h-5 rounded-full shadow-xs border border-black/10" style="background:<%=tp.colors[0]%>"></span>
                                         <span class="w-5 h-5 rounded-full shadow-xs border border-black/10" style="background:<%=tp.colors[1]%>"></span>
@@ -463,7 +463,7 @@
                                 </div>
                                 <% }) %>
                             </div>
-                            <input type="hidden" id="cfg-default-theme" value="<%=cfg.defaultTheme || 'phonepe'%>">
+                            <input type="hidden" id="cfg-default-theme" value="<%=curDefaultTheme%>">
                         </div>
 
                         <!-- Custom Theme Builder Controls -->
@@ -501,7 +501,7 @@
                                     <label class="text-[10px] font-bold text-slate-500 uppercase">Card Radius</label>
                                     <select id="cust-radius" class="pp-input mt-1 !py-2">
                                         <option value="16px" <%=customTheme.radius === '16px' ? 'selected' : ''%>>Sharp (16px)</option>
-                                        <option value="24px" <%=customTheme.radius === '24px' || !customTheme.radius ? 'selected' : ''%>>PhonePe (24px)</option>
+                                        <option value="24px" <%=customTheme.radius === '24px' || !customTheme.radius ? 'selected' : ''%>>UPay 2.0 (24px)</option>
                                         <option value="32px" <%=customTheme.radius === '32px' ? 'selected' : ''%>>Ultra Pill (32px)</option>
                                     </select>
                                 </div>
@@ -514,11 +514,11 @@
                                 <h4 class="text-sm font-extrabold text-slate-900">3. Checkout Interactive Widgets</h4>
                                 <div>
                                     <label class="text-[10px] font-bold text-slate-500 uppercase">Merchant Checkout Tagline</label>
-                                    <input type="text" id="cfg-tagline" value="<%=cfg.tagline || '100% Safe & Instant UPI Checkout'%>" class="pp-input mt-1">
+                                    <input type="text" id="cfg-tagline" value="<%=(cfg.tagline || 'UPay 2.0 • 100% Safe & Instant UPI Checkout').replace(/PhonePe/gi, 'UPay 2.0')%>" class="pp-input mt-1">
                                 </div>
                                 <div class="space-y-2.5 pt-2">
                                     <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
-                                        <span class="text-xs font-bold text-slate-700">Allow Customers to Switch Themes (6+ Themes)</span>
+                                        <span class="text-xs font-bold text-slate-700">Allow Customers to Switch Themes (7+ Themes)</span>
                                         <input type="checkbox" id="cfg-allow-theme" <%=cfg.allowCustomerThemeChange !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
                                     </label>
                                     <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
@@ -570,14 +570,14 @@
                 </section>
 
                 <!-- ========================================================= -->
-                <!-- TAB 4: PAYMENT LINKS & QUICK COLLECT GENERATOR            -->
+                <!-- TAB 4: PAYMENT LINKS & FULL LINK TELEMETRY DETAILS        -->
                 <!-- ========================================================= -->
                 <section id="view-links" class="tab-pane space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div class="lg:col-span-5 pp-card p-6 space-y-4 h-fit">
-                            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">No-Code Collect</span>
-                            <h3 class="text-lg font-extrabold text-slate-900">Create Shareable Payment Link</h3>
-                            <p class="text-xs text-slate-500">Generate a dedicated UPI payment link for WhatsApp, Instagram, or SMS invoicing without writing code.</p>
+                        <div class="lg:col-span-4 pp-card p-6 space-y-4 h-fit">
+                            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Manual Payment Link</span>
+                            <h3 class="text-lg font-extrabold text-slate-900">Create Payment Link</h3>
+                            <p class="text-xs text-slate-500">Manual payment links automatically redirect customers to <code class="mono font-bold text-[#5f259f]">/pay/thanks</code> after verification (API orders redirect to your configured webhook/redirect URL).</p>
 
                             <form onsubmit="Terminal.createPaymentLink(event)" class="space-y-3.5 pt-2">
                                 <div>
@@ -593,17 +593,22 @@
                                     <input type="text" name="description" placeholder="Includes GST & instant activation" class="pp-input mt-1">
                                 </div>
                                 <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs">
-                                    + Mint Payment Link & Order
+                                    + Mint Payment Link (Redirects /pay/thanks)
                                 </button>
                             </form>
                         </div>
 
-                        <div class="lg:col-span-7 pp-card p-6">
+                        <div class="lg:col-span-8 pp-card p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-base font-extrabold text-slate-900">Active Payment Links</h3>
-                                <span class="text-xs text-slate-400 font-semibold">Instant Copy & Share</span>
+                                <div>
+                                    <h3 class="text-base font-extrabold text-slate-900">Payment Links & Complete Order Details</h3>
+                                    <p class="text-xs text-slate-500">Displays live Payment Status, UTR, Payer details, Timestamps, and Redirect route for each link</p>
+                                </div>
+                                <button onclick="Terminal.loadPaymentLinks()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">
+                                    Refresh Links
+                                </button>
                             </div>
-                            <div id="payment-links-list" class="space-y-3"></div>
+                            <div id="payment-links-list" class="space-y-3.5"></div>
                         </div>
                     </div>
                 </section>
@@ -616,12 +621,12 @@
                         <div class="lg:col-span-5 pp-card p-6 space-y-4 h-fit">
                             <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">Checkout Conversion Booster</span>
                             <h3 class="text-lg font-extrabold text-slate-900">Create Promo Coupon</h3>
-                            <p class="text-xs text-slate-500">Customers can apply these promo codes directly on the payment page to dynamically recalculate the UPI QR amount.</p>
+                            <p class="text-xs text-slate-500">Customers can apply these promo codes directly on the UPay 2.0 payment page to dynamically recalculate the QR amount.</p>
 
                             <form onsubmit="Terminal.createCoupon(event)" class="space-y-3.5 pt-2">
                                 <div>
                                     <label class="text-[10px] font-bold text-slate-500 uppercase">Promo Code</label>
-                                    <input type="text" name="code" required placeholder="FESTIVE25" class="pp-input mt-1 uppercase mono">
+                                    <input type="text" name="code" required placeholder="UPAY25" class="pp-input mt-1 uppercase mono">
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -673,7 +678,7 @@
                                 <div>
                                     <p class="text-[10px] font-bold text-slate-500 uppercase">Destination Bank</p>
                                     <p class="text-sm font-extrabold text-slate-900"><%=user.bank?.bank || 'No Bank Linked'%></p>
-                                    <p class="text-xs mono text-slate-500"><%=user.bank?.account ? '•••• ' + user.bank.account.slice(-4) + ' (' + user.bank.ifsc + ')' : 'Configure in Merchant & UPI Rails'%></p>
+                                    <p class="text-xs mono text-slate-500"><%=user.bank?.account ? '•••• ' + user.bank.account.slice(-4) + ' (' + user.bank.ifsc + ')' : 'Configure in Logo, Profile & UPI Rails'%></p>
                                 </div>
                                 <button onclick="Terminal.nav('profile'); Terminal.subProfile('banking')" class="text-xs font-extrabold text-[#5f259f] hover:underline cursor-pointer">Edit</button>
                             </div>
@@ -723,20 +728,21 @@
                 </section>
 
                 <!-- ========================================================= -->
-                <!-- TAB 8: REFUNDS & DISPUTE RESOLUTION DESK                  -->
+                <!-- TAB 8: REFUNDS, SCREENSHOTS & DISPUTE RESOLUTION DESK     -->
                 <!-- ========================================================= -->
                 <section id="view-disputes" class="tab-pane space-y-6">
                     <div class="pp-card p-6">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
-                                <h3 class="text-lg font-extrabold text-slate-900">Refunds, UTR Verification & Dispute Center</h3>
-                                <p class="text-xs text-slate-500">Review customer-submitted manual UTRs, resolve support tickets, or issue instant refunds without page reload</p>
+                                <span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold uppercase">Manual Admin Intervention Required</span>
+                                <h3 class="text-lg font-extrabold text-slate-900 mt-1">Disputes, Customer Screenshots & UTR Verification Desk</h3>
+                                <p class="text-xs text-slate-500">Customer disputes with uploaded screenshots and UTRs never resolve automatically — review the screenshot and UTR below to Approve, Refund, or Reject.</p>
                             </div>
                             <button onclick="Terminal.loadDisputes()" class="px-4 py-2 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">
                                 Sync Tickets
                             </button>
                         </div>
-                        <div id="disputes-list" class="space-y-3"></div>
+                        <div id="disputes-list" class="space-y-4"></div>
                     </div>
                 </section>
 
@@ -777,18 +783,19 @@
 
                             <!-- Webhook Config & Live HMAC Simulator -->
                             <div class="pt-4 border-t border-purple-100 space-y-3">
-                                <h4 class="text-sm font-extrabold text-slate-900">Webhook & Redirect Endpoints</h4>
+                                <h4 class="text-sm font-extrabold text-slate-900">API Order Webhook & Redirect Endpoints</h4>
+                                <p class="text-[11px] text-slate-500">Orders created via <code class="mono font-bold">/api/create-order</code> redirect users to the URL below. Manual Admin Payment Links always redirect to <code class="mono font-bold">/pay/thanks</code>.</p>
                                 <div>
                                     <label class="text-[10px] font-bold text-slate-500 uppercase">HTTPS Webhook Callback URL</label>
                                     <input type="text" id="callback" value="<%=user.callback || ''%>" placeholder="https://api.yourdomain.com/webhook/upay" class="pp-input mt-1">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Customer Post-Payment Redirect URL</label>
-                                    <input type="text" id="redirect" value="<%=user.redirect || '/pay/thanks'%>" placeholder="/pay/thanks" class="pp-input mt-1">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">API Order Redirect URL</label>
+                                    <input type="text" id="redirect" value="<%=user.redirect || '/pay/thanks'%>" placeholder="https://yourdomain.com/order-success" class="pp-input mt-1">
                                 </div>
                                 <div class="flex gap-2.5 pt-1">
                                     <button onclick="Terminal.saveSettings(this)" class="flex-1 pp-btn-primary py-3 text-xs">
-                                        Save Endpoints
+                                        Save API Endpoints
                                     </button>
                                     <button onclick="Terminal.runWebhookSimulator()" class="px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold text-xs hover:bg-emerald-100 transition cursor-pointer">
                                         Test HMAC Webhook
@@ -848,22 +855,39 @@
                 </section>
 
                 <!-- ========================================================= -->
-                <!-- TAB 10: MERCHANT PROFILE, BANKING & EMBEDDED PAYTM RAILS  -->
+                <!-- TAB 10: MERCHANT LOGO/PIC UPLOAD, PROFILE & UPI RAILS     -->
                 <!-- ========================================================= -->
                 <section id="view-profile" class="tab-pane max-w-3xl mx-auto">
                     <div class="flex flex-wrap bg-purple-100/70 p-1 rounded-2xl w-fit mb-6 border border-purple-200/50">
-                        <button onclick="Terminal.subProfile('identity')" id="sub-nav-identity" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs bg-white shadow-xs text-[#5f259f] transition-all cursor-pointer">Merchant Identity</button>
+                        <button onclick="Terminal.subProfile('identity')" id="sub-nav-identity" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs bg-white shadow-xs text-[#5f259f] transition-all cursor-pointer">Logo & Merchant Identity</button>
                         <button onclick="Terminal.subProfile('banking')" id="sub-nav-banking" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-[#5f259f] transition-all cursor-pointer">Settlement Bank</button>
                         <button onclick="Terminal.subProfile('paytm')" id="sub-nav-paytm" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-[#5f259f] transition-all cursor-pointer">UPI & Paytm Rails</button>
                     </div>
 
-                    <!-- Sub-pane 1: Identity -->
-                    <div id="sub-view-identity" class="sub-pane pp-card p-6 sm:p-8">
-                        <div class="flex items-center gap-4 mb-6">
-                            <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=5f259f&color=fff&bold=true`%>" class="w-16 h-16 rounded-2xl object-cover border-2 border-purple-200">
-                            <div>
-                                <h3 class="text-base font-extrabold text-slate-900"><%=user.firstname%> <%=user.lastname%></h3>
-                                <p class="text-xs text-emerald-600 font-bold">PhonePe Verified Merchant • KYC Active</p>
+                    <!-- Sub-pane 1: Logo Upload & Identity -->
+                    <div id="sub-view-identity" class="sub-pane pp-card p-6 sm:p-8 space-y-6">
+                        <!-- Merchant Logo / Profile Picture Uploader -->
+                        <div class="p-5 rounded-2xl bg-purple-50/60 border border-purple-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="relative group">
+                                    <img id="profile-main-avatar" src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=5f259f&color=fff&bold=true`%>" class="w-20 h-20 rounded-2xl object-cover border-2 border-purple-200 shadow-md bg-white">
+                                    <label for="logo-file-input" class="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-xl bg-[#5f259f] text-white flex items-center justify-center shadow cursor-pointer hover:scale-105 transition" title="Upload New Logo">
+                                        📷
+                                    </label>
+                                </div>
+                                <div>
+                                    <span class="px-2 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Brand Identity</span>
+                                    <h3 class="text-base font-extrabold text-slate-900 mt-1">Merchant Logo & Profile Picture</h3>
+                                    <p class="text-xs text-slate-500">Displayed on your Admin Panel and all Customer Payment Pages</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2 sm:w-64">
+                                <input type="file" id="logo-file-input" accept="image/*" onchange="Terminal.handleLogoFileSelect(event)" class="text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-[#5f259f] file:text-white cursor-pointer">
+                                <div class="flex gap-1.5">
+                                    <input type="url" id="logo-url-input" placeholder="Or paste Logo Image URL..." class="pp-input !py-1.5 !px-2.5 text-xs">
+                                    <button type="button" onclick="Terminal.saveLogoFromUrl()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-extrabold cursor-pointer shrink-0">Save</button>
+                                </div>
                             </div>
                         </div>
 
@@ -884,7 +908,7 @@
                             </div>
                             <div>
                                 <label class="text-[10px] font-bold text-slate-500 uppercase">Business / Brand Name (Shown on Checkout)</label>
-                                <input type="text" name="company" value="<%=user.company || 'UPay Enterprise'%>" class="pp-input mt-1">
+                                <input type="text" name="company" value="<%=user.company || 'UPay 2.0 Enterprise'%>" class="pp-input mt-1">
                             </div>
                             <div>
                                 <label class="text-[10px] font-bold text-slate-500 uppercase">Merchant Mobile Number</label>
@@ -936,18 +960,18 @@
                     <div id="sub-view-paytm" class="sub-pane pp-card p-6 sm:p-8 hidden">
                         <div class="mb-6">
                             <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Direct-to-Account UPI</span>
-                            <h3 class="text-base font-extrabold text-slate-900 mt-2">Paytm Business & Multi-UPI Rail Configurator</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">Update your Paytm Merchant ID, Primary VPA, and Fallback UPI ID without leaving the dashboard.</p>
+                            <h3 class="text-base font-extrabold text-slate-900 mt-2">UPay 2.0 Multi-UPI Rail Configurator</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Update your Merchant ID, Primary VPA, and Fallback UPI ID without leaving the dashboard.</p>
                         </div>
 
                         <form onsubmit="Terminal.savePaytmRails(event)" class="space-y-4">
                             <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Primary Paytm / Merchant UPI ID (VPA)</label>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Primary Merchant UPI ID (VPA)</label>
                                 <input type="text" id="paytm-upi-input" value="<%=user.paytm?.UPI || ''%>" required placeholder="merchant@paytm" class="pp-input mt-1 mono">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Paytm Merchant ID (MID)</label>
-                                <input type="text" id="paytm-mid-input" value="<%=user.paytm?.MID || ''%>" required placeholder="YOUR_PAYTM_MID" class="pp-input mt-1 mono">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Merchant ID (MID)</label>
+                                <input type="text" id="paytm-mid-input" value="<%=user.paytm?.MID || ''%>" required placeholder="YOUR_MERCHANT_MID" class="pp-input mt-1 mono">
                             </div>
                             <div>
                                 <label class="text-[10px] font-bold text-slate-500 uppercase">Secondary Fallback UPI ID (Optional)</label>
@@ -972,7 +996,7 @@
             </div>
         </main>
 
-        <!-- PhonePe Mobile Bottom Navigation Bar -->
+        <!-- UPay 2.0 Mobile Bottom Navigation Bar -->
         <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-purple-100 h-16 flex justify-around items-center px-2 z-50">
             <button onclick="Terminal.nav('overview')" data-mob="overview" class="mob-link text-[#5f259f] flex flex-col items-center gap-0.5 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect></svg>
@@ -982,37 +1006,37 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span class="text-[10px] font-extrabold">Ledger</span>
             </button>
-            <button onclick="Terminal.nav('themes')" data-mob="themes" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343"></path></svg>
-                <span class="text-[10px] font-extrabold">Themes</span>
-            </button>
             <button onclick="Terminal.nav('links')" data-mob="links" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"></path></svg>
                 <span class="text-[10px] font-extrabold">Links</span>
             </button>
+            <button onclick="Terminal.nav('disputes')" data-mob="disputes" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944"></path></svg>
+                <span class="text-[10px] font-extrabold">Disputes</span>
+            </button>
             <button onclick="Terminal.nav('profile')" data-mob="profile" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82"></path></svg>
-                <span class="text-[10px] font-extrabold">Settings</span>
+                <span class="text-[10px] font-extrabold">Profile</span>
             </button>
         </nav>
     </div>
 
     <!-- ================================================================= -->
-    <!-- IN-APP SLIDE-OVER TRANSACTION TELEMETRY DRAWER (NO POPUP RELOAD)  -->
+    <!-- IN-APP SLIDE-OVER TRANSACTION TELEMETRY DRAWER                    -->
     <!-- ================================================================= -->
     <div id="audit-drawer-overlay" class="fixed inset-0 z-[90] bg-slate-950/50 backdrop-blur-xs hidden justify-end">
         <div class="w-full max-w-lg bg-white h-full shadow-2xl border-l border-purple-100 flex flex-col justify-between overflow-y-auto p-6">
             <div>
                 <div class="flex items-center justify-between pb-4 border-b border-purple-100">
                     <div>
-                        <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Transaction Telemetry</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">UPay 2.0 Transaction Telemetry</span>
                         <h3 id="drawer-order-id" class="text-base font-extrabold text-slate-900 mono mt-1">#ORDER</h3>
                     </div>
                     <button onclick="Terminal.closeAuditDrawer()" class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer">&times;</button>
                 </div>
 
                 <div class="my-5 p-5 rounded-2xl bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white">
-                    <p class="text-[11px] uppercase tracking-wider text-purple-200 font-bold">Total Settled Amount</p>
+                    <p class="text-[11px] uppercase tracking-wider text-purple-200 font-bold">Order Amount</p>
                     <p id="drawer-amount" class="text-3xl font-black mt-1">&#8377;0.00</p>
                     <div class="flex items-center justify-between text-xs text-purple-100 mt-3 pt-3 border-t border-white/15">
                         <span>UTR: <strong id="drawer-utr" class="mono text-white">N/A</strong></span>
@@ -1031,6 +1055,17 @@
                     Done
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Screenshot Lightbox Modal for Dispute Inspection -->
+    <div id="screenshot-lightbox" onclick="this.classList.add('hidden'); this.classList.remove('flex')" class="fixed inset-0 z-[95] bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-6 cursor-pointer">
+        <div class="max-w-xl w-full bg-white p-4 rounded-3xl shadow-2xl text-center" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-extrabold text-slate-800">Customer Uploaded Payment Screenshot</span>
+                <button type="button" onclick="document.getElementById('screenshot-lightbox').classList.add('hidden'); document.getElementById('screenshot-lightbox').classList.remove('flex')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-bold cursor-pointer">Close &times;</button>
+            </div>
+            <img id="lightbox-img" src="" alt="Dispute Screenshot" class="max-h-[70vh] mx-auto rounded-2xl object-contain border border-slate-200">
         </div>
     </div>
 
@@ -1058,7 +1093,7 @@
                 this.refreshHistory();
                 this.initChart();
                 this.renderCoupons();
-                this.renderPaymentLinks();
+                this.loadPaymentLinks();
                 this.renderWithdrawals();
             },
 
@@ -1071,16 +1106,16 @@
                 const titles = {
                     overview: 'Home & Analytics',
                     history: 'Smart Transaction Ledger',
-                    themes: 'Payment Page Theme Studio',
-                    links: 'Payment Links & Quick Collect',
+                    themes: 'UPay 2.0 Theme Studio',
+                    links: 'Payment Links & Complete Details',
                     coupons: 'Offers & Discount Coupons',
                     settlements: 'Settlements & Instant Bank Payouts',
                     customers: 'Customer Directory & Ratings',
-                    disputes: 'Refunds & Dispute Resolution Center',
+                    disputes: 'Disputes, Screenshots & UTR Verification',
                     developer: 'API, Webhooks & Security Controls',
-                    profile: 'Merchant Profile & UPI Rails'
+                    profile: 'Merchant Logo, Profile & UPI Rails'
                 };
-                document.getElementById('view-title').innerText = titles[viewId] || 'UPay Business';
+                document.getElementById('view-title').innerText = titles[viewId] || 'UPay 2.0 Business';
 
                 document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
                 const activeNav = document.querySelector(`[data-nav="${viewId}"]`);
@@ -1091,6 +1126,7 @@
                 if (activeMob) activeMob.classList.replace('text-slate-400', 'text-[#5f259f]');
 
                 if (viewId === 'overview') this.initChart();
+                if (viewId === 'links') this.loadPaymentLinks();
                 if (viewId === 'customers') this.loadCustomers();
                 if (viewId === 'disputes') this.loadDisputes();
             },
@@ -1108,6 +1144,41 @@
                 if (activeSubNav) {
                     activeSubNav.classList.remove('text-slate-600');
                     activeSubNav.classList.add('bg-white', 'shadow-xs', 'text-[#5f259f]');
+                }
+            },
+
+            // Admin Logo / Profile Pic Upload
+            handleLogoFileSelect(event) {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const base64Img = e.target.result;
+                    await this.uploadLogoPayload(base64Img);
+                };
+                reader.readAsDataURL(file);
+            },
+
+            async saveLogoFromUrl() {
+                const url = document.getElementById('logo-url-input').value.trim();
+                if (!url) return this.notify('Please enter an image URL', 'warn');
+                await this.uploadLogoPayload(url);
+            },
+
+            async uploadLogoPayload(imageStr) {
+                const res = await fetch('/user/dashboard/logo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageStr })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    document.getElementById('prfl').src = data.pic;
+                    document.getElementById('profile-main-avatar').src = data.pic;
+                    document.getElementById('sidebar-brand-logo').src = data.pic;
+                    this.notify(data.message);
+                } else {
+                    this.notify(data.message || 'Could not update logo', 'warn');
                 }
             },
 
@@ -1221,6 +1292,19 @@
                 `).join('');
             },
 
+            async loadPaymentLinks() {
+                try {
+                    const res = await fetch('/user/dashboard/payment-links', { silent: true });
+                    const data = await res.json();
+                    if (data.status) {
+                        this.state.paymentLinks = data.paymentLinks || [];
+                        this.renderPaymentLinks();
+                    }
+                } catch (e) {
+                    this.renderPaymentLinks();
+                }
+            },
+
             async createPaymentLink(e) {
                 e.preventDefault();
                 const fd = new FormData(e.target);
@@ -1266,18 +1350,45 @@
                     return;
                 }
                 box.innerHTML = this.state.paymentLinks.map(l => `
-                    <div class="p-4 rounded-2xl border border-purple-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-slate-900">${l.title}</span>
-                                <span class="mono text-xs font-black text-[#5f259f]">₹${Number(l.amount).toLocaleString('en-IN')}</span>
+                    <div class="p-4 rounded-2xl border border-purple-100 bg-white space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-purple-100 text-[#5f259f] mono text-[10px] font-extrabold">${l.linkId}</span>
+                                    <span class="text-sm font-extrabold text-slate-900">${l.title}</span>
+                                    <span class="mono text-sm font-black text-[#5f259f]">₹${Number(l.finalAmount || l.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${l.isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                        ${l.isPaid ? '✓ PAID' : '⏳ PENDING'}
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-1">${l.description || 'Manual Payment Link'} • Order: <strong class="mono text-slate-700">#${l.orderId || 'N/A'}</strong></p>
                             </div>
-                            <p class="text-[11px] text-slate-400 mono mt-0.5">${window.location.origin}${l.url}</p>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                ${l.upaytr ? `<button onclick="Terminal.openAuditDrawer('${l.upaytr}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs cursor-pointer">Full Details</button>` : ''}
+                                <button onclick="Terminal.copy('${window.location.origin}${l.url}')" class="px-3 py-1.5 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">Copy Link</button>
+                                <a href="${l.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#5f259f] text-white font-extrabold text-xs">Open &nearr;</a>
+                                <button onclick="Terminal.deletePaymentLink('${l.linkId}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs cursor-pointer">&times;</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="Terminal.copy('${window.location.origin}${l.url}')" class="px-3 py-1.5 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">Copy Link</button>
-                            <a href="${l.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#5f259f] text-white font-extrabold text-xs">Open &nearr;</a>
-                            <button onclick="Terminal.deletePaymentLink('${l.linkId}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs cursor-pointer">&times;</button>
+
+                        <!-- Complete Payment Link Metadata Bar (UTR, Payer, Redirect, Timestamps) -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2.5 border-t border-slate-100 text-[11px]">
+                            <div class="bg-slate-50 p-2 rounded-xl">
+                                <span class="text-[9px] font-bold uppercase text-slate-400 block">Payment UTR</span>
+                                <span class="mono font-bold text-slate-800">${l.utr || l.submittedUtr || 'Awaiting Payment'}</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-xl">
+                                <span class="text-[9px] font-bold uppercase text-slate-400 block">Payer Name & Contact</span>
+                                <span class="font-bold text-slate-800 truncate block">${l.customerName || l.title} (${l.customerPhone || 'N/A'})</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-xl">
+                                <span class="text-[9px] font-bold uppercase text-slate-400 block">Redirect Route</span>
+                                <span class="mono font-bold text-[#5f259f]">${l.redirect || '/pay/thanks'}</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-xl">
+                                <span class="text-[9px] font-bold uppercase text-slate-400 block">${l.isPaid ? 'Paid Timestamp' : 'Created Timestamp'}</span>
+                                <span class="font-bold text-slate-700">${l.paymentDate || l.orderCreatedAt || 'Just now'}</span>
+                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -1354,6 +1465,14 @@
                 `).join('');
             },
 
+            previewScreenshotModal(imgUrl) {
+                if (!imgUrl) return;
+                document.getElementById('lightbox-img').src = imgUrl;
+                const lb = document.getElementById('screenshot-lightbox');
+                lb.classList.remove('hidden');
+                lb.classList.add('flex');
+            },
+
             async loadDisputes() {
                 const res = await fetch('/user/dashboard/refunds', {
                     method: 'POST',
@@ -1368,24 +1487,40 @@
                     box.innerHTML = `<p class="text-xs text-slate-400 py-8 text-center">Zero active disputes or manual UTR claims! All transactions healthy.</p>`;
                     return;
                 }
-                box.innerHTML = items.map(item => `
-                    <div class="p-4 rounded-2xl border border-purple-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="mono text-xs font-extrabold text-[#5f259f]">#${item.order}</span>
-                                <span class="text-xs font-black text-slate-900">₹${item.amount}</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">${item.dispute?.status || item.status}</span>
+                box.innerHTML = items.map(item => {
+                    const shot = item.dispute?.screenshot || '';
+                    const dispUtr = item.dispute?.utr || item.submittedUtr || item.utr || 'N/A';
+                    return `
+                    <div class="p-5 rounded-2xl border border-purple-100 bg-white flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            ${shot ? `
+                                <div onclick="Terminal.previewScreenshotModal('${shot}')" class="w-20 h-20 rounded-xl border-2 border-purple-200 overflow-hidden shrink-0 cursor-pointer relative group bg-slate-100" title="Click to enlarge screenshot">
+                                    <img src="${shot}" alt="Payment Proof" class="w-full h-full object-cover">
+                                    <span class="absolute inset-0 bg-black/40 text-white text-[9px] font-extrabold flex items-center justify-center opacity-0 group-hover:opacity-100 transition">Zoom 🔍</span>
+                                </div>
+                            ` : `
+                                <div class="w-20 h-20 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold shrink-0 text-center p-2">
+                                    No Image
+                                </div>
+                            `}
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="mono text-xs font-extrabold text-[#5f259f]">#${item.order}</span>
+                                    <span class="text-sm font-black text-slate-900">₹${item.amount}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">${item.dispute?.status || item.status}</span>
+                                </div>
+                                <p class="text-xs font-bold text-slate-800 mt-1">Query: "${item.dispute?.reason || 'Manual UTR verification requested'}"</p>
+                                <p class="text-[11px] text-slate-500 mono mt-1">Customer: ${item.customerName} (${item.customerPhone || 'N/A'}) • Submitted UTR: <strong class="text-slate-900">${dispUtr}</strong></p>
                             </div>
-                            <p class="text-xs text-slate-600 mt-1">${item.dispute?.reason || 'Manual UTR Submitted by Customer: ' + item.submittedUtr}</p>
-                            <p class="text-[11px] text-slate-400 mono mt-0.5">Customer: ${item.customerName} • Submitted UTR: ${item.submittedUtr || item.utr || 'N/A'}</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button onclick="Terminal.resolveDispute('${item.order}', 'RESOLVE')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Approve & Verify</button>
-                            <button onclick="Terminal.resolveDispute('${item.order}', 'REFUND')" class="px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Issue Refund</button>
-                            <button onclick="Terminal.resolveDispute('${item.order}', 'REJECT')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-extrabold cursor-pointer">Reject</button>
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            ${shot ? `<button onclick="Terminal.previewScreenshotModal('${shot}')" class="px-3 py-2 rounded-xl bg-purple-50 text-[#5f259f] text-xs font-extrabold cursor-pointer">View Proof</button>` : ''}
+                            <button onclick="Terminal.resolveDispute('${item.order}', 'RESOLVE')" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Approve & Verify UTR</button>
+                            <button onclick="Terminal.resolveDispute('${item.order}', 'REFUND')" class="px-3.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Issue Refund</button>
+                            <button onclick="Terminal.resolveDispute('${item.order}', 'REJECT')" class="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 text-xs font-extrabold cursor-pointer">Reject</button>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             },
 
             async resolveDispute(order, action) {
@@ -1490,7 +1625,7 @@
 
             async refreshAll(btn) {
                 if (btn) btn.classList.add('refresh-spin');
-                await Promise.all([this.refreshBalance(), this.refreshHistory()]);
+                await Promise.all([this.refreshBalance(), this.refreshHistory(), this.loadPaymentLinks()]);
                 if (btn) setTimeout(() => btn.classList.remove('refresh-spin'), 600);
             },
 
@@ -1569,7 +1704,7 @@
                                     <p class="text-xs font-extrabold text-slate-900">${tx.customerName || 'Guest'} • <span class="mono text-[#5f259f]">#${tx.order}</span></p>
                                     <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${tx.isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${tx.isPaid ? 'PAID' : 'PENDING'}</span>
                                 </div>
-                                <p class="mono text-[10px] text-slate-400">UTR: ${tx.utr || tx.submittedUtr || 'Awaiting Scan'} • Mode: ${tx.mode || 'UPI'}</p>
+                                <p class="mono text-[10px] text-slate-400">UTR: ${tx.utr || tx.submittedUtr || 'Awaiting Scan'} • Mode: ${tx.mode || 'UPI'} • Redirect: ${tx.redirect || '/pay/thanks'}</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-end gap-2.5">
@@ -1596,6 +1731,7 @@
                     this.notify(data.message);
                     this.refreshBalance();
                     this.refreshHistory();
+                    this.loadPaymentLinks();
                 } else {
                     this.notify(data.message, 'warn');
                 }
@@ -1614,21 +1750,31 @@
                 document.getElementById('drawer-full-audit-link').href = `/user/dashboard/transaction/${upaytr}`;
 
                 const t = data.telemetry || {};
+                const shot = data.dispute?.screenshot || '';
                 document.getElementById('drawer-details-grid').innerHTML = `
                     <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
-                        <p class="text-[10px] font-extrabold uppercase text-slate-400">Customer & Breakdown</p>
-                        <p><strong>Name:</strong> ${data.customerName} (${data.customerEmail})</p>
+                        <p class="text-[10px] font-extrabold uppercase text-slate-400">Order & Customer Metadata</p>
+                        <p><strong>Mode:</strong> ${data.mode} | <strong>Redirect:</strong> <span class="mono">${data.redirect}</span></p>
+                        <p><strong>Customer:</strong> ${data.customerName} (${data.customerEmail})</p>
                         <p><strong>Phone:</strong> ${data.customerPhone}</p>
+                        <p><strong>Created:</strong> ${data.created_at} | <strong>Paid:</strong> ${data.payment_date}</p>
                         <p><strong>Base:</strong> ₹${data.baseAmount} | <strong>Discount:</strong> -₹${data.discountAmount} | <strong>Tip:</strong> +₹${data.tipAmount} | <strong>Fee:</strong> +₹${data.feeAmount}</p>
                         ${data.customerNote ? `<p><strong>Note:</strong> ${data.customerNote}</p>` : ''}
                     </div>
+                    ${data.dispute?.raised ? `
+                    <div class="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1.5">
+                        <p class="text-[10px] font-extrabold uppercase text-rose-600">Dispute & Proof Details (${data.dispute.status})</p>
+                        <p><strong>Submitted UTR:</strong> <span class="mono">${data.dispute.utr || data.submittedUtr}</span></p>
+                        <p><strong>Customer Query:</strong> ${data.dispute.reason}</p>
+                        ${shot ? `<img src="${shot}" onclick="Terminal.previewScreenshotModal('${shot}')" class="mt-2 max-h-36 rounded-xl border border-rose-200 cursor-pointer" title="Click to enlarge">` : ''}
+                    </div>
+                    ` : ''}
                     <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
                         <p class="text-[10px] font-extrabold uppercase text-slate-400">Device & Network Telemetry</p>
                         <p><strong>Client IP:</strong> <span class="mono">${t.ip}</span> (${t.isp})</p>
                         <p><strong>Device:</strong> ${t.deviceBrand} ${t.deviceModel} (${t.deviceType})</p>
                         <p><strong>OS / Browser:</strong> ${t.osName} ${t.osVersion} • ${t.browserName}</p>
                         <p><strong>Geo Location:</strong> ${t.city}, ${t.region}, ${t.country} (${t.zip})</p>
-                        <p><strong>Coordinates:</strong> <span class="mono">${t.lat}, ${t.longt}</span></p>
                     </div>
                 `;
 
@@ -1646,7 +1792,7 @@
             exportLedgerCSV() {
                 const rows = this.state.filteredTransactions || [];
                 if (!rows.length) return this.notify('No transactions to export', 'warn');
-                const headers = ['OrderID', 'Amount', 'Status', 'UTR', 'Mode', 'CustomerName', 'CustomerEmail', 'CreatedAt'];
+                const headers = ['OrderID', 'Amount', 'Status', 'UTR', 'Mode', 'Redirect', 'CustomerName', 'CustomerEmail', 'CreatedAt'];
                 const csv = [
                     headers.join(','),
                     ...rows.map(r => [
@@ -1655,6 +1801,7 @@
                         r.isPaid ? 'PAID' : 'PENDING',
                         r.utr || r.submittedUtr || '',
                         r.mode || 'UPI',
+                        r.redirect || '/pay/thanks',
                         `"${(r.customerName || '').replace(/"/g, '""')}"`,
                         r.customerEmail || '',
                         r.created_at || ''
@@ -1665,7 +1812,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `UPay_Ledger_${Date.now()}.csv`;
+                a.download = `UPay2_Ledger_${Date.now()}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
                 this.notify('CSV Ledger Exported!');
@@ -1783,6 +1930,7 @@
         window.onload = () => {
             Terminal.init();
             const myMenuItems = [
+                { name: "Change Logo / Pic", link: "javascript:Terminal.nav('profile')", isLogout: false },
                 { name: "Theme Studio", link: "javascript:Terminal.nav('themes')", isLogout: false },
                 { name: "UPI Rails", link: "javascript:Terminal.nav('profile');Terminal.subProfile('paytm')", isLogout: false },
                 { name: "Logout", link: "/user/logout", isLogout: true }

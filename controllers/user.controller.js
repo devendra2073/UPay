@@ -3,6 +3,7 @@ import crypto from "crypto";
 import QRCode from "qrcode";
 import mailer from "../utils/mailer.js";
 import parser from "../utils/templateParser.js";
+import upload from "../utils/cloud.js";
 import payment from "../schema/payment.model.js";
 import client from "../schema/clientModel.js";
 import banks from "../utils/getBanks.js";
@@ -53,7 +54,7 @@ export const register = async (req, res) => {
 
     try {
       const html = await parser("otp", { firstname, otp: activationotp });
-      await mailer({ email, firstname, html, subject: "OTP for UPay Account Activation" });
+      await mailer({ email, firstname, html, subject: "OTP for UPay 2.0 Account Activation" });
     } catch (mailErr) {
       console.warn("Mail send warning:", mailErr.message);
     }
@@ -182,7 +183,7 @@ export const transections = async (req, res) => {
     const trans = await payment
       .find(filter)
       .select(
-        "order amount baseAmount discountAmount tipAmount feeAmount utr submittedUtr mode upaytr MID isPaid status customerName customerEmail customerPhone customerNote created_at paymentDate selectedTheme feedback dispute -_id"
+        "order amount baseAmount discountAmount tipAmount feeAmount utr submittedUtr mode upaytr MID isPaid status redirect customerName customerEmail customerPhone customerNote created_at paymentDate selectedTheme feedback dispute -_id"
       )
       .sort({ _id: -1 })
       .limit(200);
@@ -223,6 +224,50 @@ export const profile = async (req, res) => {
   }
 };
 
+// Admin Feature: Change Merchant Logo / Profile Picture
+export const updateLogo = async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image || typeof image !== "string") {
+      return res.json({ status: false, message: "Please select a valid image or logo URL" });
+    }
+
+    let finalLogoUrl = image.trim();
+    if (finalLogoUrl.startsWith("data:image/") && process.env.my_cloud_name && process.env.my_key && process.env.my_secret) {
+      try {
+        const base64Data = finalLogoUrl.split(",")[1];
+        if (base64Data) {
+          const buff = Buffer.from(base64Data, "base64");
+          const uploaded = await upload(buff);
+          if (uploaded && uploaded.secure_url) {
+            finalLogoUrl = uploaded.secure_url;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn("Cloudinary logo upload fallback to inline data URI:", cloudErr.message);
+      }
+    }
+
+    const usr = await user.findOneAndUpdate(
+      { email: req.user.email },
+      { $set: { pic: finalLogoUrl } },
+      { new: true }
+    );
+
+    // Also update logo on unpaid orders for this merchant so checkout pages reflect new logo immediately
+    await payment.updateMany({ MID: usr.MID, isPaid: false }, { $set: { logo: finalLogoUrl } });
+
+    return res.json({
+      status: true,
+      pic: finalLogoUrl,
+      message: "Merchant Logo & Profile Picture Updated!"
+    });
+  } catch (e) {
+    console.error("updateLogo error:", e);
+    return res.status(500).json({ status: false, message: "Failed to update logo" });
+  }
+};
+
 export const callback = async (req, res) => {
   try {
     const { callback: cbUrl, redirect } = req.body;
@@ -233,7 +278,7 @@ export const callback = async (req, res) => {
     usr.callback = cbUrl;
     usr.redirect = redirect || "/pay/thanks";
     await usr.save();
-    return res.json({ status: true, message: "Webhook & Redirect Endpoints Deployed!" });
+    return res.json({ status: true, message: "API Webhook & Redirect Endpoints Deployed!" });
   } catch (e) {
     return res.json({ status: false, message: "Something went wrong" });
   }
@@ -261,7 +306,7 @@ export const saveThemeConfig = async (req, res) => {
     } = req.body;
 
     usr.checkoutConfig = {
-      defaultTheme: defaultTheme || usr.checkoutConfig?.defaultTheme || "phonepe",
+      defaultTheme: defaultTheme || usr.checkoutConfig?.defaultTheme || "upay2",
       allowCustomerThemeChange: allowCustomerThemeChange !== undefined ? Boolean(allowCustomerThemeChange) : true,
       allowCustomTheme: allowCustomTheme !== undefined ? Boolean(allowCustomTheme) : true,
       customTheme: {
@@ -272,7 +317,7 @@ export const saveThemeConfig = async (req, res) => {
         text: customTheme?.text || usr.checkoutConfig?.customTheme?.text || "#0f172a",
         radius: customTheme?.radius || usr.checkoutConfig?.customTheme?.radius || "24px"
       },
-      tagline: tagline !== undefined ? String(tagline).trim() : "100% Safe & Instant UPI Checkout",
+      tagline: tagline !== undefined ? String(tagline).trim() : "UPay 2.0 • 100% Safe & Instant UPI Checkout",
       enableTips: enableTips !== undefined ? Boolean(enableTips) : true,
       enableCoupons: enableCoupons !== undefined ? Boolean(enableCoupons) : true,
       enableSplitBill: enableSplitBill !== undefined ? Boolean(enableSplitBill) : true,
@@ -285,7 +330,7 @@ export const saveThemeConfig = async (req, res) => {
     await usr.save();
     return res.json({
       status: true,
-      message: "Checkout Theme Studio & Customer Preferences Saved!",
+      message: "UPay 2.0 Theme Studio & Checkout Preferences Saved!",
       checkoutConfig: usr.checkoutConfig
     });
   } catch (e) {
@@ -336,11 +381,43 @@ export const manageCoupons = async (req, res) => {
   }
 };
 
-// Admin Feature 3: Manage Shareable Payment Links & Quick Collect
+// Helper to enrich payment links with live order details (UTR, status, customer info, paymentDate, etc.)
+const enrichPaymentLinks = async (usr) => {
+  const links = usr.paymentLinks || [];
+  const orderIds = links.map((l) => l.orderId).filter(Boolean);
+  const orders = await payment.find({ MID: usr.MID, order: { $in: orderIds } }).lean();
+  const orderMap = new Map(orders.map((o) => [o.order, o]));
+
+  return links.map((l) => {
+    const plain = l.toObject ? l.toObject() : l;
+    const ord = orderMap.get(plain.orderId) || {};
+    return {
+      ...plain,
+      redirect: "/pay/thanks",
+      isPaid: Boolean(ord.isPaid),
+      orderStatus: ord.status || (ord.isPaid ? "PAID" : "PENDING"),
+      utr: ord.utr || "",
+      submittedUtr: ord.submittedUtr || "",
+      upaytr: ord.upaytr || "",
+      customerName: ord.customerName || plain.title,
+      customerEmail: ord.customerEmail || usr.email,
+      customerPhone: ord.customerPhone || usr.mobile || "Not Given",
+      customerNote: ord.customerNote || plain.description || "",
+      finalAmount: ord.amount || plain.amount,
+      discountAmount: ord.discountAmount || 0,
+      tipAmount: ord.tipAmount || 0,
+      paymentDate: ord.paymentDate ? new Date(ord.paymentDate).toLocaleString() : null,
+      orderCreatedAt: ord.created_at ? new Date(ord.created_at).toLocaleString() : new Date(plain.createdAt).toLocaleString(),
+      dispute: ord.dispute || { raised: false, status: "NONE" }
+    };
+  });
+};
+
+// Admin Feature 3: Manage Shareable Payment Links & Quick Collect (Always Redirects to /pay/thanks + Full Order Details)
 export const managePaymentLinks = async (req, res) => {
   try {
     const usr = await user.findOne({ email: req.user.email });
-    const { action, title, amount, description, linkId } = req.body;
+    const { action, title, amount, description, linkId } = req.body || {};
 
     if (action === "CREATE") {
       const amt = parseFloat(amount);
@@ -352,6 +429,7 @@ export const managePaymentLinks = async (req, res) => {
       const newLinkId = `PL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const logo = usr.pic || `https://ui-avatars.com/api/?background=5f259f&color=fff&size=128&name=${encodeURIComponent(usr.company)}`;
 
+      // Admin-created Payment Links are manual payments and MUST always redirect to /pay/thanks
       const payOrder = new payment({
         order: orderId,
         logo,
@@ -360,9 +438,9 @@ export const managePaymentLinks = async (req, res) => {
         MID: usr.MID,
         mode: "PAYMENT LINK",
         company: usr.company,
-        redirect: usr.redirect || "/pay/thanks",
+        redirect: "/pay/thanks",
         callback: usr.callback,
-        customerName: title,
+        customerName: title.trim(),
         customerEmail: usr.email,
         customerPhone: usr.mobile || "Not Given",
         customerNote: description || title,
@@ -371,7 +449,7 @@ export const managePaymentLinks = async (req, res) => {
           MID: usr.paytm?.MID || process.env.mid,
           UPI: usr.paytm?.UPI || process.env.upi
         },
-        selectedTheme: usr.checkoutConfig?.defaultTheme || "phonepe"
+        selectedTheme: usr.checkoutConfig?.defaultTheme || "upay2"
       });
       await payOrder.save();
 
@@ -383,32 +461,37 @@ export const managePaymentLinks = async (req, res) => {
         description: description || "",
         orderId,
         url: payUrl,
+        redirect: "/pay/thanks",
         active: true,
         clicks: 0
       });
       await usr.save();
 
+      const enriched = await enrichPaymentLinks(usr);
       return res.json({
         status: true,
-        message: "Payment Link Created!",
-        paymentLinks: usr.paymentLinks,
-        createdLink: usr.paymentLinks[0]
+        message: "Payment Link Created! Default redirect set to /pay/thanks",
+        paymentLinks: enriched,
+        createdLink: enriched[0]
       });
     }
 
     if (action === "DELETE") {
       usr.paymentLinks = (usr.paymentLinks || []).filter((l) => l.linkId !== linkId);
       await usr.save();
-      return res.json({ status: true, message: "Payment Link Removed", paymentLinks: usr.paymentLinks });
+      const enriched = await enrichPaymentLinks(usr);
+      return res.json({ status: true, message: "Payment Link Removed", paymentLinks: enriched });
     }
 
-    return res.json({ status: true, paymentLinks: usr.paymentLinks || [] });
+    const enriched = await enrichPaymentLinks(usr);
+    return res.json({ status: true, paymentLinks: enriched });
   } catch (e) {
+    console.error("managePaymentLinks error:", e);
     return res.status(500).json({ status: false, message: "Payment link error" });
   }
 };
 
-// Admin Feature 4: Refunds & Dispute Resolution Center
+// Admin Feature 4: Refunds & Dispute Resolution Center (Manual Admin Intervention Required)
 export const manageRefunds = async (req, res) => {
   try {
     const { action, order, resolutionNote } = req.body;
@@ -432,9 +515,11 @@ export const manageRefunds = async (req, res) => {
       tx.status = "REFUNDED";
       tx.dispute = {
         raised: tx.dispute?.raised || true,
+        utr: tx.dispute?.utr || tx.submittedUtr || tx.utr || "",
         reason: tx.dispute?.reason || "Merchant initiated refund",
+        screenshot: tx.dispute?.screenshot || "",
         status: "REFUNDED",
-        adminNote: resolutionNote || "Refund approved and processed",
+        adminNote: resolutionNote || "Refund approved and processed by Admin",
         createdAt: tx.dispute?.createdAt || new Date()
       };
       await tx.save();
@@ -445,28 +530,29 @@ export const manageRefunds = async (req, res) => {
     }
 
     if (action === "RESOLVE") {
+      const verifiedUtr = tx.dispute?.utr || tx.submittedUtr || tx.utr || `ADM${Date.now().toString().slice(-9)}`;
       if (tx.dispute) {
         tx.dispute.status = "RESOLVED";
-        tx.dispute.adminNote = resolutionNote || "Verified & resolved by merchant";
+        tx.dispute.adminNote = resolutionNote || "Manually verified & approved by Admin";
       }
-      if (tx.submittedUtr && !tx.isPaid) {
+      if (!tx.isPaid) {
         tx.isPaid = true;
         tx.status = "PAID";
-        tx.utr = tx.submittedUtr;
+        tx.utr = verifiedUtr;
         tx.paymentDate = new Date();
         await user.updateOne({ MID }, { $inc: { wallet: tx.amount } });
       }
       await tx.save();
-      return res.json({ status: true, message: `Order ${order} resolved & reconciled!` });
+      return res.json({ status: true, message: `Order ${order} manually verified & settled (UTR: ${verifiedUtr})!` });
     }
 
     if (action === "REJECT") {
       if (tx.dispute) {
         tx.dispute.status = "REJECTED";
-        tx.dispute.adminNote = resolutionNote || "Claim rejected after bank verification";
+        tx.dispute.adminNote = resolutionNote || "Claim rejected after manual bank verification";
       }
       await tx.save();
-      return res.json({ status: true, message: `Dispute on ${order} closed` });
+      return res.json({ status: true, message: `Dispute on ${order} rejected by Admin` });
     }
 
     return res.json({ status: false, message: "Unknown action" });
@@ -494,7 +580,7 @@ export const rotateApiKey = async (req, res) => {
   }
 };
 
-// Admin Feature 6: Save Security & Operational Controls (Maintenance Mode, IP Whitelist, Order Limits, Auto-Settle)
+// Admin Feature 6: Save Security & Operational Controls
 export const saveSecurityConfig = async (req, res) => {
   try {
     const {
@@ -659,7 +745,7 @@ export const getCustomersList = async (req, res) => {
   }
 };
 
-// Admin Feature 10: Sandbox Payment Simulator (Mark an order Paid for testing end-to-end checkout & webhooks)
+// Admin Feature 10: Sandbox Payment Simulator
 export const simulateSandboxPayment = async (req, res) => {
   try {
     const { order } = req.body;
@@ -741,7 +827,7 @@ export const sendResetMail = async (req, res) => {
     const link = `${hostUrl}/user/reset/${token}`;
     usr.resettoken = token;
     const html = await parser("reset", { firstname: usr.firstname, link });
-    await mailer({ email: usr.email, firstname: usr.firstname, html, subject: "Reset your UPay password" });
+    await mailer({ email: usr.email, firstname: usr.firstname, html, subject: "Reset your UPay 2.0 password" });
     await usr.save();
     return res.json({ status: true, message: "Recovery link sent to your email!" });
   } catch (e) {
@@ -756,7 +842,7 @@ export const reset = async (req, res) => {
   if (!usr) return res.render("invalid");
   if (usr.resettokenexpireat > Date.now()) {
     const data = jwt.sign({ token }, process.env.JWT || "upay_secret_key", { expiresIn: "1h" });
-    return res.render("reset", { data });
+    return res.render("reset",{ data });
   }
   return res.render("invalid");
 };
@@ -807,7 +893,7 @@ export const resend = async (req, res) => {
     usr.activationotpexpireat = Date.now() + 600000;
     const { firstname } = usr;
     const html = await parser("otp", { firstname, otp: usr.activationotp });
-    await mailer({ email, firstname, html, subject: "OTP for UPay Account Activation" });
+    await mailer({ email, firstname, html, subject: "OTP for UPay 2.0 Account Activation" });
     await usr.save();
     const firstp = usr.email.split("@")[0];
     const msk = `${firstp.slice(0, 3)}xxxxx${firstp.slice(-1)}`;
@@ -827,7 +913,7 @@ export const paytmconf = async (req, res) => {
   return res.render("paytmconf", { paytm: req.user?.paytm });
 };
 
-// Admin Feature 12: JSON Transaction Telemetry API (No popup window / no reload needed)
+// Admin Feature 12: JSON Transaction Telemetry API
 export const transactionApi = async (req, res) => {
   try {
     const MID = req.user.MID;
@@ -860,7 +946,10 @@ export const transactionApi = async (req, res) => {
       tipAmount: order.tipAmount || 0,
       feeAmount: order.feeAmount || 0,
       order: order.order,
+      mode: order.mode || "UPI",
+      redirect: order.redirect || "/pay/thanks",
       utr: order.utr || order.submittedUtr || "Pending",
+      submittedUtr: order.submittedUtr || "",
       isPaid: order.isPaid,
       orderStatus: order.status || (order.isPaid ? "PAID" : "PENDING"),
       payment_date: order.paymentDate ? new Date(order.paymentDate).toLocaleString() : "Awaiting Settlement",
@@ -971,7 +1060,7 @@ export const paytmcnf = async (req, res) => {
       status: true,
       qrDataUrl,
       paytm: usr.paytm,
-      message: "UPI Gateway Rails Configured & Verified!"
+      message: "UPay 2.0 UPI Gateway Rails Configured & Verified!"
     });
   } catch (e) {
     return res.status(500).json({ status: false, message: "Failed to configure Paytm rails" });

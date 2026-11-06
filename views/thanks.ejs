@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%- include('partials/seo', {
-        pageTitle: `Payment Receipt ₹${Number(typeof amount !== 'undefined' ? amount : 1499).toLocaleString('en-IN')} | UPay PhonePe Verified`,
-        pageDesc: `Official UPI payment receipt for Order #${typeof ORDERID !== 'undefined' ? ORDERID : 'VERIFIED'}.`,
+        pageTitle: `Payment Receipt ₹${Number(typeof amount !== 'undefined' ? amount : 1499).toLocaleString('en-IN')} | UPay 2.0 Verified`,
+        pageDesc: `Official UPay 2.0 payment receipt for Order #${typeof ORDERID !== 'undefined' ? ORDERID : 'VERIFIED'}.`,
         canonicalUrl: 'https://u-pay-seven.vercel.app/pay/thanks',
         robotsMeta: 'noindex, nofollow'
     }) %>
@@ -33,7 +33,7 @@
                     ✓
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-extrabold bg-white/15 text-white border border-white/20">
-                    PhonePe UPI Verified Receipt
+                    UPay 2.0 Verified Receipt
                 </span>
                 <h1 class="text-2xl font-extrabold mt-2 tracking-tight">Payment Successful</h1>
                 <div class="mt-4 flex items-baseline justify-center">
@@ -59,7 +59,7 @@
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-bold text-xs uppercase tracking-wider">Payment Rail</span>
-                    <span class="text-slate-800 font-extrabold text-xs">PhonePe / UPI Instant</span>
+                    <span class="text-slate-800 font-extrabold text-xs">UPay 2.0 Instant UPI</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 font-bold text-xs uppercase tracking-wider">Timestamp</span>
@@ -68,7 +68,7 @@
             </div>
 
             <div class="bg-purple-50/70 px-6 py-4 flex items-center justify-between border-t border-purple-100">
-                <p class="text-xs text-[#5f259f] font-extrabold">256-Bit Bank Verified</p>
+                <p class="text-xs text-[#5f259f] font-extrabold">UPay 2.0 • 256-Bit Verified</p>
                 <button type="button" onclick="window.print()" class="no-print text-xs font-extrabold text-[#5f259f] hover:underline cursor-pointer">
                     Print Receipt
                 </button>

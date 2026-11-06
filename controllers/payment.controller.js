@@ -32,7 +32,6 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Convenience Fee Pass-Through calculation if enabled by Admin
     let feeAmount = 0;
     if (checkoutConfig?.passFeeToCustomer && checkoutConfig?.convenienceFeePercent > 0) {
       feeAmount = Number(((rawAmount * checkoutConfig.convenienceFeePercent) / 100).toFixed(2));
@@ -40,6 +39,15 @@ const createOrder = async (req, res) => {
     const finalAmount = Number((rawAmount + feeAmount).toFixed(2));
 
     const mode = req.body.mode || req.mode || "UPI DEPOSIT";
+
+    // Redirect logic:
+    // - If created via external API (req.mode === "PORTAL"), redirect user to merchant's configured redirect URL.
+    // - If created manually by Admin in Dashboard / Payment Link, ALWAYS redirect to "/pay/thanks".
+    const isApiOrder = req.mode === "PORTAL";
+    const resolvedRedirect = isApiOrder
+      ? (req.body.redirect || redirect || "/pay/thanks")
+      : "/pay/thanks";
+
     req.customer = req.customer
       ? req.customer
       : {
@@ -65,15 +73,15 @@ const createOrder = async (req, res) => {
       MID,
       mode,
       company,
-      redirect,
-      callback,
+      redirect: resolvedRedirect,
+      callback: isApiOrder ? callback : (req.body.callback || callback),
       customerName,
       customerPhone: customerMobile,
       customerEmail,
       customerNote: req.body.customerNote || "",
       upaytr,
       paytm: paytmdata,
-      selectedTheme: checkoutConfig?.defaultTheme || "phonepe"
+      selectedTheme: checkoutConfig?.defaultTheme || "upay2"
     });
     await pay.save();
 
@@ -91,6 +99,7 @@ const createOrder = async (req, res) => {
       amount: finalAmount,
       baseAmount: rawAmount,
       feeAmount,
+      redirect: resolvedRedirect,
       qrDataUrl,
       intent,
       message: "Order Created Successfully",

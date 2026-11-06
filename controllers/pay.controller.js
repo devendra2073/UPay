@@ -5,6 +5,7 @@ import clientModel from "../schema/clientModel.js";
 import jwt from "jsonwebtoken";
 import parser from "../utils/templateParser.js";
 import sendMail from "../utils/mailer.js";
+import upload from "../utils/cloud.js";
 import paymentModel from "../schema/payment.model.js";
 import user from "../schema/user.model.js";
 
@@ -15,6 +16,29 @@ const buildUpiQr = async (info) => {
   const intent = `upi://pay?${commonParams}`;
   const obj = await QRCode.toDataURL(intent, { width: 320, margin: 2 });
   return { upi, commonParams, intent, obj };
+};
+
+// Helper to store screenshot via Cloudinary if configured, or keep base64 data URI
+const processScreenshotUpload = async (screenshotData) => {
+  if (!screenshotData || typeof screenshotData !== "string") return "";
+  if (screenshotData.startsWith("http://") || screenshotData.startsWith("https://")) {
+    return screenshotData;
+  }
+  if (screenshotData.startsWith("data:image/") && process.env.my_cloud_name && process.env.my_key && process.env.my_secret) {
+    try {
+      const base64Part = screenshotData.split(",")[1];
+      if (base64Part) {
+        const buffer = Buffer.from(base64Part, "base64");
+        const uploaded = await upload(buffer);
+        if (uploaded && uploaded.secure_url) {
+          return uploaded.secure_url;
+        }
+      }
+    } catch (err) {
+      console.warn("Cloudinary screenshot upload fallback to inline data URI:", err.message);
+    }
+  }
+  return screenshotData;
 };
 
 export const paymentPage = async (req, res) => {
@@ -30,7 +54,7 @@ export const paymentPage = async (req, res) => {
 
     const merchant = await user.findOne({ MID: info.MID });
     const checkoutConfig = merchant?.checkoutConfig || {
-      defaultTheme: "phonepe",
+      defaultTheme: "upay2",
       allowCustomerThemeChange: true,
       allowCustomTheme: true,
       customTheme: {
@@ -41,7 +65,7 @@ export const paymentPage = async (req, res) => {
         text: "#0f172a",
         radius: "24px"
       },
-      tagline: "100% Safe & Instant UPI Checkout",
+      tagline: "UPay 2.0 • 100% Safe & Instant UPI Checkout",
       enableTips: true,
       enableCoupons: true,
       enableSplitBill: true,
@@ -50,7 +74,8 @@ export const paymentPage = async (req, res) => {
     };
 
     const { upi, commonParams, intent, obj } = await buildUpiQr(info);
-    const { amount, company, logo } = info;
+    const { amount, company } = info;
+    const logo = merchant?.pic || info.logo;
     const baseAmount = info.baseAmount || amount;
     const redirect = info.redirect || "/pay/thanks";
 
@@ -63,7 +88,7 @@ export const paymentPage = async (req, res) => {
       couponCode: info.couponCode || "",
       tipAmount: info.tipAmount || 0,
       feeAmount: info.feeAmount || 0,
-      company,
+      company: merchant?.company || company,
       tid,
       upaytr: info.upaytr,
       redirect,
@@ -73,7 +98,7 @@ export const paymentPage = async (req, res) => {
       customerEmail: info.customerEmail || "",
       customerPhone: info.customerPhone || "",
       customerNote: info.customerNote || "",
-      selectedTheme: info.selectedTheme || checkoutConfig.defaultTheme || "phonepe",
+      selectedTheme: info.selectedTheme || checkoutConfig.defaultTheme || "upay2",
       checkoutConfig,
       upiParams: commonParams.replace(/&amp;/g, "&")
     });
@@ -128,9 +153,8 @@ export const applyCoupon = async (req, res) => {
     const merchant = await user.findOne({ MID: info.MID });
     const coupons = merchant?.coupons || [];
 
-    // Built-in fallback promo codes + Merchant-created promo codes
     const defaultCoupons = [
-      { code: "PHONEPE10", type: "PERCENT", value: 10, minOrder: 10, maxDiscount: 250, active: true },
+      { code: "UPAY10", type: "PERCENT", value: 10, minOrder: 10, maxDiscount: 250, active: true },
       { code: "UPAY20", type: "PERCENT", value: 20, minOrder: 100, maxDiscount: 500, active: true },
       { code: "WELCOME50", type: "FLAT", value: 50, minOrder: 150, maxDiscount: 50, active: true }
     ];
@@ -215,11 +239,11 @@ export const applyTip = async (req, res) => {
   }
 };
 
-// Customer Feature API 3: Manual 12-Digit UTR Instant Verification without reload
+// Customer Feature API 3: Manual UTR Submission (Logs for Admin Manual Intervention — NEVER auto-resolves!)
 export const submitManualUtr = async (req, res) => {
   try {
     const { tid } = req.params;
-    const { utr } = req.body;
+    const { utr, query, screenshot } = req.body;
     const cleanUtr = String(utr || "").trim();
     if (!/^\d{12}$/.test(cleanUtr)) {
       return res.json({ status: false, message: "Please enter a valid 12-digit numeric UPI UTR / Reference ID" });
@@ -231,14 +255,24 @@ export const submitManualUtr = async (req, res) => {
       return res.json({ status: true, state: "SUCCESS", utr: info.utr || cleanUtr, message: "Payment already verified!" });
     }
 
+    const screenshotUrl = screenshot ? await processScreenshotUpload(screenshot) : (info.dispute?.screenshot || "");
+
     info.submittedUtr = cleanUtr;
+    info.dispute = {
+      raised: true,
+      utr: cleanUtr,
+      reason: query ? String(query).trim() : `Customer submitted UTR #${cleanUtr} for manual verification`,
+      screenshot: screenshotUrl,
+      status: "OPEN",
+      createdAt: new Date()
+    };
     await info.save();
 
     return res.json({
       status: true,
-      state: "SUBMITTED",
+      state: "SUBMITTED_FOR_ADMIN",
       utr: cleanUtr,
-      message: `UTR #${cleanUtr} recorded & queued for instant bank reconciliation.`
+      message: `UTR #${cleanUtr} submitted for Admin verification. Our team will verify and approve your payment shortly.`
     });
   } catch (e) {
     return res.status(500).json({ status: false, message: "Unable to submit UTR" });
@@ -312,38 +346,48 @@ export const submitPaymentFeedback = async (req, res) => {
       submittedAt: new Date()
     };
     await info.save();
-    return res.json({ status: true, message: "Thank you for rating your UPay experience!" });
+    return res.json({ status: true, message: "Thank you for rating your UPay 2.0 experience!" });
   } catch (e) {
     return res.status(500).json({ status: false, message: "Unable to save feedback" });
   }
 };
 
-// Customer Feature API 7: Raise Support / Dispute Ticket on Order
+// Customer Feature API 7: Raise Support / Dispute Ticket with Screenshot + UTR + Query (Manual Admin Resolution Only)
 export const raisePaymentDispute = async (req, res) => {
   try {
     const { tid } = req.params;
-    const { reason, utr } = req.body;
+    const { reason, utr, screenshot } = req.body;
+    const cleanUtr = String(utr || "").trim();
+    if (!cleanUtr || !/^\d{12}$/.test(cleanUtr)) {
+      return res.json({ status: false, message: "Please provide a valid 12-digit UTR number" });
+    }
     if (!reason || !reason.trim()) {
-      return res.json({ status: false, message: "Please describe your issue" });
+      return res.json({ status: false, message: "Please enter your query / issue description" });
     }
     const info = await paymentModel.findOne({ order: tid });
     if (!info) return res.json({ status: false, message: "Order not found" });
 
+    const screenshotUrl = await processScreenshotUpload(screenshot);
+
+    info.submittedUtr = cleanUtr;
     info.dispute = {
       raised: true,
-      reason: reason.trim() + (utr ? ` (UTR: ${utr})` : ""),
+      utr: cleanUtr,
+      reason: reason.trim(),
+      screenshot: screenshotUrl,
       status: "OPEN",
       createdAt: new Date()
     };
-    if (utr) info.submittedUtr = String(utr).trim();
     await info.save();
 
     return res.json({
       status: true,
-      message: "Support ticket logged with Merchant Dispute Desk. Ticket ID: #DSP-" + info.upaytr.slice(0, 6).toUpperCase()
+      ticketId: `DSP-${info.upaytr.slice(0, 6).toUpperCase()}`,
+      message: `Dispute #DSP-${info.upaytr.slice(0, 6).toUpperCase()} submitted with UTR & screenshot. Pending manual Admin review.`
     });
   } catch (e) {
-    return res.status(500).json({ status: false, message: "Unable to submit ticket" });
+    console.error("raisePaymentDispute error:", e);
+    return res.status(500).json({ status: false, message: "Unable to submit dispute ticket" });
   }
 };
 
@@ -352,7 +396,7 @@ export const setPaymentTheme = async (req, res) => {
   try {
     const { tid } = req.params;
     const { theme } = req.body;
-    await paymentModel.updateOne({ order: tid }, { $set: { selectedTheme: theme || "phonepe" } });
+    await paymentModel.updateOne({ order: tid }, { $set: { selectedTheme: theme || "upay2" } });
     return res.json({ status: true, theme });
   } catch (e) {
     return res.json({ status: false });
@@ -410,12 +454,22 @@ export const paymentStatus = async (req, res) => {
       });
     }
 
-    const verifyUrl = `https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData=${encodeURIComponent(
-      JSON.stringify({ MID: paytmMid, ORDERID })
-    )}`;
-
-    const response = await fetch(verifyUrl);
-    const info = await response.json();
+    // Paytm Status Call: If Paytm returns Invalid Order ID or TXN_FAILURE before user pays,
+    // DO NOT expire the QR or return FAILED — keep returning PENDING until client timer expires!
+    let info = {};
+    try {
+      const verifyUrl = `https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData=${encodeURIComponent(
+        JSON.stringify({ MID: paytmMid, ORDERID })
+      )}`;
+      const response = await fetch(verifyUrl);
+      info = await response.json();
+    } catch (fetchErr) {
+      return res.status(200).json({
+        status: false,
+        state: "PENDING",
+        message: "Waiting for payment completion"
+      });
+    }
 
     const isAmountValid = parseFloat(info.TXNAMOUNT) === parseFloat(dbresp.amount);
     const isStatusSuccess = info.STATUS === "TXN_SUCCESS";
@@ -512,14 +566,8 @@ export const paymentStatus = async (req, res) => {
       return res.status(200).json({ status: true, state: "SUCCESS", utr: info.BANKTXNID });
     }
 
-    if (info.STATUS === "TXN_FAILURE") {
-      return res.status(200).json({
-        status: false,
-        state: "FAILED",
-        message: info.RESPMSG || "Transaction declined by bank"
-      });
-    }
-
+    // Even if Paytm returns Invalid Order ID or TXN_FAILURE, do NOT expire the QR early.
+    // Keep returning PENDING so client polling continues until the countdown timer expires.
     return res.status(200).json({
       status: false,
       state: "PENDING",
@@ -527,7 +575,7 @@ export const paymentStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("paymentStatus error:", error);
-    return res.status(500).json({ status: false, state: "ERROR", message: "Internal server error" });
+    return res.status(200).json({ status: false, state: "PENDING", message: "Waiting for payment completion" });
   }
 };
 

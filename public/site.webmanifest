@@ -1,7 +1,7 @@
 {
-  "name": "UPay — Instant UPI Payment Gateway",
-  "short_name": "UPay",
-  "description": "PhonePe-inspired direct-to-account UPI payment gateway with zero transaction fees, 6+ custom themes, and real-time HMAC webhooks.",
+  "name": "UPay 2.0 — Instant UPI Payment Gateway",
+  "short_name": "UPay 2.0",
+  "description": "UPay 2.0 direct-to-account UPI payment gateway with zero transaction fees, 7+ custom themes, and real-time HMAC webhooks.",
   "start_url": "/user/dashboard",
   "scope": "/",
   "display": "standalone",

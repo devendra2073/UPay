@@ -27,8 +27,9 @@ if (URI) {
 const app = express();
 app.use(cors());
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Allow up to 12MB JSON payloads for base64 dispute screenshots & merchant logo uploads
+app.use(express.json({ limit: "12mb" }));
+app.use(express.urlencoded({ extended: true, limit: "12mb" }));
 app.use(express.static(path.join(import.meta.dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(import.meta.dirname, "views"));
@@ -92,5 +93,5 @@ app.get("/*path", async (req, res) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running at ${PORT}`);
+  console.log(`UPay 2.0 Server running at ${PORT}`);
 });

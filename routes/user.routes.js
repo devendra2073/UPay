@@ -14,6 +14,7 @@ import {
   transections,
   balance,
   profile,
+  updateLogo,
   callback,
   forgot,
   sendResetMail,
@@ -71,11 +72,13 @@ router.post("/dashboard/bank", bank);
 router.get("/dashboard/transaction/:upaytr", transaction);
 router.get("/dashboard/api/transaction/:upaytr", transactionApi);
 router.post("/dashboard/profile", profile);
+router.post("/dashboard/logo", updateLogo);
 router.post("/dashboard/callback", callback);
 
-// 10+ New Admin Panel APIs (Zero Page Reload)
+// Admin Panel APIs (Zero Page Reload)
 router.post("/dashboard/theme-config", saveThemeConfig);
 router.post("/dashboard/coupons", manageCoupons);
+router.get("/dashboard/payment-links", managePaymentLinks);
 router.post("/dashboard/payment-links", managePaymentLinks);
 router.post("/dashboard/refunds", manageRefunds);
 router.post("/dashboard/rotate-api-key", rotateApiKey);

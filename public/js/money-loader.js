@@ -1,6 +1,6 @@
 /**
- * UPay Minimal Money Loader & Global API Fetch Interceptor
- * Provides a sleek PhonePe-inspired floating Rupee coin loader for API calls without page reloads.
+ * UPay 2.0 Minimal Money Loader & Global API Fetch Interceptor
+ * Provides a sleek floating Rupee coin loader for API calls without page reloads.
  */
 (function () {
   const style = document.createElement("style");
@@ -127,7 +127,7 @@
         </div>
         <div class="upay-loader-text">
           <span id="upay-loader-label">Processing Request</span>
-          <span class="upay-loader-sub">PhonePe UPI Rail • 256-Bit</span>
+          <span class="upay-loader-sub">UPay 2.0 Rail • 256-Bit</span>
         </div>
       </div>
     `;
@@ -166,7 +166,6 @@
     }
   };
 
-  // Intercept fetch calls automatically (except silent background status polling)
   const originalFetch = window.fetch.bind(window);
   window.fetch = async function (input, init = {}) {
     const url = typeof input === "string" ? input : (input?.url || "");
@@ -177,10 +176,11 @@
     let customLabel = init.loaderText || "Processing Transaction...";
     if (url.includes("coupon")) customLabel = "Applying Promo Savings...";
     else if (url.includes("tip")) customLabel = "Updating Gratitude Tip...";
-    else if (url.includes("verify-utr")) customLabel = "Verifying Bank UTR...";
+    else if (url.includes("verify-utr") || url.includes("dispute")) customLabel = "Submitting Dispute & Screenshot...";
     else if (url.includes("refresh-qr")) customLabel = "Generating Fresh QR...";
     else if (url.includes("withdraw")) customLabel = "Initiating Bank Payout...";
-    else if (url.includes("create-order") || url.includes("payment-links")) customLabel = "Minting UPI Order...";
+    else if (url.includes("create-order") || url.includes("payment-links")) customLabel = "Minting UPay 2.0 Order...";
+    else if (url.includes("logo")) customLabel = "Uploading Merchant Logo...";
     else if (url.includes("theme")) customLabel = "Saving Theme Studio...";
     else if (url.includes("balance")) customLabel = "Syncing Wallet Liquidity...";
 
