@@ -3,127 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPay - Verify OTP</title>
+    <%- include('partials/seo', {
+        pageTitle: 'Verify Merchant OTP | UPay Business Security',
+        pageDesc: 'Verify your 6-digit security code to activate your UPay Business UPI gateway account.',
+        canonicalUrl: 'https://u-pay-seven.vercel.app/user/verify',
+        robotsMeta: 'noindex, nofollow'
+    }) %>
+    <script src="/js/money-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .otp-input:focus { transform: translateY(-2px); }
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top center, #ede9fe 0%, #f5f0ff 55%, #f8fafc 100%);
         }
+        .otp-input:focus { transform: translateY(-2px); border-color: #5f259f; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-indigo-100 min-h-screen flex items-center justify-center p-6 font-sans">
+<body class="min-h-screen flex items-center justify-center p-6">
 
-    <div class="max-w-md w-full fade-in">
-        <div class="text-center mb-8">
-            <div class="inline-block p-3 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-200 mb-4">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                </svg>
+    <div class="max-w-md w-full">
+        <div class="text-center mb-7">
+            <div class="w-14 h-14 rounded-2xl bg-[#5f259f] text-white font-black text-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-200">
+                &#8377;
             </div>
-            <h1 class="text-2xl font-bold text-slate-800">Verify Your Identity</h1>
-            <p class="text-slate-500 mt-1">We've sent a 6-digit code to your email.</p>
+            <h1 class="text-2xl font-extrabold text-slate-900">Verify Your Identity</h1>
+            <p class="text-slate-500 text-xs font-medium mt-1">Enter the 6-digit activation OTP sent to your registered email.</p>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
-            <div class="grid grid-cols-6 gap-2 sm:gap-3 mb-8" id="otp-container">
-                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-[3/4] sm:aspect-square text-center text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
-                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-[3/4] sm:aspect-square text-center text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
-                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-[3/4] sm:aspect-square text-center text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
-                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-[3/4] sm:aspect-square text-center text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
-                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-[3/4] sm:aspect-square text-center text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
-                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-[3/4] sm:aspect-square text-center text-2xl font-bold border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
+        <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-purple-100">
+            <div class="grid grid-cols-6 gap-2 sm:gap-3 mb-7" id="otp-container">
+                <% for(let i=0; i<6; i++) { %>
+                <input type="text" maxlength="1" inputmode="numeric" class="otp-input w-full aspect-square text-center text-2xl font-extrabold border-2 border-slate-200 rounded-xl outline-none transition-all">
+                <% } %>
             </div>
 
-            <button onclick="verifyOTP()" id="verify-btn" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-200 active:scale-[0.98]">
-                Verify Code
+            <button onclick="verifyOTP()" id="verify-btn" class="w-full bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white font-extrabold py-3.5 rounded-xl hover:opacity-95 transition shadow-lg shadow-purple-200 cursor-pointer text-sm">
+                Verify & Activate Merchant Account
             </button>
-<div class="text-center mt-6">
-    <p class="text-slate-500 text-sm">
-        Didn't receive code? 
-        <button id="resend-btn" onclick="resendOTP()" class="text-indigo-600 font-bold hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed">
-            Resend
-        </button>
-        <span id="timer-text" class="text-slate-400 ml-1 hidden">(<span id="timer">60</span>s)</span>
-    </p>
-</div>
+
+            <div class="text-center mt-6">
+                <p class="text-slate-500 text-xs font-semibold">
+                    Didn't receive the OTP?
+                    <button id="resend-btn" onclick="resendOTP()" class="text-[#5f259f] font-extrabold hover:underline disabled:text-slate-400 cursor-pointer ml-1">
+                        Resend OTP
+                    </button>
+                    <span id="timer-text" class="text-slate-400 ml-1 hidden">(<span id="timer">60</span>s)</span>
+                </p>
+            </div>
         </div>
     </div>
 
     <script>
         const inputs = document.querySelectorAll('.otp-input');
-         
-    let timerInterval;
-    const resendBtn = document.getElementById('resend-btn');
-    const timerText = document.getElementById('timer-text');
-    const timerDisplay = document.getElementById('timer');
+        let timerInterval;
+        const resendBtn = document.getElementById('resend-btn');
+        const timerText = document.getElementById('timer-text');
+        const timerDisplay = document.getElementById('timer');
 
-    function startTimer(seconds = 60) {
-        // Reset UI state
-        resendBtn.disabled = true;
-        timerText.classList.remove('hidden');
-        let timeLeft = seconds;
-        
-        timerDisplay.innerText = timeLeft;
-
-        timerInterval = setInterval(() => {
-            timeLeft--;
+        function startTimer(seconds = 60) {
+            resendBtn.disabled = true;
+            timerText.classList.remove('hidden');
+            let timeLeft = seconds;
             timerDisplay.innerText = timeLeft;
 
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                resendBtn.disabled = false;
-                timerText.classList.add('hidden');
-            }
-        }, 1000);
-    }
-
-    async function resendOTP() {
-        // Prevent action if already counting down
-        if (resendBtn.disabled) return;
-
-        try {
-            // Optional: Call your backend to trigger a new email
-            const resp= await fetch('/user/resend-otp', { method: 'POST' })
-             const res=await resp.json()
-             if(res.status){
-               tst(res.message);
-            startTimer(60); // Start 60s cooldown
-            return 0;
-             }
-          tst("Failed to resend code", true);  
-            
-        } catch (err) {
-            tst("Failed to resend code", true);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    resendBtn.disabled = false;
+                    timerText.classList.add('hidden');
+                }
+            }, 1000);
         }
-    }
 
-    // Optional: Start the timer automatically when page loads
-     window.onload = () => startTimer(30);
-        
-        function tst(text, isError = false) {    
+        async function resendOTP() {
+            if (resendBtn.disabled) return;
+            try {
+                const resp = await fetch('/user/resend-otp', { method: 'POST' });
+                const res = await resp.json();
+                if (res.status) {
+                    tst(res.message);
+                    startTimer(60);
+                    return;
+                }
+                tst(res.message || "Failed to resend code", true);
+            } catch (err) {
+                tst("Failed to resend code", true);
+            }
+        }
+
+        window.onload = () => startTimer(30);
+
+        function tst(text, isError = false) {
             Toastify({
                 text,
-                style: { background: isError ? "linear-gradient(to right, #ff5f6d, #ffc371)" : "linear-gradient(to right, #4f46e5, #818cf8)" }
+                style: { background: isError ? "#e11d48" : "linear-gradient(135deg, #5f259f, #7c3aed)", borderRadius: "12px", fontSize: "12px", fontWeight: "700" }
             }).showToast();
-            navigator.vibrate(250)
         }
 
-        // Logic for auto-focus and navigation
         inputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 if (e.target.value && index < inputs.length - 1) inputs[index + 1].focus();
             });
-
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.value && index > 0) inputs[index - 1].focus();
             });
-
-            // Desktop Paste Support
             input.addEventListener('paste', (e) => {
                 const data = e.clipboardData.getData('text').slice(0, 6);
                 if (/^\d+$/.test(data)) {
@@ -140,8 +128,6 @@
 
             const btn = document.getElementById('verify-btn');
             btn.disabled = true;
-            btn.innerText = "Verifying...";
-
             try {
                 const response = await fetch('/user/verify', {
                     method: 'POST',
@@ -149,7 +135,6 @@
                     body: JSON.stringify({ otp })
                 });
                 const result = await response.json();
-
                 if (result.status) {
                     tst("Verification Successful!");
                     location.href = "/user/dashboard";
@@ -160,7 +145,6 @@
                 tst("Connection error", true);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Verify Code";
             }
         }
     </script>

@@ -3,138 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPay - Login & Registration</title>
+    <%- include('partials/seo', {
+        pageTitle: 'UPay Business Login & Merchant Onboarding | PhonePe-Style UPI Gateway',
+        pageDesc: 'Sign in or create your UPay Business account to accept 0% fee instant UPI payments with dynamic QR codes, 7+ checkout themes, and signed HMAC webhooks.',
+        canonicalUrl: 'https://u-pay-seven.vercel.app/user/login'
+    }) %>
+    <script src="/js/money-loader.js"></script>
     <script src="/js/google.js" defer=""></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top center, #ede9fe 0%, #f5f0ff 55%, #f8fafc 100%);
+        }
+        .fade-in { animation: fadeIn 0.35s ease-in-out; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .hidden-form { display: none; }
-        
-        .spinner {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 2px solid #fff;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 8px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-indigo-100 min-h-screen flex items-center justify-center p-6 font-sans">
+<body class="min-h-screen flex items-center justify-center p-5">
 
     <div class="max-w-md w-full">
-        <div class="text-center mb-8">
-            <div class="inline-block p-3  mb-2">
-                <img src="/upay.png" alt="upay" class="h-15 object-contain"/>
+        <div class="text-center mb-7">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#5f259f] to-[#7c3aed] text-white font-black text-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-300">
+                &#8377;
             </div>
-            <h1 class="text-2xl font-bold text-slate-800" id="page-title">Welcome Back</h1>
-            <p class="text-slate-500 mt-1" id="page-subtitle">Please enter your details to sign in.</p>
+            <span class="px-3 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase tracking-wider">PhonePe Business Rail</span>
+            <h1 class="text-2xl font-extrabold text-slate-900 mt-2" id="page-title">Welcome Back to UPay</h1>
+            <p class="text-slate-500 text-xs font-medium mt-1" id="page-subtitle">Sign in to manage your UPI terminal, themes, and instant payouts.</p>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
-            
-            <form id="login-form" class="space-y-5 fade-in">
+        <div class="bg-white rounded-3xl shadow-xl shadow-purple-900/5 p-7 sm:p-8 border border-purple-100">
+
+            <form id="login-form" class="space-y-4 fade-in">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-                    <input type="email" name="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">Merchant Email</label>
+                    <input type="email" name="email" required placeholder="merchant@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#5f259f] outline-none text-sm font-semibold transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-                    <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+                    <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#5f259f] outline-none text-sm font-semibold transition-all">
                 </div>
-                
-                <div class="flex justify-center py-2">
+
+                <div class="flex justify-center py-1">
                     <div class="g-recaptcha" data-sitekey="6Lcaq4csAAAAAJwVD8N3_NP8ToFWYBnrU7baLOnc"></div>
                 </div>
 
-                <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center justify-between text-xs font-semibold">
                     <label class="flex items-center text-slate-600 cursor-pointer">
-                        <input type="checkbox" name="remember" class="mr-2 rounded border-gray-300 text-indigo-600"> Remember me
+                        <input type="checkbox" name="remember" class="mr-2 rounded accent-[#5f259f]"> Keep me signed in
                     </label>
-                    <a href="/user/forgot-password" class="text-indigo-600 font-semibold hover:text-indigo-700">Forgot password?</a>
+                    <a href="/user/forgot-password" class="text-[#5f259f] font-extrabold hover:underline">Forgot password?</a>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-200 active:scale-[0.98] flex items-center justify-center">
-                    <span>Sign In</span>
+                <button type="submit" class="w-full bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white font-extrabold py-3.5 rounded-xl hover:opacity-95 transition shadow-lg shadow-purple-200 active:scale-[0.98] flex items-center justify-center text-sm cursor-pointer">
+                    <span>Sign In to Merchant Hub</span>
                 </button>
             </form>
 
             <form id="register-form" class="space-y-4 fade-in hidden-form">
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">First Name</label>
-                        <input type="text" name="firstname" required placeholder="John" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">First Name</label>
+                        <input type="text" name="firstname" required placeholder="Aarav" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#5f259f] outline-none text-sm font-semibold">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Last Name</label>
-                        <input type="text" name="lastname" required placeholder="Doe" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">Last Name</label>
+                        <input type="text" name="lastname" required placeholder="Sharma" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#5f259f] outline-none text-sm font-semibold">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-                    <input type="email" name="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">Business Email</label>
+                    <input type="email" name="email" required placeholder="founder@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#5f259f] outline-none text-sm font-semibold">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Create Password</label>
-                    <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">Create Password</label>
+                    <input type="password" name="password" required placeholder="Min 6 characters" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#5f259f] outline-none text-sm font-semibold">
                 </div>
 
-                <div class="flex justify-center py-2">
+                <div class="flex justify-center py-1">
                     <div class="g-recaptcha" data-sitekey="6Lcaq4csAAAAAJwVD8N3_NP8ToFWYBnrU7baLOnc"></div>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-200 mt-2 flex items-center justify-center">
-                    <span>Create Account</span>
+                <button type="submit" class="w-full bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white font-extrabold py-3.5 rounded-xl hover:opacity-95 transition shadow-lg shadow-purple-200 flex items-center justify-center text-sm cursor-pointer">
+                    <span>Create Free Merchant Account</span>
                 </button>
             </form>
 
-            <div class="relative my-8">
+            <div class="relative my-6">
                 <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-100"></span></div>
-                <div class="relative flex justify-center text-xs uppercase">
-                    <span class="bg-white px-4 text-slate-400 tracking-widest font-medium">Or continue with</span>
+                <div class="relative flex justify-center text-[11px] uppercase">
+                    <span class="bg-white px-3 text-slate-400 tracking-widest font-bold">Or Instant One-Tap</span>
                 </div>
             </div>
 
-        
-                <div id="buttonDiv"></div>
-               
-            
+            <div id="buttonDiv" class="flex justify-center"></div>
         </div>
 
-        <p class="text-center mt-8 text-slate-500 font-medium">
-            <span id="toggle-text">Don't have an account?</span>
-            <button id="toggle-btn" class="text-indigo-600 font-bold hover:underline ml-1 cursor-pointer">Sign up</button>
+        <p class="text-center mt-6 text-slate-600 text-xs font-semibold">
+            <span id="toggle-text">New to UPay Business?</span>
+            <button id="toggle-btn" class="text-[#5f259f] font-extrabold hover:underline ml-1 cursor-pointer">Create Merchant Account</button>
         </p>
     </div>
+
     <script>
-        function tst(text, type = 'success') {    
+        function tst(text, type = 'success') {
             Toastify({
                 text: text,
                 duration: 3000,
                 close: true,
                 gravity: "top",
-                position: "right",
+                position: "center",
                 style: {
-                    background: type === 'success' ? "#4f46e5" : "#ef4444",
+                    background: type === 'success' ? "linear-gradient(135deg, #5f259f, #7c3aed)" : "#e11d48",
                     borderRadius: "12px",
+                    fontSize: "12px",
+                    fontWeight: "700"
                 }
             }).showToast();
-if(navigator.vibrate){
-            navigator.vibrate(300)
-}
         }
 
         const loginForm = document.getElementById('login-form');
@@ -151,42 +144,38 @@ if(navigator.vibrate){
             isLogin = !isLogin;
             loginForm.classList.toggle('hidden-form');
             registerForm.classList.toggle('hidden-form');
-            grecaptcha.reset(); // Reset captcha when switching forms
-            
+            if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
+
             if (isLogin) {
-                pageTitle.innerText = "Welcome Back";
-                pageSubtitle.innerText = "Please enter your details to sign in.";
-                toggleText.innerText = "Don't have an account?";
-                toggleBtn.innerText = "Sign up";
+                pageTitle.innerText = "Welcome Back to UPay";
+                pageSubtitle.innerText = "Sign in to manage your UPI terminal, themes, and instant payouts.";
+                toggleText.innerText = "New to UPay Business?";
+                toggleBtn.innerText = "Create Merchant Account";
             } else {
-                pageTitle.innerText = "Create Account";
-                pageSubtitle.innerText = "Join us today and start your journey.";
-                toggleText.innerText = "Already have an account?";
-                toggleBtn.innerText = "Log in";
+                pageTitle.innerText = "Create Merchant Account";
+                pageSubtitle.innerText = "Start accepting 0% fee direct-to-bank UPI payments in 60 seconds.";
+                toggleText.innerText = "Already registered?";
+                toggleBtn.innerText = "Sign in";
             }
         });
 
         async function handleFormSubmit(event, endpoint) {
             event.preventDefault();
             const form = event.target;
-            
-            // --- reCAPTCHA Validation ---
-            const captchaResponse = grecaptcha.getResponse(isLogin ? 0 : 1);
+            const captchaResponse = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse(isLogin ? 0 : 1) : '';
             if (!captchaResponse) {
-                return tst("Please verify that you are not a robot!", "error");
+                return tst("Please complete the reCAPTCHA check!", "error");
             }
 
             const submitBtn = form.querySelector('button[type="submit"]');
             const btnSpan = submitBtn.querySelector('span');
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            
-            // Send captcha response to backend
             data['g-recaptcha-response'] = captchaResponse;
 
             const originalText = btnSpan.innerText;
             submitBtn.disabled = true;
-            btnSpan.innerHTML = `<span class="spinner"></span> Processing...`;
+            btnSpan.innerText = "Authenticating...";
 
             try {
                 const response = await fetch(endpoint, {
@@ -194,22 +183,22 @@ if(navigator.vibrate){
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
                 const result = await response.json();
 
                 if (response.ok && result.status) {
-                    tst(result.message || "Action Successful!");
-                    setTimeout(() => {
-                        window.location.href = (endpoint === "/user/register") ? "/user/verify" : "/user/dashboard";
-                    }, 1200);
+                    tst(result.message || "Success!", "success");
+                    form.reset();
+                    location.href = result.redirect || "/user/dashboard";
                 } else {
-                    tst(result.message || "An error occurred", "error");
-                    grecaptcha.reset(); // Reset on error so they can try again
-                    if (result.rdr) location.href = result.rdr;
+                    if (result.rdr) {
+                        location.href = result.rdr;
+                        return;
+                    }
+                    tst(result.message || "Authentication failed", "error");
+                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(isLogin ? 0 : 1);
                 }
             } catch (error) {
-                tst("Server connection failed.", "error");
-                grecaptcha.reset();
+                tst("Network error. Please try again.", "error");
             } finally {
                 submitBtn.disabled = false;
                 btnSpan.innerText = originalText;
@@ -218,53 +207,40 @@ if(navigator.vibrate){
 
         loginForm.addEventListener('submit', (e) => handleFormSubmit(e, '/user/login'));
         registerForm.addEventListener('submit', (e) => handleFormSubmit(e, '/user/register'));
-          
+
         async function handleCredentialResponse(response) {
-          const res=  await fetch("/user/SignInWithGoogle",{
-              method:"post",
-              headers:{
-                "Content-Type":"application/json"
-              },
-              body:JSON.stringify({idToken:response.credential})
-            })
-            const rs=await res.json()
-            console.log(rs)
-            if(rs.status){
-              tst(rs.message)
-              setTimeout(()=>{
-                location.href="/user/dashboard"
-              },2000)
-              
+            try {
+                const verify = await fetch("/user/SignInWithGoogle", {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ idToken: response.credential })
+                });
+                const res = await verify.json();
+                if (res.status) {
+                    tst(res.message);
+                    location.href = "/user/dashboard";
+                } else {
+                    tst(res.message, "error");
+                }
+            } catch (e) {
+                tst("Google Sign-In failed", "error");
             }
-            else{
-              tst(rs.message)
-            }
-            
-            // Yahan se token backend ko bhejo verify karne ke liye
         }
 
         window.onload = function () {
-            // 2. Initialize Google Identity
-            google.accounts.id.initialize({
-                client_id: "382846360562-rvchitsflgo2tnmqlk5o7ueps7p877kt.apps.googleusercontent.com", // <-- APNA ID YAHA DALO
-                callback: handleCredentialResponse,
-                use_fedcm_for_prompt: true, // Naye browser standard ke liye
-                auto_select: false,
-                itp_support:true// User ko choose karne do
-            });
-
-            // 3. One Tap Prompt dikhao
-            google.accounts.id.prompt((notification) => {
-                if (notification.isNotDisplayed()) {
-                    console.warn("One Tap displayed nahi hua. Reason: " + notification.getNotDisplayedReason());
-                }
-            });
-
-            // 4. Fallback Button (Extra safety ke liye)
-            google.accounts.id.renderButton(
-                document.getElementById("buttonDiv"),
-                { theme: "outline", size: "large", shape: "pill" }
-            );
+            if (window.google && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: "382846360562-rvchitsflgo2tnmqlk5o7ueps7p877kt.apps.googleusercontent.com",
+                    callback: handleCredentialResponse,
+                    use_fedcm_for_prompt: true,
+                    auto_select: true
+                });
+                google.accounts.id.prompt();
+                google.accounts.id.renderButton(
+                    document.getElementById("buttonDiv"),
+                    { theme: "outline", size: "large", shape: "pill" }
+                );
+            }
         };
     </script>
 </body>

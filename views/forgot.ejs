@@ -3,167 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPay | Reset Password</title>
+    <%- include('partials/seo', {
+        pageTitle: 'Reset Merchant Password | UPay Business',
+        pageDesc: 'Recover access to your UPay Business merchant account with a secure email recovery link.',
+        canonicalUrl: 'https://u-pay-seven.vercel.app/user/forgot-password'
+    }) %>
+    <script src="/js/money-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
-            background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
-            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top center, #ede9fe 0%, #f5f0ff 55%, #f8fafc 100%);
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-        }
-        .input-glow:focus {
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-        }
-        /* Loading spinner animation */
-        .spinner {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 2px solid #fff;
-            width: 16px;
-            height: 16px;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="flex items-center justify-center p-6 text-slate-900 font-sans">
+<body class="flex items-center justify-center min-h-screen p-6 text-slate-900">
 
-    <div class="glass-card w-full max-w-md p-8 rounded-2xl">
-        
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold tracking-tighter text-blue-600 italic">UPay</h1>
-            <p class="text-slate-500 mt-1 text-sm font-medium">Secure Payment Gateway</p>
-        </div>
-
-        <div class="mb-6">
-            <h2 class="text-xl font-bold text-slate-800">Reset your password</h2>
-            <p class="text-slate-500 text-sm mt-1">Enter your registered email address to receive a recovery link.</p>
-        </div>
-
-        <form id="resetForm" class="space-y-6">
-            <div class="relative">
-                <label for="email" class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-widest">Email Address</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                        <i data-lucide="mail" class="w-4 h-4"></i>
-                    </span>
-                    <input 
-                        type="email" 
-                        name="email" 
-                        id="email" 
-                        required 
-                        placeholder="name@example.com" 
-                        class="w-full bg-white border border-slate-200 rounded-lg py-3 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all input-glow"
-                    >
-                </div>
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border border-purple-100">
+        <div class="text-center mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-[#5f259f] text-white font-black text-xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-purple-200">
+                &#8377;
             </div>
-            
+            <h1 class="text-xl font-extrabold text-slate-900">Reset Your Password</h1>
+            <p class="text-slate-500 mt-1 text-xs">Enter your registered merchant email to receive an instant recovery link.</p>
+        </div>
+
+        <form id="resetForm" class="space-y-5">
+            <div>
+                <label for="email" class="block text-xs font-extrabold text-slate-500 mb-1.5 uppercase tracking-wider">Merchant Email Address</label>
+                <input type="email" name="email" id="email" required placeholder="merchant@company.com"
+                    class="w-full bg-slate-50 border border-slate-200 focus:border-[#5f259f] rounded-xl py-3 px-4 text-sm font-semibold outline-none transition-all">
+            </div>
+
             <div class="flex justify-center">
                 <div class="g-recaptcha" data-sitekey="6Lcaq4csAAAAAJwVD8N3_NP8ToFWYBnrU7baLOnc"></div>
             </div>
 
-            <div id="message" class="hidden text-sm p-3 rounded-lg text-center"></div>
+            <div id="message" class="hidden text-xs font-bold p-3 rounded-xl text-center"></div>
 
-            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-300 transform hover:scale-[1.01] active:scale-95 shadow-md shadow-blue-200 flex items-center justify-center gap-2">
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white font-extrabold py-3.5 rounded-xl transition shadow-lg shadow-purple-200 text-sm cursor-pointer">
                 <span id="btnText">Send Recovery Link</span>
-                <div id="btnLoader" class="hidden spinner"></div>
             </button>
         </form>
 
-        <div class="mt-8 text-center border-t border-slate-100 pt-6">
-            <a href="/user/login" class="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors inline-flex items-center gap-2">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back to Sign In
+        <div class="mt-6 text-center border-t border-slate-100 pt-5">
+            <a href="/user/login" class="text-xs font-extrabold text-[#5f259f] hover:underline">
+                &larr; Back to Merchant Sign In
             </a>
         </div>
     </div>
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
-        lucide.createIcons();
-
         const resetForm = document.getElementById('resetForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const btnLoader = document.getElementById('btnLoader');
         const messageDiv = document.getElementById('message');
 
         resetForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // 1. Get reCAPTCHA response
-            const captchaResponse = grecaptcha.getResponse();
+            const captchaResponse = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
             if (!captchaResponse) {
                 showMessage("Please complete the CAPTCHA", "error");
                 return;
             }
-
-            // 2. Prepare UI for loading
-            setLoading(true);
-            messageDiv.classList.add('hidden');
-
-            // 3. Collect Data
             const formData = new FormData(resetForm);
             const data = {
                 email: formData.get('email'),
                 'g-recaptcha-response': captchaResponse
             };
-
             try {
                 const response = await fetch('/user/forgot-password/submit', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
                 const result = await response.json();
-
-                if (response.ok) {
-                    showMessage("Recovery link sent! Check your email.", "success");
+                if (response.ok && result.status) {
+                    showMessage(result.message || "Recovery link sent! Check your email.", "success");
                     resetForm.reset();
-                    grecaptcha.reset(); // Clear captcha on success
+                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
                 } else {
                     showMessage(result.message || "Something went wrong.", "error");
-                    grecaptcha.reset();
+                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
                 }
             } catch (error) {
-                showMessage("Network error. Please try again later.", "error");
-            } finally {
-                setLoading(false);
+                showMessage("Network error. Please try again.", "error");
             }
         });
 
-        function setLoading(isLoading) {
-            submitBtn.disabled = isLoading;
-            if (isLoading) {
-                btnText.textContent = "Processing...";
-                btnLoader.classList.remove('hidden');
-                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-            } else {
-                btnText.textContent = "Send Recovery Link";
-                btnLoader.classList.add('hidden');
-                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-            }
-        }
-
         function showMessage(text, type) {
             messageDiv.textContent = text;
-            messageDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
-            
-            if (type === 'error') {
-                messageDiv.classList.add('bg-red-50', 'text-red-600', 'border', 'border-red-100');
-            } else {
-                messageDiv.classList.add('bg-green-50', 'text-green-600', 'border', 'border-green-100');
-            }
+            messageDiv.className = type === 'error'
+                ? 'text-xs font-bold p-3 rounded-xl text-center bg-rose-50 text-rose-600 border border-rose-100'
+                : 'text-xs font-bold p-3 rounded-xl text-center bg-emerald-50 text-emerald-700 border border-emerald-100';
         }
     </script>
 </body>

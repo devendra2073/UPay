@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /pay/
+Allow: /documentation.html
+Allow: /privacy.html
+Allow: /termsOfservices.html
+Disallow: /user/dashboard/api/
+Sitemap: https://u-pay-seven.vercel.app/sitemap.xml

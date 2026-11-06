@@ -1,85 +1,136 @@
-import {Schema,model} from "mongoose";
-const paymentSchema=new Schema({
-  order:{
-    type:String,
-    required:true,
-    unique:true,
+import { Schema, model } from "mongoose";
+
+const paymentSchema = new Schema({
+  order: {
+    type: String,
+    required: true,
+    unique: true
   },
-  logo:{
-    type:String
+  logo: {
+    type: String
   },
-  mode:{
-    type:String,
-    required:true,
+  mode: {
+    type: String,
+    required: true
   },
-  company:{
-    type:String,
-    required:true,
+  company: {
+    type: String,
+    required: true
   },
-  amount:{
-    required:true,
-    type:Number
+  baseAmount: {
+    type: Number
   },
-  isPaid:{
-    type:Boolean,
-    required:true,
-    default:false,
+  amount: {
+    required: true,
+    type: Number
   },
-  utr:{
-    type:String
+  discountAmount: {
+    type: Number,
+    default: 0
   },
-  created_at:{
-    type:Date,
-    default:Date.now(),
-    required:true,
+  couponCode: {
+    type: String,
+    default: ""
   },
-  MID:{
-    type:String,
-    required:true,
+  tipAmount: {
+    type: Number,
+    default: 0
+  },
+  feeAmount: {
+    type: Number,
+    default: 0
+  },
+  isPaid: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  status: {
+    type: String,
+    enum: ["PENDING", "PAID", "FAILED", "REFUND_REQUESTED", "REFUNDED"],
+    default: "PENDING"
+  },
+  utr: {
+    type: String
+  },
+  submittedUtr: {
+    type: String,
+    default: ""
+  },
+  created_at: {
+    type: Date,
+    default: () => Date.now(),
+    required: true
+  },
+  expiresAt: {
+    type: Date,
+    default: () => new Date(Date.now() + 5 * 60 * 1000)
+  },
+  MID: {
+    type: String,
+    required: true
   },
   lastCheckedAt: {
-  type: Date,
-  default: null
-}
-,
-  upaytr:{
-    type:String,
-    unique:true,
-    required:true
+    type: Date,
+    default: null
   },
-  customerName:{
-    type:String,
-    default:"Not Given"
+  upaytr: {
+    type: String,
+    unique: true,
+    required: true
   },
-  customerEmail:{
-    type:String,
-    default:"Not Given"
+  customerName: {
+    type: String,
+    default: "Not Given"
   },
-  customerPhone:{
-    type:String,
-    default:"Not Given"
+  customerEmail: {
+    type: String,
+    default: "Not Given"
   },
-  upi_address:{
-    type:String
+  customerPhone: {
+    type: String,
+    default: "Not Given"
+  },
+  customerNote: {
+    type: String,
+    default: ""
+  },
+  upi_address: {
+    type: String
+  },
+  paymentDate: {
+    type: Date
+  },
+  callback: {
+    type: String
+  },
+  redirect: {
+    type: String
+  },
+  api_response: {
+    type: String
+  },
+  paytm: {
+    MID: String,
+    UPI: String
+  },
+  selectedTheme: {
+    type: String,
+    default: "phonepe"
+  },
+  feedback: {
+    rating: { type: Number, default: 0 },
+    comment: { type: String, default: "" },
+    submittedAt: { type: Date }
+  },
+  dispute: {
+    raised: { type: Boolean, default: false },
+    reason: { type: String, default: "" },
+    status: { type: String, enum: ["NONE", "OPEN", "RESOLVED", "REFUNDED", "REJECTED"], default: "NONE" },
+    adminNote: { type: String, default: "" },
+    createdAt: { type: Date }
   }
-  ,
-  paymentDate:{
-    type:Date
-  },
-  callback:{
-    type:String,
-    
-  },
-  redirect:{
-    type:String
-  },
-  api_response:{
-    type:String,
-  },
-  paytm:{
-    MID:String,
-    UPI:String
-  }
-})
-const paymentModel=model("payment",paymentSchema);
+});
+
+const paymentModel = model("payment", paymentSchema);
 export default paymentModel;

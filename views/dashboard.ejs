@@ -2,85 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UPay Terminal | Minimal Enterprise Dashboard</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <%- include('partials/seo', {
+        pageTitle: 'UPay Business Admin | PhonePe-Style UPI Merchant Dashboard & Theme Studio',
+        pageDesc: 'Manage instant UPI collections, customize checkout themes, create payment links, issue discount coupons, resolve disputes, and monitor real-time webhooks on UPay Business.',
+        canonicalUrl: 'https://u-pay-seven.vercel.app/user/dashboard',
+        robotsMeta: 'noindex, nofollow'
+    }) %>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="/js/money-loader.js"></script>
     <script src="/js/trig.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-    <!-- SocialBar_1 Integration -->
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-        
+
         :root {
-            --primary: #4f46e5;
-            --primary-focus: rgba(79, 70, 229, 0.08);
-            --surface: #ffffff;
-            --subtle: #f8fafc;
-            --border: #f1f5f9;
-            --border-hover: #e2e8f0;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
+            --pp-primary: #5f259f;
+            --pp-primary-dark: #461878;
+            --pp-accent: #7c3aed;
+            --pp-bg: #f6f4fb;
+            --pp-surface: #ffffff;
+            --pp-border: #ece7f6;
+            --pp-green: #00b970;
         }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-            background-color: #fafbfc;
-            color: var(--text-dark);
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--pp-bg);
+            color: #0f172a;
             -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Minimal Card Styling */
-        .m-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 1.25rem;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        .pp-card {
+            background: var(--pp-surface);
+            border: 1px solid var(--pp-border);
+            border-radius: 1.35rem;
+            box-shadow: 0 8px 26px -12px rgba(95, 37, 159, 0.08);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .m-card:hover {
-            border-color: var(--border-hover);
+        .pp-card:hover {
+            border-color: #d8c8f5;
+            box-shadow: 0 12px 32px -12px rgba(95, 37, 159, 0.14);
         }
 
-        /* Clean Inputs */
-        .m-input {
-            width: 100%;
-            padding: 0.875rem 1.125rem;
-            border-radius: 0.875rem;
-            border: 1px solid var(--border-hover);
-            background: #ffffff;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-dark);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        .pp-hero-banner {
+            background: linear-gradient(135deg, #431675 0%, #5f259f 52%, #7c3aed 100%);
+            box-shadow: 0 20px 45px -15px rgba(95, 37, 159, 0.42);
         }
-        .m-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-focus);
+
+        .pp-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.875rem;
+            border: 1.5px solid #e2dcf0;
+            background: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #0f172a;
+            transition: all 0.2s ease;
+        }
+        .pp-input:focus {
+            border-color: var(--pp-primary);
+            box-shadow: 0 0 0 4px rgba(95, 37, 159, 0.12);
             outline: none;
         }
 
-        /* Tabs & Animations */
+        .pp-btn-primary {
+            background: linear-gradient(135deg, #5f259f 0%, #7c3aed 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 0.875rem;
+            box-shadow: 0 8px 20px -6px rgba(95, 37, 159, 0.45);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .pp-btn-primary:hover {
+            opacity: 0.96;
+            transform: translateY(-1px);
+        }
+        .pp-btn-primary:active {
+            transform: scale(0.98);
+        }
+
         .tab-pane { display: none; opacity: 0; transform: translateY(6px); }
-        .tab-pane.active { 
-            display: block; 
-            opacity: 1; 
-            transform: translateY(0); 
-            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+        .tab-pane.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.28s ease, transform 0.28s ease;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #5f259f 0%, #7c3aed 100%);
+            color: #ffffff !important;
+            box-shadow: 0 8px 20px -6px rgba(95, 37, 159, 0.4);
+        }
+        .nav-link.active svg {
+            color: #ffffff !important;
         }
 
         .refresh-spin { animation: spin 0.75s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .btn-press { transition: transform 0.15s ease, opacity 0.15s ease; }
-        .btn-press:active { transform: scale(0.97); }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -88,480 +116,983 @@
 </head>
 <body class="overflow-hidden select-none">
 
+    <%
+      const cfg = user.checkoutConfig || {};
+      const customTheme = cfg.customTheme || { primary: '#5f259f', secondary: '#7c3aed', surface: '#ffffff', background: '#f5f0ff', text: '#0f172a', radius: '24px' };
+      const sec = user.securityConfig || { maintenanceMode: false, ipWhitelist: '', minOrderAmount: 1, maxOrderAmount: 100000, autoSettleEnabled: false, autoSettleThreshold: 5000 };
+    %>
+
     <div class="flex h-screen w-full">
 
-        <!-- Minimal Desktop Sidebar -->
-        <aside class="hidden lg:flex w-72 flex-col bg-white border-r border-slate-100 p-6">
-            <!-- Brand -->
-            <div class="flex items-center gap-3 px-3 mb-10">
-                <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-100">
-                    <!-- Vector Lightning Logo -->
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                    </svg>
-                </div>
-                <div class="flex items-baseline gap-1">
-                    <span class="text-lg font-black tracking-tight text-slate-900">UPay</span>
-                    <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 mono">PRO</span>
+        <!-- PhonePe Business Desktop Sidebar -->
+        <aside class="hidden lg:flex w-72 flex-col bg-white border-r border-purple-100 p-5 shrink-0">
+            <!-- PhonePe Brand Header -->
+            <div class="flex items-center justify-between px-3 py-2 mb-6 rounded-2xl bg-purple-50/70 border border-purple-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-[#5f259f] flex items-center justify-center text-white font-black text-xl shadow-md shadow-purple-200">
+                        &#8377;
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-base font-extrabold tracking-tight text-slate-900">UPay</span>
+                            <span class="text-[9px] uppercase font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-[#5f259f] text-white">Business</span>
+                        </div>
+                        <p class="text-[11px] font-semibold text-purple-700 truncate max-w-[140px]"><%=user.company || 'Merchant Hub'%></p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="flex-1 space-y-1">
-                <button onclick="Terminal.nav('overview')" data-nav="overview" class="nav-link active w-full flex items-center gap-3.5 px-4 py-3 rounded-xl bg-slate-50 text-indigo-600 font-semibold text-sm transition-all btn-press">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect></svg>
-                    <span>Overview</span>
+            <!-- Navigation Links (8 Dedicated Modules) -->
+            <nav class="flex-1 space-y-1 overflow-y-auto no-scrollbar pr-1">
+                <p class="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">Core Payments</p>
+                <button onclick="Terminal.nav('overview')" data-nav="overview" class="nav-link active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect></svg>
+                    <span>Home & Analytics</span>
                 </button>
-                <button onclick="Terminal.nav('history')" data-nav="history" class="nav-link w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-50/80 font-semibold text-sm transition-all btn-press">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Ledger</span>
+                <button onclick="Terminal.nav('history')" data-nav="history" class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <span class="flex items-center gap-3">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Smart Ledger</span>
+                    </span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-purple-100 text-[#5f259f] font-extrabold">Live</span>
                 </button>
-                <button onclick="Terminal.nav('developer')" data-nav="developer" class="nav-link w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-50/80 font-semibold text-sm transition-all btn-press">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                    <span>Integrations</span>
+                <button onclick="Terminal.nav('links')" data-nav="links" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    <span>Payment Links & QR</span>
                 </button>
-                <button onclick="Terminal.nav('profile')" data-nav="profile" class="nav-link w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-50/80 font-semibold text-sm transition-all btn-press">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
-                    <span>Settings</span>
+                <button onclick="Terminal.nav('settlements')" data-nav="settlements" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    <span>Settlements & Bank</span>
+                </button>
+
+                <p class="px-3 pt-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">Growth & Checkout</p>
+                <button onclick="Terminal.nav('themes')" data-nav="themes" class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <span class="flex items-center gap-3">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                        <span>Theme Studio</span>
+                    </span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold">7+ Themes</span>
+                </button>
+                <button onclick="Terminal.nav('coupons')" data-nav="coupons" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                    <span>Offers & Coupons</span>
+                </button>
+                <button onclick="Terminal.nav('customers')" data-nav="customers" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Customers & Ratings</span>
+                </button>
+                <button onclick="Terminal.nav('disputes')" data-nav="disputes" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <span>Refunds & Disputes</span>
+                </button>
+
+                <p class="px-3 pt-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">Developer & Security</p>
+                <button onclick="Terminal.nav('developer')" data-nav="developer" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    <span>API, Webhooks & Security</span>
+                </button>
+                <button onclick="Terminal.nav('profile')" data-nav="profile" class="nav-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50/70 font-bold text-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
+                    <span>Merchant & UPI Rails</span>
                 </button>
             </nav>
 
-            <!-- Vector Art Card (Tier Box) -->
-            <div class="mt-auto m-card p-4 bg-slate-50/70 border-slate-100 relative overflow-hidden">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-100/70 text-indigo-600 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-xs font-bold text-slate-800">Priority Tier</span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        </div>
-                        <p class="text-[11px] text-slate-400">99.98% Gateway SLA</p>
-                    </div>
-                </div>
+            <!-- Quick Collect Action Button -->
+            <div class="mt-4 pt-4 border-t border-purple-100">
+                <button onclick="openpop()" class="w-full pp-btn-primary py-3 px-4 flex items-center justify-center gap-2 text-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Instant Collect QR</span>
+                </button>
             </div>
         </aside>
 
-        <!-- Main Body Area -->
-        <main id="view-scroller" class="flex-1 overflow-y-auto no-scrollbar relative bg-[#fafbfc] pb-32 lg:pb-12">
-            
-            <!-- Sticky Header -->
-            <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 lg:px-12 py-4 flex items-center justify-between border-b border-slate-100">
+        <!-- Main Workspace Scroller -->
+        <main id="view-scroller" class="flex-1 overflow-y-auto no-scrollbar relative pb-28 lg:pb-12">
+
+            <!-- Sticky PhonePe Top Bar -->
+            <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md px-5 lg:px-10 py-3.5 flex items-center justify-between border-b border-purple-100">
                 <div class="flex items-center gap-3">
-                    <div class="lg:hidden w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <div class="lg:hidden w-9 h-9 rounded-xl bg-[#5f259f] text-white flex items-center justify-center font-black">
+                        &#8377;
                     </div>
                     <div>
-                        <h2 id="view-title" class="text-base font-bold text-slate-900 tracking-tight">Overview</h2>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[11px] text-slate-400 font-medium">Node HK-442 • Connected</span>
+                        <h1 id="view-title" class="text-base font-extrabold text-slate-900 tracking-tight">Home & Analytics</h1>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[11px] text-slate-500 font-semibold">MID: <span class="mono font-bold text-[#5f259f]"><%=user.MID%></span> • Zero-Reload API Active</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2.5">
-                    <button onclick="Terminal.simulateSync(this)" class="p-2 rounded-xl bg-white border border-slate-200/80 text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-all btn-press shadow-2xs">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <button onclick="openpop()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5f259f] font-extrabold text-xs transition cursor-pointer">
+                        <span>+ Quick Collect</span>
                     </button>
-                    
-                    <div class="relative group cursor-pointer">
-                        <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=4f46e5&color=fff&bold=true`%>" class="w-9 h-9 rounded-xl border border-slate-200 object-cover" id="prfl">
+                    <button onclick="Terminal.nav('themes')" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-200 text-slate-700 hover:border-[#5f259f] font-bold text-xs transition cursor-pointer">
+                        <span>🎨 Theme Studio</span>
+                    </button>
+                    <button onclick="Terminal.refreshAll(this)" title="Sync Dashboard Data" class="p-2.5 rounded-xl bg-white border border-purple-100 text-slate-600 hover:text-[#5f259f] transition cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+
+                    <div class="relative cursor-pointer">
+                        <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=5f259f&color=fff&bold=true`%>" alt="Merchant Avatar" class="w-9 h-9 rounded-xl border-2 border-purple-200 object-cover" id="prfl">
                         <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
                         <div id="menuc"></div>
                     </div>
                 </div>
             </header>
 
-            <div class="max-w-5xl mx-auto p-5 lg:p-10">
+            <div class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
-                <!-- 1. OVERVIEW VIEW -->
+                <!-- ========================================================= -->
+                <!-- TAB 1: HOME & ANALYTICS OVERVIEW                          -->
+                <!-- ========================================================= -->
                 <section id="view-overview" class="tab-pane active space-y-6">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-                        
-                        <!-- Primary Balance Minimal Card -->
-                        <div class="md:col-span-7 m-card p-7 bg-white relative overflow-hidden flex flex-col justify-between">
-                            <!-- Background Vector Watermark -->
-                            <svg class="absolute -right-8 -bottom-8 w-44 h-44 text-slate-50 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                            </svg>
 
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <!-- PhonePe Purple Hero Settlement Card -->
+                        <div class="lg:col-span-7 pp-hero-banner rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden flex flex-col justify-between">
+                            <div class="absolute -right-10 -bottom-10 w-52 h-52 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
                             <div class="relative z-10">
-                                <div class="flex items-center justify-between text-slate-500">
-                                    <span class="text-xs font-semibold uppercase tracking-wider">Settlement Balance</span>
-                                    <button onclick="Terminal.refreshBalance(this)" class="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-slate-700 rounded-lg transition-colors">
-                                        <svg id="balance-refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                <div class="flex items-center justify-between">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-[11px] font-extrabold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        PhonePe Business Wallet
+                                    </span>
+                                    <button onclick="Terminal.refreshBalance(this)" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer" title="Sync Wallet">
+                                        <svg id="balance-refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                     </button>
                                 </div>
-                                <h3 id="stat-balance" class="text-4xl lg:text-5xl font-black mt-3 text-slate-900 tracking-tight tabular-nums">&#8377;<%=user.wallet%></h3>
-                                
-                                <div class="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                                    <span>+12.5% vs last cycle</span>
+
+                                <p class="text-purple-200 text-xs font-semibold uppercase tracking-widest mt-5">Available Settlement Balance</p>
+                                <h2 id="stat-balance" class="text-4xl sm:text-5xl font-black mt-1 tracking-tight tabular-nums">&#8377;<%=Number(user.wallet || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})%></h2>
+
+                                <div class="flex flex-wrap items-center gap-2 mt-3">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-xs font-bold">
+                                        &#9650; 0% Commission Direct UPI
+                                    </span>
+                                    <span class="text-xs text-purple-200">• Active Theme: <strong id="badge-active-theme" class="uppercase text-white"><%=cfg.defaultTheme || 'phonepe'%></strong></span>
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 mt-8 relative z-10">
-                                <button onclick="Terminal.simulateSettlement()" class="flex-1 bg-slate-900 hover:bg-black text-white py-3 px-5 rounded-xl font-bold text-xs btn-press transition-colors shadow-2xs">
-                                    Withdraw to Bank
+                            <div class="flex flex-wrap items-center gap-3 mt-7 relative z-10">
+                                <button onclick="Terminal.nav('settlements')" class="flex-1 bg-white text-[#5f259f] hover:bg-purple-50 py-3.5 px-5 rounded-2xl font-extrabold text-xs shadow-lg transition cursor-pointer">
+                                    Instant Bank Payout &rarr;
                                 </button>
-                                <button onclick="openpop()" class="p-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 rounded-xl btn-press transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <button onclick="openpop()" class="py-3.5 px-5 bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-2xl font-extrabold text-xs transition cursor-pointer flex items-center gap-1.5">
+                                    <span>+ Collect Money</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Right Info Column -->
-                        <div class="md:col-span-5 space-y-4">
-                            <% if (user.bank.bank) { %>
-                            <div class="m-card p-5 flex items-center justify-between">
+                        <!-- Right Quick Rail & KPI Grid -->
+                        <div class="lg:col-span-5 space-y-4">
+                            <!-- UPI Rail Card (Opens Embedded Tab without Page Reload!) -->
+                            <div class="pp-card p-5 flex items-center justify-between cursor-pointer" onclick="Terminal.nav('profile'); Terminal.subProfile('paytm')">
                                 <div class="space-y-1">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Settlement Route</p>
-                                    <h4 class="text-sm font-bold text-slate-900"><%=user.bank.bank%></h4>
-                                    <p class="mono text-xs text-slate-500">•••• <%=user.bank.account.slice(-4)%></p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-extrabold text-[#5f259f] uppercase tracking-wider">Active UPI Merchant Rail</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold <%=user.paytm?.UPI ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'%>">
+                                            <%=user.paytm?.UPI ? 'VERIFIED' : 'SETUP NEEDED'%>
+                                        </span>
+                                    </div>
+                                    <h4 class="text-sm font-extrabold text-slate-900" id="overview-upi-display"><%=user.paytm?.UPI || 'Click to link Paytm Business UPI'%></h4>
+                                    <p class="mono text-xs text-slate-500">MID: <%=user.paytm?.MID || 'Not Configured'%></p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5">
-                                    <img src="<%=user.bank.logo%>" alt="<%=user.bank.bank%>" class="max-h-full max-w-full object-contain"/>
-                                </div>
-                            </div>
-                            <% } %>
-
-                            <div class="m-card p-5 flex items-center justify-between cursor-pointer hover:border-indigo-100" onclick="location.href='dashboard/paytm'">
-                                <div class="space-y-1">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">UPI Rail Engine</p>
-                                    <h4 class="text-sm font-bold text-slate-900"><%=user.provider || "Standard Provider"%></h4>
-                                    <p class="mono text-xs text-slate-500"><%=user.paytm?.UPI ? user.paytm?.UPI : "UPI is not linked"%></p>
-                                </div>
-                                <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2">
-                                    <img src="/assets/<%=user.paytm?.UPI ? 'paytm' : 'not'%>.png" alt="Provider" class="max-h-full max-w-full object-contain"/>
+                                <div class="w-11 h-11 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#5f259f] font-extrabold">
+                                    UPI
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="m-card p-4">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Success Rate</p>
-                                    <p class="text-xl font-bold text-slate-900 mt-1">99.2%</p>
+                            <!-- 4 Mini KPI Cards -->
+                            <div class="grid grid-cols-2 gap-3.5">
+                                <div class="pp-card p-4">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Conversion Rate</p>
+                                    <p id="kpi-conversion" class="text-xl font-black text-emerald-600 mt-1">99.4%</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Direct Intent QR</p>
                                 </div>
-                                <div class="m-card p-4">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Throughput</p>
-                                    <p class="text-xl font-bold text-slate-900 mt-1">120 tps</p>
+                                <div class="pp-card p-4">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Avg Order Ticket</p>
+                                    <p id="kpi-avg-ticket" class="text-xl font-black text-slate-900 mt-1">&#8377;840</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Across UPI apps</p>
+                                </div>
+                                <div class="pp-card p-4 cursor-pointer" onclick="Terminal.nav('coupons')">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Active Coupons</p>
+                                    <p id="kpi-coupons-count" class="text-xl font-black text-[#5f259f] mt-1"><%=(user.coupons || []).length%></p>
+                                    <p class="text-[11px] text-purple-600 font-semibold mt-0.5">Manage Offers &rarr;</p>
+                                </div>
+                                <div class="pp-card p-4 cursor-pointer" onclick="Terminal.nav('links')">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Payment Links</p>
+                                    <p id="kpi-links-count" class="text-xl font-black text-slate-900 mt-1"><%=(user.paymentLinks || []).length%></p>
+                                    <p class="text-[11px] text-purple-600 font-semibold mt-0.5">Create Link &rarr;</p>
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
-                    <!-- Minimal Clean Chart -->
-                    <div class="m-card p-6 lg:p-7">
-                        <div class="flex items-center justify-between mb-6">
+                    <!-- PhonePe Quick Actions Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <button onclick="openpop()" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-purple-100 text-[#5f259f] flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">&#8377;</div>
+                            <p class="text-xs font-extrabold text-slate-900">Quick Collect</p>
+                            <p class="text-[10px] text-slate-400">Generate dynamic QR</p>
+                        </button>
+                        <button onclick="Terminal.nav('themes')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🎨</div>
+                            <p class="text-xs font-extrabold text-slate-900">Theme Studio</p>
+                            <p class="text-[10px] text-slate-400">7+ Themes & Custom</p>
+                        </button>
+                        <button onclick="Terminal.nav('links')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🔗</div>
+                            <p class="text-xs font-extrabold text-slate-900">Payment Links</p>
+                            <p class="text-[10px] text-slate-400">Share on WhatsApp</p>
+                        </button>
+                        <button onclick="Terminal.nav('coupons')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🏷️</div>
+                            <p class="text-xs font-extrabold text-slate-900">Promo Codes</p>
+                            <p class="text-[10px] text-slate-400">Boost conversions</p>
+                        </button>
+                        <button onclick="Terminal.nav('disputes')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🛡️</div>
+                            <p class="text-xs font-extrabold text-slate-900">Dispute Desk</p>
+                            <p class="text-[10px] text-slate-400">Refunds & UTR check</p>
+                        </button>
+                        <button onclick="Terminal.nav('developer')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
+                            <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">⚡</div>
+                            <p class="text-xs font-extrabold text-slate-900">Webhook Test</p>
+                            <p class="text-[10px] text-slate-400">HMAC simulator</p>
+                        </button>
+                    </div>
+
+                    <!-- Interactive Volume Chart with Timeframe Switcher (7D / 30D / 90D via API) -->
+                    <div class="pp-card p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
-                                <h4 class="text-sm font-bold text-slate-900">Processing Volume</h4>
-                                <p class="text-xs text-slate-400">Aggregated real-time settlement activity</p>
+                                <h3 class="text-sm font-extrabold text-slate-900">Settlement Volume & Velocity</h3>
+                                <p class="text-xs text-slate-400">Real-time UPI collection trend across PhonePe, GPay & Paytm</p>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                                <span class="text-xs font-semibold text-slate-600">Last 7 Days</span>
+                            <div class="flex items-center gap-1.5 bg-purple-50 p-1 rounded-xl border border-purple-100">
+                                <button onclick="Terminal.loadAnalytics('7D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#5f259f] text-white cursor-pointer">7D</button>
+                                <button onclick="Terminal.loadAnalytics('30D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">30D</button>
+                                <button onclick="Terminal.loadAnalytics('90D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">90D</button>
                             </div>
                         </div>
-                        <div class="h-[240px] w-full">
+                        <div class="relative h-64 w-full">
                             <canvas id="mainChart"></canvas>
                         </div>
                     </div>
-
-                    <!-- NativeBanner_1 Integration -->
-                    <div class="m-card p-4 lg:p-5 overflow-hidden">
-                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sponsored Insights</span>
-                            <span class="text-[10px] font-semibold text-slate-400 mono">Ad</span>
-                        </div>
-                        <div class="w-full overflow-x-auto no-scrollbar">
-                            
-                    </div>
                 </section>
 
-                <!-- 2. LEDGER VIEW -->
-                <section id="view-history" class="tab-pane">
-                    <div class="m-card p-6 lg:p-8">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <!-- ========================================================= -->
+                <!-- TAB 2: SMART LEDGER + FILTERS + CSV EXPORT + SANDBOX SIM  -->
+                <!-- ========================================================= -->
+                <section id="view-history" class="tab-pane space-y-5">
+                    <div class="pp-card p-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                             <div>
-                                <h3 class="text-lg font-bold text-slate-900 tracking-tight">Transaction Ledger</h3>
-                                <p class="text-xs text-slate-400">Complete immutable record of all incoming UPI intents</p>
+                                <h3 class="text-lg font-extrabold text-slate-900">Smart Transaction Ledger</h3>
+                                <p class="text-xs text-slate-500">Click any transaction to open the slide-over Telemetry & Geo-Audit Drawer (zero popup windows)</p>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <select id="ledger-status-filter" onchange="Terminal.refreshHistory()" class="pp-input !w-auto !py-2 text-xs">
+                                    <option value="ALL_RECORDS">All Statuses</option>
+                                    <option value="PAID">Paid Only</option>
+                                    <option value="PENDING">Pending Only</option>
+                                    <option value="DISPUTED">Disputed / Support</option>
+                                </select>
                                 <div class="relative">
-                                    <input type="text" placeholder="Filter by UTR..." class="m-input !py-2 !pl-9 text-xs w-48 lg:w-60">
-                                    <svg class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    <input type="text" id="ledger-search" oninput="Terminal.filterLedgerLocal()" placeholder="Search UTR, Order, Name..." class="pp-input !py-2 !pl-8 text-xs w-48 sm:w-56">
+                                    <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                                 </div>
-                                <button onclick="Terminal.refreshHistory(this)" class="p-2.5 bg-slate-50 border border-slate-200 text-slate-700 hover:text-black rounded-xl btn-press">
+                                <button onclick="Terminal.exportLedgerCSV()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-[#5f259f] hover:bg-purple-100 font-extrabold text-xs transition cursor-pointer">
+                                    Export CSV
+                                </button>
+                                <button onclick="Terminal.refreshHistory(this)" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl cursor-pointer">
                                     <svg id="history-refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                 </button>
                             </div>
                         </div>
 
-                        <div id="tx-container" class="divide-y divide-slate-100 min-h-[360px]">
-                            <!-- Hydrated via Terminal.renderTransactions() -->
+                        <div id="tx-container" class="divide-y divide-purple-50 min-h-[340px]"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- TAB 3: PAYMENT PAGE THEME STUDIO (7 PRESETS + CUSTOM)     -->
+                <!-- ========================================================= -->
+                <section id="view-themes" class="tab-pane space-y-6">
+                    <div class="pp-card p-6 sm:p-8">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-purple-100">
+                            <div>
+                                <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase tracking-wider">Checkout Experience Engine</span>
+                                <h3 class="text-xl font-extrabold text-slate-900 mt-2">Payment Page Theme Studio</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Choose from 7 curated checkout themes or design your own custom brand theme. Changes apply immediately without page reload.</p>
+                            </div>
+                            <button onclick="Terminal.saveThemeStudio()" class="pp-btn-primary px-6 py-3 text-xs shrink-0">
+                                Save Theme & Checkout Config
+                            </button>
                         </div>
 
-                        <div class="mt-8 pt-4 border-t border-slate-100 flex justify-center">
-                            <button class="text-xs font-bold text-slate-500 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors">Load Historical Records</button>
+                        <!-- 7 Preset Themes Grid -->
+                        <div class="mt-6">
+                            <label class="text-xs font-extrabold uppercase tracking-wider text-slate-500 block mb-3">1. Select Default Payment Page Theme (7 Presets + Custom)</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5" id="admin-theme-grid">
+                                <%
+                                  const themePresets = [
+                                    { id: 'phonepe', name: 'PhonePe Royal', colors: ['#5f259f', '#7c3aed', '#f5f0ff'], desc: 'Signature PhonePe Purple' },
+                                    { id: 'midnight', name: 'Midnight Dark', colors: ['#0f172a', '#6366f1', '#1e293b'], desc: 'Obsidian Neo-Bank Dark' },
+                                    { id: 'emerald', name: 'Emerald Mint', colors: ['#059669', '#10b981', '#ecfdf5'], desc: 'Fresh Fintech Green' },
+                                    { id: 'gold', name: 'Royal Gold', colors: ['#b45309', '#f59e0b', '#fffbeb'], desc: 'Warm Luxury Amber' },
+                                    { id: 'ocean', name: 'Oceanic Cyan', colors: ['#0284c7', '#06b6d4', '#f0f9ff'], desc: 'Crisp Sky & Cyan' },
+                                    { id: 'rose', name: 'Rose Sunset', colors: ['#e11d48', '#f43f5e', '#fff1f2'], desc: 'Vibrant Coral & Rose' },
+                                    { id: 'monochrome', name: 'Minimal Slate', colors: ['#18181b', '#52525b', '#f4f4f5'], desc: 'High-Contrast Monochrome' },
+                                    { id: 'custom', name: 'Custom Brand', colors: [customTheme.primary, customTheme.secondary, customTheme.background], desc: 'Your Custom Hex Palette' }
+                                  ];
+                                %>
+                                <% themePresets.forEach(tp => { %>
+                                <div onclick="Terminal.selectAdminTheme('<%=tp.id%>')" data-theme-card="<%=tp.id%>"
+                                    class="theme-card-option p-4 rounded-2xl border-2 cursor-pointer transition-all <%=(cfg.defaultTheme || 'phonepe') === tp.id ? 'border-[#5f259f] bg-purple-50/50 shadow-md' : 'border-slate-200 hover:border-purple-300 bg-white'%>">
+                                    <div class="flex items-center gap-1.5 mb-2.5">
+                                        <span class="w-5 h-5 rounded-full shadow-xs border border-black/10" style="background:<%=tp.colors[0]%>"></span>
+                                        <span class="w-5 h-5 rounded-full shadow-xs border border-black/10" style="background:<%=tp.colors[1]%>"></span>
+                                        <span class="w-5 h-5 rounded-full shadow-xs border border-black/10" style="background:<%=tp.colors[2]%>"></span>
+                                    </div>
+                                    <p class="text-xs font-extrabold text-slate-900"><%=tp.name%></p>
+                                    <p class="text-[10px] text-slate-500 mt-0.5"><%=tp.desc%></p>
+                                </div>
+                                <% }) %>
+                            </div>
+                            <input type="hidden" id="cfg-default-theme" value="<%=cfg.defaultTheme || 'phonepe'%>">
+                        </div>
+
+                        <!-- Custom Theme Builder Controls -->
+                        <div class="mt-8 p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-slate-900">2. Custom Brand Theme Palette Builder</h4>
+                                    <p class="text-xs text-slate-500">Used when "Custom Brand" is active or when customers open the Customizer on the payment page</p>
+                                </div>
+                                <span class="text-[11px] font-mono font-bold text-[#5f259f]">Live CSS Variables</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Primary Brand</label>
+                                    <input type="color" id="cust-primary" value="<%=customTheme.primary || '#5f259f'%>" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Accent Gradient</label>
+                                    <input type="color" id="cust-secondary" value="<%=customTheme.secondary || '#7c3aed'%>" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Page Backdrop</label>
+                                    <input type="color" id="cust-background" value="<%=customTheme.background || '#f5f0ff'%>" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Card Surface</label>
+                                    <input type="color" id="cust-surface" value="<%=customTheme.surface || '#ffffff'%>" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Text Color</label>
+                                    <input type="color" id="cust-text" value="<%=customTheme.text || '#0f172a'%>" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Card Radius</label>
+                                    <select id="cust-radius" class="pp-input mt-1 !py-2">
+                                        <option value="16px" <%=customTheme.radius === '16px' ? 'selected' : ''%>>Sharp (16px)</option>
+                                        <option value="24px" <%=customTheme.radius === '24px' || !customTheme.radius ? 'selected' : ''%>>PhonePe (24px)</option>
+                                        <option value="32px" <%=customTheme.radius === '32px' ? 'selected' : ''%>>Ultra Pill (32px)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Checkout Features & Fee Pass-Through Controls -->
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="text-sm font-extrabold text-slate-900">3. Checkout Interactive Widgets</h4>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Merchant Checkout Tagline</label>
+                                    <input type="text" id="cfg-tagline" value="<%=cfg.tagline || '100% Safe & Instant UPI Checkout'%>" class="pp-input mt-1">
+                                </div>
+                                <div class="space-y-2.5 pt-2">
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                        <span class="text-xs font-bold text-slate-700">Allow Customers to Switch Themes (6+ Themes)</span>
+                                        <input type="checkbox" id="cfg-allow-theme" <%=cfg.allowCustomerThemeChange !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                        <span class="text-xs font-bold text-slate-700">Allow Customer Custom Theme Builder</span>
+                                        <input type="checkbox" id="cfg-allow-custom" <%=cfg.allowCustomTheme !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                        <span class="text-xs font-bold text-slate-700">Enable Promo Code / Discount Box on Checkout</span>
+                                        <input type="checkbox" id="cfg-enable-coupons" <%=cfg.enableCoupons !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                        <span class="text-xs font-bold text-slate-700">Enable Customer Tip / Gratuity Selector</span>
+                                        <input type="checkbox" id="cfg-enable-tips" <%=cfg.enableTips !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                        <span class="text-xs font-bold text-slate-700">Enable Split Bill Calculator on Checkout</span>
+                                        <input type="checkbox" id="cfg-enable-split" <%=cfg.enableSplitBill !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <h4 class="text-sm font-extrabold text-slate-900">4. Fee Pass-Through & Customer Support</h4>
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                                    <label class="flex items-center justify-between cursor-pointer">
+                                        <div>
+                                            <p class="text-xs font-extrabold text-slate-800">Pass Convenience Fee to Customer</p>
+                                            <p class="text-[11px] text-slate-500">Automatically adds a % processing surcharge to order total</p>
+                                        </div>
+                                        <input type="checkbox" id="cfg-pass-fee" <%=cfg.passFeeToCustomer ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                    </label>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Convenience Fee Percentage (%)</label>
+                                        <input type="number" step="0.1" min="0" max="10" id="cfg-fee-percent" value="<%=cfg.convenienceFeePercent || 1.5%>" class="pp-input mt-1">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Support Email (Shown on Payment Page)</label>
+                                    <input type="email" id="cfg-support-email" value="<%=cfg.supportEmail || user.email%>" class="pp-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Support WhatsApp Number</label>
+                                    <input type="text" id="cfg-support-wa" value="<%=cfg.supportWhatsapp || user.mobile || '+919876543210'%>" class="pp-input mt-1">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 3. INTEGRATIONS / DEVELOPER VIEW -->
-                <section id="view-developer" class="tab-pane max-w-2xl mx-auto space-y-5">
-                    
-                    <!-- API Keys Card -->
-                 <div class="m-card p-6 lg:p-7">
-    <div class="flex items-start justify-between gap-3 mb-6">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
-            </div>
-            <div>
-                <h3 class="text-sm font-bold text-slate-900">API Credentials</h3>
-                <p class="text-xs text-slate-400">Used for authenticating server-side requests</p>
-            </div>
-        </div>
-        <a href="/documenetation.html" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
-            <span>Docs</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-        </a>
-    </div>
+                <!-- ========================================================= -->
+                <!-- TAB 4: PAYMENT LINKS & QUICK COLLECT GENERATOR            -->
+                <!-- ========================================================= -->
+                <section id="view-links" class="tab-pane space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-5 pp-card p-6 space-y-4 h-fit">
+                            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">No-Code Collect</span>
+                            <h3 class="text-lg font-extrabold text-slate-900">Create Shareable Payment Link</h3>
+                            <p class="text-xs text-slate-500">Generate a dedicated UPI payment link for WhatsApp, Instagram, or SMS invoicing without writing code.</p>
 
-    <div class="space-y-4">
-        <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Secret Key</label>
-            <div class="mt-1 flex items-center justify-between bg-slate-50 border border-slate-200/80 p-3 rounded-xl mono text-xs text-slate-700">
-                <span class="truncate mr-2"><%=user.api%></span>
-                <button onclick="Terminal.copy('<%=user.api%>')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 shrink-0">Copy</button>
-            </div>
-        </div>
-        <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant Identifier (MID)</label>
-            <div class="mt-1 flex items-center justify-between bg-slate-50 border border-slate-200/80 p-3 rounded-xl mono text-xs text-slate-700">
-                <span><%=user.MID%></span>
-                <button onclick="Terminal.copy('<%=user.MID%>')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 shrink-0">Copy</button>
-            </div>
-        </div>
-    </div>
+                            <form onsubmit="Terminal.createPaymentLink(event)" class="space-y-3.5 pt-2">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Customer / Purpose Title</label>
+                                    <input type="text" name="title" required placeholder="e.g. Premium Web Design Invoice #104" class="pp-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Amount (&#8377; INR)</label>
+                                    <input type="number" name="amount" required min="1" placeholder="1499" class="pp-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Notes / Description</label>
+                                    <input type="text" name="description" placeholder="Includes GST & instant activation" class="pp-input mt-1">
+                                </div>
+                                <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs">
+                                    + Mint Payment Link & Order
+                                </button>
+                            </form>
+                        </div>
 
-    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span>Need integration help?</span>
-        <a href="/documentation.html" target="_blank" class="font-medium text-indigo-600 hover:underline">
-            Read API Documentation &rarr;
-        </a>
-    </div>
-</div>
-
-
-                    <!-- Webhook Settings Card -->
-                    <div class="m-card p-6 lg:p-7">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <div class="lg:col-span-7 pp-card p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-base font-extrabold text-slate-900">Active Payment Links</h3>
+                                <span class="text-xs text-slate-400 font-semibold">Instant Copy & Share</span>
                             </div>
+                            <div id="payment-links-list" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- TAB 5: OFFERS & DISCOUNT COUPONS ENGINE                   -->
+                <!-- ========================================================= -->
+                <section id="view-coupons" class="tab-pane space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-5 pp-card p-6 space-y-4 h-fit">
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">Checkout Conversion Booster</span>
+                            <h3 class="text-lg font-extrabold text-slate-900">Create Promo Coupon</h3>
+                            <p class="text-xs text-slate-500">Customers can apply these promo codes directly on the payment page to dynamically recalculate the UPI QR amount.</p>
+
+                            <form onsubmit="Terminal.createCoupon(event)" class="space-y-3.5 pt-2">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Promo Code</label>
+                                    <input type="text" name="code" required placeholder="FESTIVE25" class="pp-input mt-1 uppercase mono">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Discount Type</label>
+                                        <select name="type" class="pp-input mt-1">
+                                            <option value="PERCENT">Percentage (%)</option>
+                                            <option value="FLAT">Flat Rupees (&#8377;)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Value</label>
+                                        <input type="number" name="value" required min="1" placeholder="15" class="pp-input mt-1">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Min Order (&#8377;)</label>
+                                        <input type="number" name="minOrder" value="100" class="pp-input mt-1">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Max Discount (&#8377;)</label>
+                                        <input type="number" name="maxDiscount" value="250" class="pp-input mt-1">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs">
+                                    + Publish Promo Coupon
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-7 pp-card p-6">
+                            <h3 class="text-base font-extrabold text-slate-900 mb-4">Active & Paused Promo Codes</h3>
+                            <div id="coupons-list" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- TAB 6: SETTLEMENTS & INSTANT BANK PAYOUTS                 -->
+                <!-- ========================================================= -->
+                <section id="view-settlements" class="tab-pane space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-5 pp-card p-6 space-y-4 h-fit">
+                            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Instant Liquidity</span>
+                            <h3 class="text-lg font-extrabold text-slate-900">Withdraw to Settlement Bank</h3>
+                            <p class="text-xs text-slate-500">Transfer collected wallet liquidity directly to your linked bank account via IMPS, NEFT, or RTGS.</p>
+
+                            <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-100 flex items-center justify-between">
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase">Destination Bank</p>
+                                    <p class="text-sm font-extrabold text-slate-900"><%=user.bank?.bank || 'No Bank Linked'%></p>
+                                    <p class="text-xs mono text-slate-500"><%=user.bank?.account ? '•••• ' + user.bank.account.slice(-4) + ' (' + user.bank.ifsc + ')' : 'Configure in Merchant & UPI Rails'%></p>
+                                </div>
+                                <button onclick="Terminal.nav('profile'); Terminal.subProfile('banking')" class="text-xs font-extrabold text-[#5f259f] hover:underline cursor-pointer">Edit</button>
+                            </div>
+
+                            <form onsubmit="Terminal.requestWithdrawal(event)" class="space-y-3.5">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Payout Amount (&#8377;)</label>
+                                    <input type="number" id="withdraw-amount" required min="1" value="<%=user.wallet || 500%>" class="pp-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Transfer Rail</label>
+                                    <select id="withdraw-mode" class="pp-input mt-1">
+                                        <option value="IMPS">IMPS (Instant 24x7 Settlement)</option>
+                                        <option value="NEFT">NEFT (Zero Fee Batch)</option>
+                                        <option value="RTGS">RTGS (High Value Priority)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs">
+                                    Dispatch Instant Bank Payout
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-7 pp-card p-6">
+                            <h3 class="text-base font-extrabold text-slate-900 mb-4">Payout & Settlement History</h3>
+                            <div id="withdrawals-list" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- TAB 7: CUSTOMERS DIRECTORY & CHECKOUT RATINGS             -->
+                <!-- ========================================================= -->
+                <section id="view-customers" class="tab-pane space-y-6">
+                    <div class="pp-card p-6">
+                        <div class="flex items-center justify-between mb-6">
                             <div>
-                                <h3 class="text-sm font-bold text-slate-900">Webhook Handlers</h3>
-                                <p class="text-xs text-slate-400">Receive instant transaction status events</p>
+                                <h3 class="text-lg font-extrabold text-slate-900">Customer Directory & Loyalty Insights</h3>
+                                <p class="text-xs text-slate-500">Aggregated payer profiles, total volume, and checkout star ratings</p>
+                            </div>
+                            <button onclick="Terminal.loadCustomers()" class="px-4 py-2 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">
+                                Refresh CRM
+                            </button>
+                        </div>
+                        <div id="customers-list" class="divide-y divide-purple-50"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- TAB 8: REFUNDS & DISPUTE RESOLUTION DESK                  -->
+                <!-- ========================================================= -->
+                <section id="view-disputes" class="tab-pane space-y-6">
+                    <div class="pp-card p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <div>
+                                <h3 class="text-lg font-extrabold text-slate-900">Refunds, UTR Verification & Dispute Center</h3>
+                                <p class="text-xs text-slate-500">Review customer-submitted manual UTRs, resolve support tickets, or issue instant refunds without page reload</p>
+                            </div>
+                            <button onclick="Terminal.loadDisputes()" class="px-4 py-2 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">
+                                Sync Tickets
+                            </button>
+                        </div>
+                        <div id="disputes-list" class="space-y-3"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- TAB 9: DEVELOPER API, WEBHOOK SIMULATOR & SECURITY        -->
+                <!-- ========================================================= -->
+                <section id="view-developer" class="tab-pane space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- API Credentials + 1-Click Key Rotation -->
+                        <div class="lg:col-span-6 pp-card p-6 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-base font-extrabold text-slate-900">API Credentials & Key Rotation</h3>
+                                    <p class="text-xs text-slate-500">Authenticate `/api/create-order` & verify HMAC signatures</p>
+                                </div>
+                                <a href="/documentation.html" target="_blank" class="text-xs font-extrabold text-[#5f259f] hover:underline">API Docs &nearr;</a>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Secret API Key</label>
+                                    <div class="mt-1 flex items-center justify-between bg-purple-50/60 border border-purple-100 p-3 rounded-xl mono text-xs text-slate-800">
+                                        <span id="api-key-display" class="truncate mr-2"><%=user.api%></span>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <button onclick="Terminal.copy(document.getElementById('api-key-display').innerText)" class="text-xs font-extrabold text-[#5f259f] cursor-pointer">Copy</button>
+                                            <button onclick="Terminal.rotateKey()" class="text-xs font-extrabold text-rose-600 hover:underline cursor-pointer">Rotate Key</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant Identifier (MID)</label>
+                                    <div class="mt-1 flex items-center justify-between bg-purple-50/60 border border-purple-100 p-3 rounded-xl mono text-xs text-slate-800">
+                                        <span><%=user.MID%></span>
+                                        <button onclick="Terminal.copy('<%=user.MID%>')" class="text-xs font-extrabold text-[#5f259f] cursor-pointer">Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Webhook Config & Live HMAC Simulator -->
+                            <div class="pt-4 border-t border-purple-100 space-y-3">
+                                <h4 class="text-sm font-extrabold text-slate-900">Webhook & Redirect Endpoints</h4>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">HTTPS Webhook Callback URL</label>
+                                    <input type="text" id="callback" value="<%=user.callback || ''%>" placeholder="https://api.yourdomain.com/webhook/upay" class="pp-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Customer Post-Payment Redirect URL</label>
+                                    <input type="text" id="redirect" value="<%=user.redirect || '/pay/thanks'%>" placeholder="/pay/thanks" class="pp-input mt-1">
+                                </div>
+                                <div class="flex gap-2.5 pt-1">
+                                    <button onclick="Terminal.saveSettings(this)" class="flex-1 pp-btn-primary py-3 text-xs">
+                                        Save Endpoints
+                                    </button>
+                                    <button onclick="Terminal.runWebhookSimulator()" class="px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold text-xs hover:bg-emerald-100 transition cursor-pointer">
+                                        Test HMAC Webhook
+                                    </button>
+                                </div>
+                                <pre id="webhook-test-output" class="hidden p-3 rounded-xl bg-slate-950 text-emerald-400 mono text-[10px] overflow-x-auto"></pre>
                             </div>
                         </div>
 
-                        <div class="space-y-4">
+                        <!-- Security, Maintenance Mode & Order Limits -->
+                        <div class="lg:col-span-6 pp-card p-6 space-y-4">
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Success Callback URL</label>
-                                <input type="text" id="callback" value="<%=user.callback%>" placeholder="https://api.yourdomain.com/v1/success" class="m-input mt-1">
+                                <h3 class="text-base font-extrabold text-slate-900">Gateway Security & Risk Controls</h3>
+                                <p class="text-xs text-slate-500">Configure order limits, IP whitelisting, and maintenance switches</p>
                             </div>
+
+                            <label class="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50/60 border border-rose-100 cursor-pointer">
+                                <div>
+                                    <p class="text-xs font-extrabold text-rose-900">Gateway Maintenance Mode</p>
+                                    <p class="text-[11px] text-rose-600">Temporarily pause new order creation while performing maintenance</p>
+                                </div>
+                                <input type="checkbox" id="sec-maintenance" <%=sec.maintenanceMode ? 'checked' : ''%> class="accent-rose-600 w-4 h-4">
+                            </label>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Min Order Amount (&#8377;)</label>
+                                    <input type="number" id="sec-min-amt" value="<%=sec.minOrderAmount || 1%>" class="pp-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Max Order Amount (&#8377;)</label>
+                                    <input type="number" id="sec-max-amt" value="<%=sec.maxOrderAmount || 100000%>" class="pp-input mt-1">
+                                </div>
+                            </div>
+
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">User Redirect URL</label>
-                                <input type="text" id="redirect" value="<%=user.redirect%>" placeholder="https://yourdomain.com/thanks" class="m-input mt-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Allowed Server IP Whitelist (Comma separated, optional)</label>
+                                <input type="text" id="sec-ips" value="<%=sec.ipWhitelist || ''%>" placeholder="e.g. 103.21.244.0, 192.0.2.1 (Leave blank for all)" class="pp-input mt-1 mono">
                             </div>
-                            <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl flex items-start gap-2.5 text-[11px] text-amber-800">
-                                <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                                <span>Endpoints must support HTTPS and return an immediate <code class="mono font-semibold">200 OK</code> acknowledgement within 3 seconds.</span>
+
+                            <div class="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2.5">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-extrabold text-slate-800">Auto-Settlement Rule</span>
+                                    <input type="checkbox" id="sec-autosettle" <%=sec.autoSettleEnabled ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                                </label>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Auto-Settle When Balance Exceeds (&#8377;)</label>
+                                    <input type="number" id="sec-threshold" value="<%=sec.autoSettleThreshold || 5000%>" class="pp-input mt-1">
+                                </div>
                             </div>
-                            <button onclick="Terminal.saveSettings(this)" class="w-full py-3 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl btn-press transition-colors shadow-2xs mt-2">
-                                Deploy Endpoints
+
+                            <button onclick="Terminal.saveSecurity()" class="w-full pp-btn-primary py-3.5 text-xs">
+                                Update Security & Risk Policies
                             </button>
                         </div>
                     </div>
                 </section>
 
-                <!-- 4. SETTINGS / PROFILE VIEW -->
-                <section id="view-profile" class="tab-pane max-w-2xl mx-auto">
-                    <!-- Segmented Toggle -->
-                    <div class="flex bg-slate-100/70 p-1 rounded-xl w-fit mb-6 border border-slate-200/40">
-                        <button onclick="Terminal.subProfile('identity')" id="sub-nav-identity" class="sub-trigger px-5 py-2 rounded-lg font-bold text-xs bg-white shadow-2xs text-indigo-600 transition-all">Identity Profile</button>
-                        <button onclick="Terminal.subProfile('banking')" id="sub-nav-banking" class="sub-trigger px-5 py-2 rounded-lg font-bold text-xs text-slate-500 hover:text-slate-800 transition-all">Banking Rails</button>
+                <!-- ========================================================= -->
+                <!-- TAB 10: MERCHANT PROFILE, BANKING & EMBEDDED PAYTM RAILS  -->
+                <!-- ========================================================= -->
+                <section id="view-profile" class="tab-pane max-w-3xl mx-auto">
+                    <div class="flex flex-wrap bg-purple-100/70 p-1 rounded-2xl w-fit mb-6 border border-purple-200/50">
+                        <button onclick="Terminal.subProfile('identity')" id="sub-nav-identity" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs bg-white shadow-xs text-[#5f259f] transition-all cursor-pointer">Merchant Identity</button>
+                        <button onclick="Terminal.subProfile('banking')" id="sub-nav-banking" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-[#5f259f] transition-all cursor-pointer">Settlement Bank</button>
+                        <button onclick="Terminal.subProfile('paytm')" id="sub-nav-paytm" class="sub-trigger px-4 py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-[#5f259f] transition-all cursor-pointer">UPI & Paytm Rails</button>
                     </div>
 
                     <!-- Sub-pane 1: Identity -->
-                    <div id="sub-view-identity" class="sub-pane active m-card p-6 lg:p-8">
-                        <div class="flex items-center gap-4 mb-8">
-                            <div class="relative">
-                                <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=4f46e5&color=fff&bold=true`%>" class="w-16 h-16 rounded-2xl object-cover border border-slate-200">
-                                <div class="absolute -bottom-1 -right-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs text-slate-500">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                                </div>
-                            </div>
+                    <div id="sub-view-identity" class="sub-pane pp-card p-6 sm:p-8">
+                        <div class="flex items-center gap-4 mb-6">
+                            <img src="<%=(user.pic)?user.pic:`https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=5f259f&color=fff&bold=true`%>" class="w-16 h-16 rounded-2xl object-cover border-2 border-purple-200">
                             <div>
-                                <h3 class="text-base font-bold text-slate-900"><%=user.firstname%> <%=user.lastname%></h3>
-                                <p class="text-xs text-slate-400">Merchant Account Verification: Verified</p>
+                                <h3 class="text-base font-extrabold text-slate-900"><%=user.firstname%> <%=user.lastname%></h3>
+                                <p class="text-xs text-emerald-600 font-bold">PhonePe Verified Merchant • KYC Active</p>
                             </div>
                         </div>
 
                         <form onsubmit="Terminal.saveProfile(event)" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">First Name</label>
-                                    <input name="firstname" type="text" value="<%=user.firstname%>" class="m-input mt-1">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">First Name</label>
+                                    <input name="firstname" type="text" value="<%=user.firstname%>" class="pp-input mt-1">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Last Name</label>
-                                    <input name="lastname" type="text" value="<%=user.lastname%>" class="m-input mt-1">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Last Name</label>
+                                    <input name="lastname" type="text" value="<%=user.lastname%>" class="pp-input mt-1">
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary Email</label>
-                                <input type="email" value="<%=user.email%>" class="m-input mt-1 bg-slate-50 text-slate-500" readonly>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Primary Email</label>
+                                <input type="email" value="<%=user.email%>" class="pp-input mt-1 bg-slate-50 text-slate-500" readonly>
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Registered Business Entity</label>
-                                <input type="text" name="company" value="<%=user.company || 'UPay PVT LTD'%>" class="m-input mt-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Business / Brand Name (Shown on Checkout)</label>
+                                <input type="text" name="company" value="<%=user.company || 'UPay Enterprise'%>" class="pp-input mt-1">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Direct Contact</label>
-                                <input type="tel" value="+91 <%=user.mobile || '0000000000'%>" name="mobile" class="m-input mt-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Merchant Mobile Number</label>
+                                <input type="tel" value="<%=user.mobile || '9876543210'%>" name="mobile" class="pp-input mt-1">
                             </div>
-                            <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold btn-press transition-colors shadow-2xs mt-4">
-                                Update Legal Profile
+                            <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs mt-2">
+                                Save Merchant Profile
                             </button>
                         </form>
                     </div>
 
                     <!-- Sub-pane 2: Banking -->
-                    <div id="sub-view-banking" class="sub-pane m-card p-6 lg:p-8 hidden">
+                    <div id="sub-view-banking" class="sub-pane pp-card p-6 sm:p-8 hidden">
                         <div class="mb-6">
-                            <h3 class="text-base font-bold text-slate-900">Settlement Account Configuration</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Automated NEFT / IMPS daily settlement target</p>
+                            <h3 class="text-base font-extrabold text-slate-900">Settlement Bank Configuration</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Configure your target bank account for instant IMPS/NEFT payouts</p>
                         </div>
-                        
+
                         <form onsubmit="Terminal.saveBank(event)" class="space-y-4">
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bank Name</label>
-                                <select name="bank" class="m-input mt-1">
-                                    <% list.forEach((val) => { %> 
-                                        <option value="<%=val.name%>" <%=val.name == user.bank.bank ? 'selected' : ''%>><%=val.name%></option>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Select Bank</label>
+                                <select name="bank" class="pp-input mt-1">
+                                    <% list.forEach((val) => { %>
+                                        <option value="<%=val.name%>" <%=val.name == user.bank?.bank ? 'selected' : ''%>><%=val.name%></option>
                                     <% }) %>
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Holder Name</label>
-                                <input type="text" name="holder" value="<%if (user.bank.bank){%><%=user.bank.holder%><% } %>" placeholder="UPay Enterprise LLC" class="m-input mt-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Account Holder Name</label>
+                                <input type="text" name="holder" value="<%=user.bank?.holder || ''%>" placeholder="Registered Business / Holder Name" class="pp-input mt-1">
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Number</label>
-                                    <input type="number" value="<%if (user.bank.bank){%><%=user.bank.account%><% } %>" name="account" placeholder="•••• •••• 9901" class="m-input mt-1 mono">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Account Number</label>
+                                    <input type="text" value="<%=user.bank?.account || ''%>" name="account" placeholder="0000111122223333" class="pp-input mt-1 mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">IFSC Code</label>
-                                    <input type="text" value="<%if (user.bank.bank){%><%=user.bank.ifsc%><% } %>" name="ifsc" placeholder="HDFC0001234" class="m-input mt-1 uppercase mono">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">IFSC Code</label>
+                                    <input type="text" value="<%=user.bank?.ifsc || ''%>" name="ifsc" placeholder="HDFC0001234" class="pp-input mt-1 uppercase mono">
                                 </div>
                             </div>
-                            
-                            <div class="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
-                                <p class="text-[11px] text-slate-500">By saving, you authorize automatic daily batch settlements to the linked account.</p>
-                            </div>
-                            
-                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold btn-press transition-colors shadow-2xs mt-2">
-                                Save Settlement Rails
+                            <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs mt-2">
+                                Save Settlement Bank Account
                             </button>
                         </form>
+                    </div>
+
+                    <!-- Sub-pane 3: Embedded UPI & Paytm Gateway Config (No Page Reload!) -->
+                    <div id="sub-view-paytm" class="sub-pane pp-card p-6 sm:p-8 hidden">
+                        <div class="mb-6">
+                            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Direct-to-Account UPI</span>
+                            <h3 class="text-base font-extrabold text-slate-900 mt-2">Paytm Business & Multi-UPI Rail Configurator</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Update your Paytm Merchant ID, Primary VPA, and Fallback UPI ID without leaving the dashboard.</p>
+                        </div>
+
+                        <form onsubmit="Terminal.savePaytmRails(event)" class="space-y-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Primary Paytm / Merchant UPI ID (VPA)</label>
+                                <input type="text" id="paytm-upi-input" value="<%=user.paytm?.UPI || ''%>" required placeholder="merchant@paytm" class="pp-input mt-1 mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Paytm Merchant ID (MID)</label>
+                                <input type="text" id="paytm-mid-input" value="<%=user.paytm?.MID || ''%>" required placeholder="YOUR_PAYTM_MID" class="pp-input mt-1 mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Secondary Fallback UPI ID (Optional)</label>
+                                <input type="text" id="paytm-fallback-input" value="<%=user.paytm?.fallbackUPI || ''%>" placeholder="backupmerchant@ybl" class="pp-input mt-1 mono">
+                            </div>
+                            <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                <span class="text-xs font-bold text-slate-700">Enable Automatic UPI Rail Failover</span>
+                                <input type="checkbox" id="paytm-failover-input" <%=user.paytm?.autoFailover !== false ? 'checked' : ''%> class="accent-[#5f259f] w-4 h-4">
+                            </label>
+                            <button type="submit" class="w-full pp-btn-primary py-3.5 text-xs">
+                                Verify & Save UPI Rails
+                            </button>
+                        </form>
+
+                        <div id="paytm-qr-preview-box" class="hidden mt-6 p-5 rounded-2xl bg-purple-50 border border-purple-100 text-center">
+                            <p class="text-xs font-extrabold text-[#5f259f] mb-2">Live Merchant Terminal QR Ready</p>
+                            <img id="paytm-test-qr" src="" alt="Test QR" class="w-40 h-40 mx-auto rounded-xl bg-white p-2 border border-purple-200">
+                        </div>
                     </div>
                 </section>
 
             </div>
         </main>
 
-        <!-- Minimal Mobile Navigation Bar -->
-        <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 h-18 flex justify-around items-center px-4 z-50">
-            <button onclick="Terminal.nav('overview')" data-mob="overview" class="mob-link text-indigo-600 flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect></svg>
-                <span class="text-[10px] font-bold">Overview</span>
+        <!-- PhonePe Mobile Bottom Navigation Bar -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-purple-100 h-16 flex justify-around items-center px-2 z-50">
+            <button onclick="Terminal.nav('overview')" data-mob="overview" class="mob-link text-[#5f259f] flex flex-col items-center gap-0.5 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect></svg>
+                <span class="text-[10px] font-extrabold">Home</span>
             </button>
-            <button onclick="Terminal.nav('history')" data-mob="history" class="mob-link text-slate-400 flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span class="text-[10px] font-bold">Ledger</span>
+            <button onclick="Terminal.nav('history')" data-mob="history" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-[10px] font-extrabold">Ledger</span>
             </button>
-            <button onclick="Terminal.nav('developer')" data-mob="developer" class="mob-link text-slate-400 flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                <span class="text-[10px] font-bold">API</span>
+            <button onclick="Terminal.nav('themes')" data-mob="themes" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343"></path></svg>
+                <span class="text-[10px] font-extrabold">Themes</span>
             </button>
-            <button onclick="Terminal.nav('profile')" data-mob="profile" class="mob-link text-slate-400 flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
-                <span class="text-[10px] font-bold">Settings</span>
+            <button onclick="Terminal.nav('links')" data-mob="links" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"></path></svg>
+                <span class="text-[10px] font-extrabold">Links</span>
+            </button>
+            <button onclick="Terminal.nav('profile')" data-mob="profile" class="mob-link text-slate-400 flex flex-col items-center gap-0.5 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82"></path></svg>
+                <span class="text-[10px] font-extrabold">Settings</span>
             </button>
         </nav>
     </div>
 
+    <!-- ================================================================= -->
+    <!-- IN-APP SLIDE-OVER TRANSACTION TELEMETRY DRAWER (NO POPUP RELOAD)  -->
+    <!-- ================================================================= -->
+    <div id="audit-drawer-overlay" class="fixed inset-0 z-[90] bg-slate-950/50 backdrop-blur-xs hidden justify-end">
+        <div class="w-full max-w-lg bg-white h-full shadow-2xl border-l border-purple-100 flex flex-col justify-between overflow-y-auto p-6">
+            <div>
+                <div class="flex items-center justify-between pb-4 border-b border-purple-100">
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5f259f] text-[10px] font-extrabold uppercase">Transaction Telemetry</span>
+                        <h3 id="drawer-order-id" class="text-base font-extrabold text-slate-900 mono mt-1">#ORDER</h3>
+                    </div>
+                    <button onclick="Terminal.closeAuditDrawer()" class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer">&times;</button>
+                </div>
+
+                <div class="my-5 p-5 rounded-2xl bg-gradient-to-r from-[#5f259f] to-[#7c3aed] text-white">
+                    <p class="text-[11px] uppercase tracking-wider text-purple-200 font-bold">Total Settled Amount</p>
+                    <p id="drawer-amount" class="text-3xl font-black mt-1">&#8377;0.00</p>
+                    <div class="flex items-center justify-between text-xs text-purple-100 mt-3 pt-3 border-t border-white/15">
+                        <span>UTR: <strong id="drawer-utr" class="mono text-white">N/A</strong></span>
+                        <span id="drawer-status-badge" class="px-2 py-0.5 rounded bg-white/20 font-bold">PAID</span>
+                    </div>
+                </div>
+
+                <div id="drawer-details-grid" class="space-y-3 text-xs"></div>
+            </div>
+
+            <div class="pt-4 border-t border-purple-100 flex gap-2.5 mt-6">
+                <a id="drawer-full-audit-link" href="#" target="_blank" class="flex-1 py-3 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs text-center hover:bg-purple-100 transition">
+                    Open Full Audit Page &nearr;
+                </a>
+                <button onclick="Terminal.closeAuditDrawer()" class="px-5 py-3 rounded-xl bg-slate-900 text-white font-extrabold text-xs cursor-pointer">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="/js/popup.js"></script>
     <script>
-        /**
-         * UPay Pro Minimalist Terminal Engine
-         */
+        const INITIAL_COUPONS = <%- JSON.stringify(user.coupons || []) %>;
+        const INITIAL_LINKS = <%- JSON.stringify(user.paymentLinks || []) %>;
+        const INITIAL_WITHDRAWALS = <%- JSON.stringify(user.withdrawals || []) %>;
+
         const Terminal = {
             state: {
-                balance: parseFloat(<%=user.wallet%> || 0),
+                balance: parseFloat(<%=user.wallet || 0%>),
                 isRefreshing: false,
                 chart: null,
-                transactions: []
+                transactions: [],
+                filteredTransactions: [],
+                coupons: INITIAL_COUPONS,
+                paymentLinks: INITIAL_LINKS,
+                withdrawals: INITIAL_WITHDRAWALS,
+                customers: [],
+                disputes: []
             },
 
             init() {
-                this.renderTransactions();
+                this.refreshHistory();
                 this.initChart();
-                this.setupInterceptors();
+                this.renderCoupons();
+                this.renderPaymentLinks();
+                this.renderWithdrawals();
             },
 
             nav(viewId) {
                 document.getElementById('view-scroller').scrollTo({ top: 0, behavior: 'smooth' });
-                
                 document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
                 const target = document.getElementById(`view-${viewId}`);
                 if (target) target.classList.add('active');
 
-                // Titles
-                const titles = { overview: 'Overview', history: 'Ledger', developer: 'Integrations', profile: 'Settings' };
-                document.getElementById('view-title').innerText = titles[viewId] || 'Dashboard';
+                const titles = {
+                    overview: 'Home & Analytics',
+                    history: 'Smart Transaction Ledger',
+                    themes: 'Payment Page Theme Studio',
+                    links: 'Payment Links & Quick Collect',
+                    coupons: 'Offers & Discount Coupons',
+                    settlements: 'Settlements & Instant Bank Payouts',
+                    customers: 'Customer Directory & Ratings',
+                    disputes: 'Refunds & Dispute Resolution Center',
+                    developer: 'API, Webhooks & Security Controls',
+                    profile: 'Merchant Profile & UPI Rails'
+                };
+                document.getElementById('view-title').innerText = titles[viewId] || 'UPay Business';
 
-                // Desktop Nav Active State
-                document.querySelectorAll('.nav-link').forEach(el => {
-                    el.classList.remove('bg-slate-50', 'text-indigo-600', 'active');
-                    el.classList.add('text-slate-500');
-                    const svg = el.querySelector('svg');
-                    if(svg) svg.classList.replace('text-indigo-600', 'text-slate-400');
-                });
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
                 const activeNav = document.querySelector(`[data-nav="${viewId}"]`);
-                if (activeNav) {
-                    activeNav.classList.add('bg-slate-50', 'text-indigo-600', 'active');
-                    activeNav.classList.remove('text-slate-500');
-                    const svg = activeNav.querySelector('svg');
-                    if(svg) svg.classList.replace('text-slate-400', 'text-indigo-600');
-                }
+                if (activeNav) activeNav.classList.add('active');
 
-                // Mobile Nav Active State
-                document.querySelectorAll('.mob-link').forEach(el => {
-                    el.classList.replace('text-indigo-600', 'text-slate-400');
-                });
+                document.querySelectorAll('.mob-link').forEach(el => el.classList.replace('text-[#5f259f]', 'text-slate-400'));
                 const activeMob = document.querySelector(`[data-mob="${viewId}"]`);
-                if (activeMob) activeMob.classList.replace('text-slate-400', 'text-indigo-600');
+                if (activeMob) activeMob.classList.replace('text-slate-400', 'text-[#5f259f]');
 
                 if (viewId === 'overview') this.initChart();
+                if (viewId === 'customers') this.loadCustomers();
+                if (viewId === 'disputes') this.loadDisputes();
             },
 
             subProfile(subId) {
@@ -570,17 +1101,402 @@
                 if (targetSub) targetSub.classList.remove('hidden');
 
                 document.querySelectorAll('.sub-trigger').forEach(el => {
-                    el.classList.remove('bg-white', 'shadow-2xs', 'text-indigo-600');
-                    el.classList.add('text-slate-500');
+                    el.classList.remove('bg-white', 'shadow-xs', 'text-[#5f259f]');
+                    el.classList.add('text-slate-600');
                 });
                 const activeSubNav = document.getElementById(`sub-nav-${subId}`);
-                if (activeSubNav) activeSubNav.classList.add('bg-white', 'shadow-2xs', 'text-indigo-600');
+                if (activeSubNav) {
+                    activeSubNav.classList.remove('text-slate-600');
+                    activeSubNav.classList.add('bg-white', 'shadow-xs', 'text-[#5f259f]');
+                }
             },
 
-            async refreshBalance(btn) {
+            selectAdminTheme(themeId) {
+                document.getElementById('cfg-default-theme').value = themeId;
+                document.querySelectorAll('.theme-card-option').forEach(el => {
+                    if (el.getAttribute('data-theme-card') === themeId) {
+                        el.className = 'theme-card-option p-4 rounded-2xl border-2 cursor-pointer transition-all border-[#5f259f] bg-purple-50/50 shadow-md';
+                    } else {
+                        el.className = 'theme-card-option p-4 rounded-2xl border-2 cursor-pointer transition-all border-slate-200 hover:border-purple-300 bg-white';
+                    }
+                });
+            },
+
+            async saveThemeStudio() {
+                const payload = {
+                    defaultTheme: document.getElementById('cfg-default-theme').value,
+                    allowCustomerThemeChange: document.getElementById('cfg-allow-theme').checked,
+                    allowCustomTheme: document.getElementById('cfg-allow-custom').checked,
+                    tagline: document.getElementById('cfg-tagline').value,
+                    enableCoupons: document.getElementById('cfg-enable-coupons').checked,
+                    enableTips: document.getElementById('cfg-enable-tips').checked,
+                    enableSplitBill: document.getElementById('cfg-enable-split').checked,
+                    passFeeToCustomer: document.getElementById('cfg-pass-fee').checked,
+                    convenienceFeePercent: document.getElementById('cfg-fee-percent').value,
+                    supportEmail: document.getElementById('cfg-support-email').value,
+                    supportWhatsapp: document.getElementById('cfg-support-wa').value,
+                    customTheme: {
+                        primary: document.getElementById('cust-primary').value,
+                        secondary: document.getElementById('cust-secondary').value,
+                        background: document.getElementById('cust-background').value,
+                        surface: document.getElementById('cust-surface').value,
+                        text: document.getElementById('cust-text').value,
+                        radius: document.getElementById('cust-radius').value
+                    }
+                };
+                const res = await fetch('/user/dashboard/theme-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status) {
+                    const badge = document.getElementById('badge-active-theme');
+                    if (badge) badge.textContent = payload.defaultTheme;
+                    this.notify(data.message);
+                } else {
+                    this.notify(data.message || 'Error saving theme', 'warn');
+                }
+            },
+
+            async createCoupon(e) {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const payload = Object.fromEntries(fd.entries());
+                payload.action = 'CREATE';
+                const res = await fetch('/user/dashboard/coupons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.state.coupons = data.coupons || [];
+                    this.renderCoupons();
+                    e.target.reset();
+                    this.notify(data.message);
+                } else {
+                    this.notify(data.message, 'warn');
+                }
+            },
+
+            async toggleCoupon(code, action = 'TOGGLE') {
+                const res = await fetch('/user/dashboard/coupons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, code })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.state.coupons = data.coupons || [];
+                    this.renderCoupons();
+                    this.notify(data.message);
+                }
+            },
+
+            renderCoupons() {
+                const countEl = document.getElementById('kpi-coupons-count');
+                if (countEl) countEl.textContent = this.state.coupons.length;
+                const box = document.getElementById('coupons-list');
+                if (!box) return;
+                if (!this.state.coupons.length) {
+                    box.innerHTML = `<p class="text-xs text-slate-400 py-8 text-center">No promo codes created yet.</p>`;
+                    return;
+                }
+                box.innerHTML = this.state.coupons.map(c => `
+                    <div class="p-4 rounded-2xl border border-purple-100 bg-purple-50/30 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-lg bg-[#5f259f] text-white mono text-xs font-extrabold">${c.code}</span>
+                                <span class="text-xs font-extrabold text-slate-800">${c.type === 'PERCENT' ? c.value + '% OFF' : '₹' + c.value + ' FLAT OFF'}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${c.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${c.active ? 'ACTIVE' : 'PAUSED'}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-1">Min Order: ₹${c.minOrder || 0} • Max Discount: ₹${c.maxDiscount || 500}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="Terminal.toggleCoupon('${c.code}', 'TOGGLE')" class="px-3 py-1.5 rounded-lg border border-purple-200 text-xs font-bold text-[#5f259f] cursor-pointer">${c.active ? 'Pause' : 'Activate'}</button>
+                            <button onclick="Terminal.toggleCoupon('${c.code}', 'DELETE')" class="px-3 py-1.5 rounded-lg bg-rose-50 text-xs font-bold text-rose-600 cursor-pointer">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async createPaymentLink(e) {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const payload = Object.fromEntries(fd.entries());
+                payload.action = 'CREATE';
+                const res = await fetch('/user/dashboard/payment-links', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.state.paymentLinks = data.paymentLinks || [];
+                    this.renderPaymentLinks();
+                    e.target.reset();
+                    this.notify(data.message);
+                } else {
+                    this.notify(data.message, 'warn');
+                }
+            },
+
+            async deletePaymentLink(linkId) {
+                const res = await fetch('/user/dashboard/payment-links', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'DELETE', linkId })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.state.paymentLinks = data.paymentLinks || [];
+                    this.renderPaymentLinks();
+                    this.notify(data.message);
+                }
+            },
+
+            renderPaymentLinks() {
+                const countEl = document.getElementById('kpi-links-count');
+                if (countEl) countEl.textContent = this.state.paymentLinks.length;
+                const box = document.getElementById('payment-links-list');
+                if (!box) return;
+                if (!this.state.paymentLinks.length) {
+                    box.innerHTML = `<p class="text-xs text-slate-400 py-8 text-center">No shareable payment links yet. Create one on the left!</p>`;
+                    return;
+                }
+                box.innerHTML = this.state.paymentLinks.map(l => `
+                    <div class="p-4 rounded-2xl border border-purple-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-extrabold text-slate-900">${l.title}</span>
+                                <span class="mono text-xs font-black text-[#5f259f]">₹${Number(l.amount).toLocaleString('en-IN')}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mono mt-0.5">${window.location.origin}${l.url}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="Terminal.copy('${window.location.origin}${l.url}')" class="px-3 py-1.5 rounded-xl bg-purple-50 text-[#5f259f] font-extrabold text-xs cursor-pointer">Copy Link</button>
+                            <a href="${l.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#5f259f] text-white font-extrabold text-xs">Open &nearr;</a>
+                            <button onclick="Terminal.deletePaymentLink('${l.linkId}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs cursor-pointer">&times;</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async requestWithdrawal(e) {
+                e.preventDefault();
+                const amount = document.getElementById('withdraw-amount').value;
+                const mode = document.getElementById('withdraw-mode').value;
+                const res = await fetch('/user/dashboard/withdraw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, mode })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.state.balance = data.wallet;
+                    document.getElementById('stat-balance').innerText = `₹${Number(data.wallet).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+                    this.state.withdrawals = data.withdrawals || [];
+                    this.renderWithdrawals();
+                    this.notify(data.message);
+                } else {
+                    this.notify(data.message, 'warn');
+                }
+            },
+
+            renderWithdrawals() {
+                const box = document.getElementById('withdrawals-list');
+                if (!box) return;
+                if (!this.state.withdrawals.length) {
+                    box.innerHTML = `<p class="text-xs text-slate-400 py-8 text-center">No bank withdrawals initiated yet.</p>`;
+                    return;
+                }
+                box.innerHTML = this.state.withdrawals.map(w => `
+                    <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50/70 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-extrabold text-slate-900">${w.bankName || 'Settlement Bank'} (••${w.accountLast4 || '0000'})</p>
+                            <p class="text-[11px] text-slate-400 mono">${w.wid} • ${w.mode} • ${new Date(w.createdAt).toLocaleString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black text-emerald-600">₹${Number(w.amount).toLocaleString('en-IN')}</p>
+                            <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${w.status}</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async loadCustomers() {
+                const res = await fetch('/user/dashboard/customers');
+                const data = await res.json();
+                const box = document.getElementById('customers-list');
+                if (!box) return;
+                const list = data.customers || [];
+                if (!list.length) {
+                    box.innerHTML = `<p class="text-xs text-slate-400 py-8 text-center">No customer records found yet.</p>`;
+                    return;
+                }
+                box.innerHTML = list.map(c => `
+                    <div class="py-3.5 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-purple-100 text-[#5f259f] font-extrabold text-xs flex items-center justify-center uppercase">
+                                ${(c.name || 'G').slice(0, 2)}
+                            </div>
+                            <div>
+                                <p class="text-xs font-extrabold text-slate-900">${c.name}</p>
+                                <p class="text-[11px] text-slate-400">${c.email} • ${c.phone}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-black text-slate-900">₹${Number(c.totalSpend).toLocaleString('en-IN')} <span class="text-[10px] text-slate-400 font-semibold">(${c.paidCount}/${c.txCount} paid)</span></p>
+                            <p class="text-[10px] text-amber-500 font-bold">${c.lastRating ? '★'.repeat(c.lastRating) + ' Rated' : 'Verified Payer'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async loadDisputes() {
+                const res = await fetch('/user/dashboard/refunds', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'LIST' })
+                });
+                const data = await res.json();
+                const box = document.getElementById('disputes-list');
+                if (!box) return;
+                const items = data.items || [];
+                if (!items.length) {
+                    box.innerHTML = `<p class="text-xs text-slate-400 py-8 text-center">Zero active disputes or manual UTR claims! All transactions healthy.</p>`;
+                    return;
+                }
+                box.innerHTML = items.map(item => `
+                    <div class="p-4 rounded-2xl border border-purple-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="mono text-xs font-extrabold text-[#5f259f]">#${item.order}</span>
+                                <span class="text-xs font-black text-slate-900">₹${item.amount}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">${item.dispute?.status || item.status}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-1">${item.dispute?.reason || 'Manual UTR Submitted by Customer: ' + item.submittedUtr}</p>
+                            <p class="text-[11px] text-slate-400 mono mt-0.5">Customer: ${item.customerName} • Submitted UTR: ${item.submittedUtr || item.utr || 'N/A'}</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="Terminal.resolveDispute('${item.order}', 'RESOLVE')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Approve & Verify</button>
+                            <button onclick="Terminal.resolveDispute('${item.order}', 'REFUND')" class="px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Issue Refund</button>
+                            <button onclick="Terminal.resolveDispute('${item.order}', 'REJECT')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-extrabold cursor-pointer">Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async resolveDispute(order, action) {
+                const res = await fetch('/user/dashboard/refunds', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order, action })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.notify(data.message);
+                    this.loadDisputes();
+                    this.refreshBalance();
+                    this.refreshHistory();
+                } else {
+                    this.notify(data.message, 'warn');
+                }
+            },
+
+            async rotateKey() {
+                const res = await fetch('/user/dashboard/rotate-api-key', { method: 'POST' });
+                const data = await res.json();
+                if (data.status) {
+                    document.getElementById('api-key-display').innerText = data.api;
+                    this.notify(data.message);
+                }
+            },
+
+            async saveSecurity() {
+                const payload = {
+                    maintenanceMode: document.getElementById('sec-maintenance').checked,
+                    minOrderAmount: document.getElementById('sec-min-amt').value,
+                    maxOrderAmount: document.getElementById('sec-max-amt').value,
+                    ipWhitelist: document.getElementById('sec-ips').value,
+                    autoSettleEnabled: document.getElementById('sec-autosettle').checked,
+                    autoSettleThreshold: document.getElementById('sec-threshold').value
+                };
+                const res = await fetch('/user/dashboard/security', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                this.notify(data.message, data.status ? 'success' : 'warn');
+            },
+
+            async runWebhookSimulator() {
+                const callback = document.getElementById('callback').value;
+                const res = await fetch('/user/dashboard/test-webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ callback, amount: 499 })
+                });
+                const data = await res.json();
+                const out = document.getElementById('webhook-test-output');
+                out.classList.remove('hidden');
+                out.textContent = JSON.stringify(data.payload, null, 2);
+                this.notify(data.message);
+            },
+
+            async savePaytmRails(e) {
+                e.preventDefault();
+                const UPI = document.getElementById('paytm-upi-input').value;
+                const MID = document.getElementById('paytm-mid-input').value;
+                const fallbackUPI = document.getElementById('paytm-fallback-input').value;
+                const autoFailover = document.getElementById('paytm-failover-input').checked;
+
+                const res = await fetch('/user/dashboard/paytm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ UPI, MID, fallbackUPI, autoFailover })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    document.getElementById('overview-upi-display').textContent = UPI;
+                    if (data.qrDataUrl) {
+                        document.getElementById('paytm-test-qr').src = data.qrDataUrl;
+                        document.getElementById('paytm-qr-preview-box').classList.remove('hidden');
+                    }
+                    this.notify(data.message);
+                } else {
+                    this.notify(data.message, 'warn');
+                }
+            },
+
+            async loadAnalytics(range, btn) {
+                document.querySelectorAll('.range-btn').forEach(b => {
+                    b.className = 'range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer';
+                });
+                if (btn) btn.className = 'range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#5f259f] text-white cursor-pointer';
+
+                const res = await fetch(`/user/dashboard/analytics?range=${range}`);
+                const data = await res.json();
+                if (data.status && this.state.chart) {
+                    this.state.chart.data.labels = data.labels;
+                    this.state.chart.data.datasets[0].data = data.series;
+                    this.state.chart.update();
+                    if (data.avgTicket) document.getElementById('kpi-avg-ticket').textContent = `₹${data.avgTicket}`;
+                    if (data.conversionRate) document.getElementById('kpi-conversion').textContent = `${data.conversionRate}%`;
+                }
+            },
+
+            async refreshAll(btn) {
+                if (btn) btn.classList.add('refresh-spin');
+                await Promise.all([this.refreshBalance(), this.refreshHistory()]);
+                if (btn) setTimeout(() => btn.classList.remove('refresh-spin'), 600);
+            },
+
+            async refreshBalance() {
                 if (this.state.isRefreshing) return;
                 this.state.isRefreshing = true;
-
                 const icon = document.getElementById('balance-refresh-icon');
                 if (icon) icon.classList.add('refresh-spin');
 
@@ -588,18 +1504,8 @@
                     const res = await fetch("/user/dashboard/balance");
                     const data = await res.json();
                     this.state.balance = data.wallet || 0;
-                    
-                    gsap.to(this.state, {
-                        balance: this.state.balance,
-                        duration: 0.8,
-                        ease: "power2.out",
-                        onUpdate: () => {
-                            document.getElementById('stat-balance').innerText = `₹${this.state.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        }
-                    });
-
-                    this.notify('Balance Synchronized');
-                } catch(err) {
+                    document.getElementById('stat-balance').innerText = `₹${Number(this.state.balance).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                } catch (err) {
                     this.notify('Failed to sync balance', 'warn');
                 } finally {
                     if (icon) icon.classList.remove('refresh-spin');
@@ -607,124 +1513,198 @@
                 }
             },
 
-            async refreshHistory(btn) {
+            async refreshHistory() {
                 const icon = document.getElementById('history-refresh-icon');
-                const container = document.getElementById('tx-container');
-                
                 if (icon) icon.classList.add('refresh-spin');
-                if (container) container.style.opacity = '0.5';
+                const statusFilter = document.getElementById('ledger-status-filter')?.value || 'ALL_RECORDS';
+                const query = statusFilter === 'ALL_RECORDS' ? '?all=1' : `?status=${statusFilter}`;
 
                 try {
-                    const res = await fetch("/user/dashboard/transections");
+                    const res = await fetch(`/user/dashboard/transections${query}`);
                     this.state.transactions = await res.json();
-                    this.renderTransactions();
-                    this.notify('Ledger Refreshed');
-                } catch(err) {
+                    this.filterLedgerLocal();
+                } catch (err) {
                     this.notify('Failed to update ledger', 'warn');
                 } finally {
                     if (icon) icon.classList.remove('refresh-spin');
-                    if (container) container.style.opacity = '1';
                 }
             },
 
-            simulateSettlement() {
-                this.notify('Settlement Request Dispatched');
+            filterLedgerLocal() {
+                const q = (document.getElementById('ledger-search')?.value || '').toLowerCase().trim();
+                this.state.filteredTransactions = (this.state.transactions || []).filter(tx => {
+                    if (!q) return true;
+                    return (
+                        (tx.order || '').toLowerCase().includes(q) ||
+                        (tx.utr || '').toLowerCase().includes(q) ||
+                        (tx.customerName || '').toLowerCase().includes(q) ||
+                        (tx.mode || '').toLowerCase().includes(q)
+                    );
+                });
+                this.renderTransactions();
             },
 
-            async saveProfile(e) {
-                e.preventDefault();
-                const formdata = new FormData(e.target);
-                const data = Object.fromEntries(formdata.entries());
-                try {
-                    const res = await fetch('/user/dashboard/profile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    const result = await res.json();
-                    this.notify(result.message, result.status ? 'success' : 'warn');
-                } catch(err) {
-                    this.notify('Network error occurred', 'warn');
-                }
-            },
-
-            async saveBank(e) {
-                e.preventDefault();
-                const formdata = new FormData(e.target);
-                const data = Object.fromEntries(formdata.entries());
-                try {
-                    const res = await fetch('/user/dashboard/bank', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    const result = await res.json();
-                    this.notify(result.message, result.status ? 'success' : 'warn');
-                } catch(err) {
-                    this.notify('Network error occurred', 'warn');
-                }
-            },
-
-            async saveSettings(btn) {
-                btn.innerText = "Deploying...";
-                btn.disabled = true;
-                const callback = document.getElementById("callback").value;
-                const redirect = document.getElementById("redirect").value;
-                try {
-                    const res = await fetch('/user/dashboard/callback', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ callback, redirect })
-                    });
-                    const result = await res.json();
-                    this.notify(result.message, result.status ? 'success' : 'warn');
-                } catch(err) {
-                    this.notify('Failed to deploy endpoints', 'warn');
-                } finally {
-                    btn.disabled = false;
-                    btn.innerText = "Deploy Endpoints";
-                }
-            },
-
-            async renderTransactions() {
-                try {
-                    const resp = await fetch("/user/dashboard/transections");
-                    this.state.transactions = await resp.json();
-                } catch (e) {}
-
+            renderTransactions() {
                 const container = document.getElementById('tx-container');
                 if (!container) return;
 
-                if (!this.state.transactions || this.state.transactions.length === 0) {
+                const list = this.state.filteredTransactions || [];
+                if (!list.length) {
                     container.innerHTML = `
                         <div class="py-12 text-center text-slate-400">
-                            <svg class="w-8 h-8 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                            <p class="text-xs">No records available in this cycle</p>
+                            <p class="text-xs font-bold">No transactions match the current filter.</p>
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = this.state.transactions.map(tx => `
-                    <div onclick="openNewWindow('${tx.upaytr||0}')" class="flex items-center justify-between py-3.5 hover:bg-slate-50/60 px-3 rounded-xl transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${tx.amount > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path d="${tx.amount > 0 ? 'M7 11l5-5m0 0l5 5m-5-5v12' : 'M17 13l-5 5m0 0l-5-5m5-5v12'}"></path>
-                                </svg>
+                container.innerHTML = list.map(tx => `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 hover:bg-purple-50/40 px-3 rounded-2xl transition-colors gap-2">
+                        <div onclick="Terminal.openAuditDrawer('${tx.upaytr}')" class="flex items-center gap-3 cursor-pointer flex-1">
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${tx.isPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} font-black text-xs">
+                                ${tx.isPaid ? '✓' : '⏳'}
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-slate-800">${tx.mode || 'UPI Intent'}</p>  
-                                <p class="mono text-[10px] text-slate-400">${tx.utr}</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-xs font-extrabold text-slate-900">${tx.customerName || 'Guest'} • <span class="mono text-[#5f259f]">#${tx.order}</span></p>
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${tx.isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${tx.isPaid ? 'PAID' : 'PENDING'}</span>
+                                </div>
+                                <p class="mono text-[10px] text-slate-400">UTR: ${tx.utr || tx.submittedUtr || 'Awaiting Scan'} • Mode: ${tx.mode || 'UPI'}</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="mono text-xs font-bold ${tx.amount > 0 ? 'text-emerald-600' : 'text-slate-900'}">
-                                ${tx.amount > 0 ? '+' : ''}${tx.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                        <div class="flex items-center justify-end gap-2.5">
+                            ${!tx.isPaid ? `
+                                <a href="/pay/${tx.order}" target="_blank" class="px-2.5 py-1 rounded-lg bg-purple-50 text-[#5f259f] text-[10px] font-extrabold">Checkout &nearr;</a>
+                                <button onclick="Terminal.simulateOrderPaid('${tx.order}')" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold cursor-pointer">Simulate Paid</button>
+                            ` : ''}
+                            <span onclick="Terminal.openAuditDrawer('${tx.upaytr}')" class="mono text-sm font-black ${tx.isPaid ? 'text-emerald-600' : 'text-slate-800'} cursor-pointer">
+                                ${tx.isPaid ? '+' : ''}₹${Number(tx.amount || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
                             </span>
                         </div>
                     </div>
                 `).join('');
+            },
+
+            async simulateOrderPaid(order) {
+                const res = await fetch('/user/dashboard/simulate-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    this.notify(data.message);
+                    this.refreshBalance();
+                    this.refreshHistory();
+                } else {
+                    this.notify(data.message, 'warn');
+                }
+            },
+
+            async openAuditDrawer(upaytr) {
+                if (!upaytr) return;
+                const res = await fetch(`/user/dashboard/api/transaction/${upaytr}`);
+                const data = await res.json();
+                if (!data.status) return this.notify(data.message || 'Could not load telemetry', 'warn');
+
+                document.getElementById('drawer-order-id').textContent = `#${data.order}`;
+                document.getElementById('drawer-amount').textContent = `₹${Number(data.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+                document.getElementById('drawer-utr').textContent = data.utr;
+                document.getElementById('drawer-status-badge').textContent = data.orderStatus;
+                document.getElementById('drawer-full-audit-link').href = `/user/dashboard/transaction/${upaytr}`;
+
+                const t = data.telemetry || {};
+                document.getElementById('drawer-details-grid').innerHTML = `
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                        <p class="text-[10px] font-extrabold uppercase text-slate-400">Customer & Breakdown</p>
+                        <p><strong>Name:</strong> ${data.customerName} (${data.customerEmail})</p>
+                        <p><strong>Phone:</strong> ${data.customerPhone}</p>
+                        <p><strong>Base:</strong> ₹${data.baseAmount} | <strong>Discount:</strong> -₹${data.discountAmount} | <strong>Tip:</strong> +₹${data.tipAmount} | <strong>Fee:</strong> +₹${data.feeAmount}</p>
+                        ${data.customerNote ? `<p><strong>Note:</strong> ${data.customerNote}</p>` : ''}
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                        <p class="text-[10px] font-extrabold uppercase text-slate-400">Device & Network Telemetry</p>
+                        <p><strong>Client IP:</strong> <span class="mono">${t.ip}</span> (${t.isp})</p>
+                        <p><strong>Device:</strong> ${t.deviceBrand} ${t.deviceModel} (${t.deviceType})</p>
+                        <p><strong>OS / Browser:</strong> ${t.osName} ${t.osVersion} • ${t.browserName}</p>
+                        <p><strong>Geo Location:</strong> ${t.city}, ${t.region}, ${t.country} (${t.zip})</p>
+                        <p><strong>Coordinates:</strong> <span class="mono">${t.lat}, ${t.longt}</span></p>
+                    </div>
+                `;
+
+                const overlay = document.getElementById('audit-drawer-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            },
+
+            closeAuditDrawer() {
+                const overlay = document.getElementById('audit-drawer-overlay');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            },
+
+            exportLedgerCSV() {
+                const rows = this.state.filteredTransactions || [];
+                if (!rows.length) return this.notify('No transactions to export', 'warn');
+                const headers = ['OrderID', 'Amount', 'Status', 'UTR', 'Mode', 'CustomerName', 'CustomerEmail', 'CreatedAt'];
+                const csv = [
+                    headers.join(','),
+                    ...rows.map(r => [
+                        r.order,
+                        r.amount,
+                        r.isPaid ? 'PAID' : 'PENDING',
+                        r.utr || r.submittedUtr || '',
+                        r.mode || 'UPI',
+                        `"${(r.customerName || '').replace(/"/g, '""')}"`,
+                        r.customerEmail || '',
+                        r.created_at || ''
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `UPay_Ledger_${Date.now()}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                this.notify('CSV Ledger Exported!');
+            },
+
+            async saveProfile(e) {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target).entries());
+                const res = await fetch('/user/dashboard/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                this.notify(result.message, result.status ? 'success' : 'warn');
+            },
+
+            async saveBank(e) {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target).entries());
+                const res = await fetch('/user/dashboard/bank', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                this.notify(result.message, result.status ? 'success' : 'warn');
+            },
+
+            async saveSettings(btn) {
+                const callback = document.getElementById("callback").value;
+                const redirect = document.getElementById("redirect").value;
+                const res = await fetch('/user/dashboard/callback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ callback, redirect })
+                });
+                const result = await res.json();
+                this.notify(result.message, result.status ? 'success' : 'warn');
             },
 
             initChart() {
@@ -732,25 +1712,25 @@
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
                 if (this.state.chart) this.state.chart.destroy();
-                
+
                 const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-                gradient.addColorStop(0, 'rgba(79, 70, 229, 0.08)');
-                gradient.addColorStop(1, 'rgba(79, 70, 229, 0.00)');
+                gradient.addColorStop(0, 'rgba(95, 37, 159, 0.22)');
+                gradient.addColorStop(1, 'rgba(95, 37, 159, 0.00)');
 
                 this.state.chart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                         datasets: [{
-                            data: [4200, 7800, 5600, 11200, 9800, 15400, 14250],
-                            borderColor: '#4f46e5',
-                            borderWidth: 2.5,
+                            data: [4800, 8200, 6900, 12400, 10900, 16800, 19450],
+                            borderColor: '#5f259f',
+                            borderWidth: 3,
                             pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#4f46e5',
-                            pointBorderWidth: 2,
-                            pointRadius: 3,
-                            pointHoverRadius: 5,
-                            tension: 0.35,
+                            pointBorderColor: '#5f259f',
+                            pointBorderWidth: 2.5,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.38,
                             fill: true,
                             backgroundColor: gradient
                         }]
@@ -758,13 +1738,13 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, tooltip: { cornerRadius: 8, padding: 8 } },
+                        plugins: { legend: { display: false }, tooltip: { cornerRadius: 10, padding: 10 } },
                         scales: {
                             y: { display: false },
-                            x: { 
-                                grid: { display: false }, 
-                                border: { display: false }, 
-                                ticks: { font: { size: 11, family: 'Inter' }, color: '#94a3b8' } 
+                            x: {
+                                grid: { display: false },
+                                border: { display: false },
+                                ticks: { font: { size: 11, weight: 'bold' }, color: '#64748b' }
                             }
                         }
                     }
@@ -774,47 +1754,24 @@
             notify(text, type = 'success') {
                 Toastify({
                     text: text,
-                    duration: 2500,
+                    duration: 2800,
                     gravity: "top",
                     position: "center",
                     style: {
-                        background: type === 'success' ? "#0f172a" : "#ea580c",
-                        borderRadius: "8px",
+                        background: type === 'success' ? "linear-gradient(135deg, #5f259f, #7c3aed)" : "#e11d48",
+                        borderRadius: "12px",
                         fontSize: "12px",
-                        fontWeight: "600",
-                        boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)"
+                        fontWeight: "700",
+                        boxShadow: "0 10px 25px -5px rgba(95, 37, 159, 0.35)"
                     }
                 }).showToast();
             },
 
-
-
-
             copy(text) {
                 navigator.clipboard.writeText(text);
                 this.notify('Copied to Clipboard');
-            },
-
-            simulateSync(btn) {
-                this.notify('Syncing Cluster Nodes...');
-                btn.classList.add('refresh-spin');
-                setTimeout(() => btn.classList.remove('refresh-spin'), 750);
-            },
-
-            setupInterceptors() {
-                document.body.addEventListener('touchmove', (e) => {
-                    if (e.target.closest('#view-scroller')) return;
-                    e.preventDefault();
-                }, { passive: false });
             }
         };
-function openNewWindow(upaytr) {
-  window.open(
-    `/user/dashboard/transaction/${upaytr}`,
-    "Transaction Details",
-    "width=600,height=400,scrollbars=yes,resizable=yes"
-  );
-}
 
         function openpop() {
             if (typeof UPayDeposit !== 'undefined') {
@@ -826,6 +1783,8 @@ function openNewWindow(upaytr) {
         window.onload = () => {
             Terminal.init();
             const myMenuItems = [
+                { name: "Theme Studio", link: "javascript:Terminal.nav('themes')", isLogout: false },
+                { name: "UPI Rails", link: "javascript:Terminal.nav('profile');Terminal.subProfile('paytm')", isLogout: false },
                 { name: "Logout", link: "/user/logout", isLogout: true }
             ];
             if (typeof setupDynamicMenu === 'function') {
