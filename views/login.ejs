@@ -11,8 +11,7 @@
     <script src="/js/money-loader.js"></script>
     <script src="/js/google.js" defer=""></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
+    <script src="/js/toast.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -115,19 +114,13 @@
 
     <script>
         function tst(text, type = 'success') {
-            Toastify({
-                text: text,
+            UPayToast.show({
+                message: text,
+                variant: type === 'success' ? 'success' : 'error',
                 duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "center",
-                style: {
-                    background: type === 'success' ? "linear-gradient(135deg, #5f259f, #7c3aed)" : "#e11d48",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: "700"
-                }
-            }).showToast();
+                dismissible: true,
+                position: "top-center"
+            });
         }
 
         const loginForm = document.getElementById('login-form');

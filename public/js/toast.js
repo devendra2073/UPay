@@ -755,6 +755,7 @@
       this.isDragging = false;
       this.dragStartX = 0;
       this.dragDeltaX = 0;
+      this._justDragged = false;
 
       this.config = this._normalizeOptions(options);
       this.remainingMs = isNumber(this.config.duration) && this.config.duration > 0
@@ -1055,6 +1056,10 @@
       });
 
       this.el.addEventListener('click', () => {
+        if (this._justDragged) {
+          this._justDragged = false;
+          return;
+        }
         if (this.config.closeOnClick && this.config.dismissible) {
           this.dismiss('click');
         }
@@ -1098,6 +1103,9 @@
       const onPointerMove = (e) => {
         if (!this.isDragging || !this.el) return;
         this.dragDeltaX = e.clientX - this.dragStartX;
+        if (Math.abs(this.dragDeltaX) > 6) {
+          this._justDragged = true;
+        }
         const opacity = clamp(1 - Math.abs(this.dragDeltaX) / (threshold * 2.2), 0.25, 1);
         this.el.style.transform = `translateX(${this.dragDeltaX}px)`;
         this.el.style.opacity = String(opacity);
@@ -1265,14 +1273,21 @@
       if (!isBrowser()) return null;
       injectStylesOnce();
 
-      if (!this._rootEl || !document.body.contains(this._rootEl)) {
+      const mountTarget = document.body || document.documentElement;
+      if (!mountTarget) return null;
+
+      if (!this._rootEl || !mountTarget.contains(this._rootEl)) {
         let existing = document.querySelector(`[${ROOT_ATTR}="true"]`);
         if (!existing) {
           existing = document.createElement('div');
           existing.setAttribute(ROOT_ATTR, 'true');
-          (document.body || document.documentElement).appendChild(existing);
+          mountTarget.appendChild(existing);
+        } else if (document.body && existing.parentElement !== document.body) {
+          document.body.appendChild(existing);
         }
         this._rootEl = existing;
+      } else if (document.body && this._rootEl.parentElement !== document.body) {
+        document.body.appendChild(this._rootEl);
       }
 
       this._syncRootAttributes();
@@ -1324,21 +1339,29 @@
       if (!isBrowser() || this._bound) return;
       this._bound = true;
 
-      window.addEventListener('blur', () => {
+      this._onWindowBlur = () => {
         this.isWindowBlurred = true;
         this.activeMap.forEach((item) => {
           if (this.config.pauseOnWindowBlur) item.pause();
         });
-      });
+      };
 
-      window.addEventListener('focus', () => {
+      this._onWindowFocus = () => {
         this.isWindowBlurred = false;
         this.activeMap.forEach((item) => {
           if (this.config.pauseOnWindowBlur && !item.isHovered) item.resume();
         });
-      });
+      };
 
-      document.addEventListener('keydown', (e) => {
+      this._onVisibilityChange = () => {
+        if (document.hidden) {
+          this._onWindowBlur();
+        } else {
+          this._onWindowFocus();
+        }
+      };
+
+      this._onKeyDown = (e) => {
         if (e.key === 'Escape' && this.activeMap.size > 0) {
           const entries = Array.from(this.activeMap.values());
           const topToast = this.config.newestOnTop ? entries[entries.length - 1] : entries[0];
@@ -1346,20 +1369,25 @@
             topToast.dismiss('escape');
           }
         }
-      });
+      };
+
+      window.addEventListener('blur', this._onWindowBlur);
+      window.addEventListener('focus', this._onWindowFocus);
+      document.addEventListener('visibilitychange', this._onVisibilityChange);
+      document.addEventListener('keydown', this._onKeyDown);
 
       if (typeof window.matchMedia === 'function') {
         try {
           this._mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-          const onThemeChange = () => {
+          this._onThemeChange = () => {
             if (this.config.theme === THEMES.AUTO) {
               this._syncRootAttributes();
             }
           };
           if (isFunction(this._mediaQuery.addEventListener)) {
-            this._mediaQuery.addEventListener('change', onThemeChange);
+            this._mediaQuery.addEventListener('change', this._onThemeChange);
           } else if (isFunction(this._mediaQuery.addListener)) {
-            this._mediaQuery.addListener(onThemeChange);
+            this._mediaQuery.addListener(this._onThemeChange);
           }
         } catch (_) {}
       }
@@ -1471,9 +1499,13 @@
           existing.remainingMs = existing.config.duration;
           existing.elapsedWhileRunning = 0;
           existing._lastTickTime = performance.now();
+          if (existing.progressBarEl) {
+            existing.progressBarEl.style.transform = 'scaleX(1)';
+          }
           return this._createHandle(existing);
         }
-        return this._createHandle(null);
+        const queued = this.queue.find((q) => q.getSignature() === item.getSignature());
+        return this._createHandle(queued || null);
       }
 
       if (this.activeMap.size >= this.config.maxVisible) {
@@ -1567,6 +1599,7 @@
         : '';
 
       return this.show({
+        ...p,
         title: p.title || 'UPI Payment Verified',
         message: p.message || (formattedAmt ? `Received ${formattedAmt}` : 'Payment confirmed'),
         description: p.description || '',
@@ -1574,10 +1607,9 @@
         amount: p.amount,
         utr: p.utr,
         orderId: p.orderId,
-        variant: VARIANTS.PAYMENT,
+        variant: p.variant || VARIANTS.PAYMENT,
         duration: p.duration !== undefined ? p.duration : 4200,
-        playSound: p.playSound !== undefined ? Boolean(p.playSound) : true,
-        ...p
+        playSound: p.playSound !== undefined ? Boolean(p.playSound) : true
       });
     }
 
@@ -1670,6 +1702,19 @@
     destroy() {
       this.dismissAll('destroy');
       this.events.clear();
+      if (isBrowser() && this._bound) {
+        if (this._onWindowBlur) window.removeEventListener('blur', this._onWindowBlur);
+        if (this._onWindowFocus) window.removeEventListener('focus', this._onWindowFocus);
+        if (this._onVisibilityChange) document.removeEventListener('visibilitychange', this._onVisibilityChange);
+        if (this._onKeyDown) document.removeEventListener('keydown', this._onKeyDown);
+        if (this._mediaQuery && this._onThemeChange) {
+          if (isFunction(this._mediaQuery.removeEventListener)) {
+            this._mediaQuery.removeEventListener('change', this._onThemeChange);
+          } else if (isFunction(this._mediaQuery.removeListener)) {
+            this._mediaQuery.removeListener(this._onThemeChange);
+          }
+        }
+      }
       if (this._rootEl && this._rootEl.parentElement) {
         this._rootEl.parentElement.removeChild(this._rootEl);
       }

@@ -11,8 +11,7 @@
     <!-- Minimal Animated Money Loader (No Voice Announcement!) -->
     <script src="/js/money-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"></script>
+    <script src="/js/toast.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 
     <%
@@ -1268,18 +1267,12 @@
             },
 
             toast(text, isError = false) {
-                Toastify({
-                    text,
+                UPayToast.show({
+                    message: text,
+                    variant: isError ? 'error' : 'success',
                     duration: 2600,
-                    gravity: "top",
-                    position: "center",
-                    style: {
-                        background: isError ? "#e11d48" : "linear-gradient(135deg, var(--theme-primary), var(--theme-secondary))",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                        fontWeight: "700"
-                    }
-                }).showToast();
+                    position: "top-center"
+                });
             }
         };
 
