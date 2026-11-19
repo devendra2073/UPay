@@ -17,21 +17,25 @@
 
     <%
       const cfg = typeof checkoutConfig !== 'undefined' ? checkoutConfig : {};
-      const cTheme = cfg.customTheme || { primary: '#5f259f', secondary: '#7c3aed', surface: '#ffffff', background: '#f5f0ff', text: '#0f172a', radius: '24px' };
+      const cTheme = cfg.customTheme || { primary: '#5b21b6', secondary: '#7c3aed', surface: '#ffffff', background: '#f8fafc', text: '#0f172a', radius: '20px' };
       const rawTheme = typeof selectedTheme !== 'undefined' ? selectedTheme : (cfg.defaultTheme || 'upay2');
       const initTheme = rawTheme === 'phonepe' ? 'upay2' : rawTheme;
     %>
 
     <style>
         :root {
-            --theme-primary: #5f259f;
+            --theme-primary: #5b21b6;
             --theme-secondary: #7c3aed;
-            --theme-bg: #f5f0ff;
+            --theme-bg: #f8fafc;
             --theme-surface: #ffffff;
             --theme-text: #0f172a;
             --theme-muted: #64748b;
-            --theme-border: rgba(95, 37, 159, 0.14);
-            --theme-radius: 24px;
+            --theme-border: rgba(15, 23, 42, 0.08);
+            --theme-radius: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -44,75 +48,81 @@
 
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        .theme-card {
+        .fintech-card {
             background: var(--theme-surface);
             color: var(--theme-text);
             border: 1px solid var(--theme-border);
             border-radius: var(--theme-radius);
-            box-shadow: 0 24px 60px -15px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(95, 37, 159, 0.05);
-            transition: background 0.35s ease, color 0.35s ease, border-radius 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.04);
+            transition: background 0.35s ease, color 0.35s ease, border-radius 0.25s ease, border-color 0.25s ease;
         }
 
-        .theme-header-banner {
-            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
-            color: #ffffff;
+        .fintech-panel {
+            background: color-mix(in srgb, var(--theme-text) 2.5%, transparent);
+            border: 1px solid var(--theme-border);
+            border-radius: calc(var(--theme-radius) - 6px);
         }
 
-        .theme-btn-primary {
+        .fintech-accent-btn {
             background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
             color: #ffffff;
-            box-shadow: 0 12px 28px -8px var(--theme-primary);
-            transition: all 0.22s ease;
+            box-shadow: 0 10px 24px -10px var(--theme-primary);
+            transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
         }
-        .theme-btn-primary:hover {
-            opacity: 0.95;
+        .fintech-accent-btn:hover {
+            opacity: 0.96;
             transform: translateY(-1px);
         }
-        .theme-btn-primary:active {
-            transform: scale(0.98);
+        .fintech-accent-btn:active {
+            transform: scale(0.985);
         }
 
-        .theme-qr-frame {
-            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
-            padding: 10px;
-            border-radius: 28px;
-            box-shadow: 0 18px 40px -12px rgba(95, 37, 159, 0.35);
-        }
-
-        .theme-badge-soft {
-            background: color-mix(in srgb, var(--theme-primary) 10%, transparent);
-            color: var(--theme-primary);
-            border: 1px solid color-mix(in srgb, var(--theme-primary) 22%, transparent);
+        .qr-shell {
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 14px 32px -14px rgba(15, 23, 42, 0.16);
         }
 
         .scan-laser {
             position: absolute;
-            left: 12px;
-            right: 12px;
-            height: 2.5px;
-            background: linear-gradient(90deg, transparent, var(--theme-primary), #10b981, var(--theme-secondary), transparent);
-            box-shadow: 0 0 12px var(--theme-primary);
-            animation: laserSweep 2.6s ease-in-out infinite;
+            left: 10px;
+            right: 10px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--theme-primary), #10b981, transparent);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--theme-primary) 65%, transparent);
+            animation: laserSweep 2.8s ease-in-out infinite;
             pointer-events: none;
         }
         @keyframes laserSweep {
-            0%, 100% { top: 14px; opacity: 0.75; }
-            50% { top: calc(100% - 16px); opacity: 1; }
+            0%, 100% { top: 12px; opacity: 0.65; }
+            50% { top: calc(100% - 14px); opacity: 1; }
         }
 
-        .popup-in { animation: popIn .35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        /* Gesture Entry Overlay */
+        #gesture-gate-overlay {
+            transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.38s ease;
+        }
+        #gesture-gate-overlay.dismissed {
+            opacity: 0;
+            transform: scale(1.03) translateY(-8px);
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .popup-in { animation: popIn .32s cubic-bezier(0.16, 1, 0.3, 1) both; }
         @keyframes popIn {
-            from { opacity: 0; transform: scale(.92) translateY(12px); }
+            from { opacity: 0; transform: scale(.95) translateY(8px); }
             to { opacity: 1; transform: none; }
         }
 
-        .redirect-bar { height: 5px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
-        .redirect-bar > span { display: block; height: 100%; width: 0; background: #00b970; border-radius: 99px; }
-        .redirect-bar.run > span { animation: fillBar 3.5s linear forwards; }
+        .redirect-bar { height: 4px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+        .redirect-bar > span { display: block; height: 100%; width: 0; background: #10b981; border-radius: 99px; }
+        .redirect-bar.run > span { animation: fillBar 3.4s linear forwards; }
         @keyframes fillBar { to { width: 100%; } }
 
         .bit {
-            position: absolute; top: 80px; left: 50%; width: 8px; height: 12px; border-radius: 2px; opacity: 0; pointer-events: none;
+            position: absolute; top: 76px; left: 50%; width: 7px; height: 11px; border-radius: 2px; opacity: 0; pointer-events: none;
             animation: fall var(--t) cubic-bezier(.15, .7, .4, 1) var(--d) forwards;
         }
         @keyframes fall {
@@ -124,45 +134,115 @@
 <body class="flex flex-col items-center justify-center min-h-screen p-3 sm:p-5 lg:p-8 relative overflow-x-hidden">
 
     <!-- ================================================================= -->
-    <!-- TOP FLOATING UPay 2.0 TOOLBAR: THEME SWITCHER (7 THEMES) + LANG   -->
+    <!-- PRE-CHECKOUT GESTURE GATE OVERLAY (UNLOCKS /assets/done.mp3)      -->
     <!-- ================================================================= -->
-    <div class="w-full max-w-4xl mb-3 flex flex-wrap items-center justify-between gap-2 z-20 px-1">
-        <!-- Brand & Security Pill -->
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-xl theme-header-banner flex items-center justify-center font-black text-sm shadow-sm">
-                &#8377;
+    <div id="gesture-gate-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-md">
+        <div class="w-full max-w-md bg-white text-slate-900 rounded-3xl border border-slate-200/90 shadow-2xl p-6 sm:p-7 popup-in">
+            <!-- Top Row: Brand & Encryption Pill -->
+            <div class="flex items-center justify-between gap-2 pb-5 border-b border-slate-100">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V7l7-4z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12l1.7 1.7 3.3-3.4"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xs font-extrabold tracking-tight text-slate-900">UPay 2.0 Checkout</div>
+                        <div class="text-[11px] text-slate-500 truncate"><%=company%> • #<%=tid%></div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    256-Bit UPI
+                </span>
             </div>
-            <div>
+
+            <!-- Amount Hero Block -->
+            <div class="py-6 text-center">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Payable Amount</span>
+                <div class="mt-1.5 flex items-baseline justify-center gap-1">
+                    <span class="text-xl font-bold text-slate-400">&#8377;</span>
+                    <span id="gate-amount-display" class="text-4xl sm:text-[42px] font-black tracking-tight text-slate-900 tabular-nums">
+                        <%= Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    </span>
+                </div>
+                <p class="mt-2 text-xs text-slate-500">
+                    Merchant: <strong class="text-slate-700"><%=company%></strong>
+                </p>
+            </div>
+
+            <!-- Minimal Info Strip -->
+            <div class="rounded-2xl bg-slate-50 border border-slate-200/70 px-4 py-3 flex items-center justify-between text-xs mb-5">
+                <span class="text-slate-500 font-medium">Instant UPI QR & Audio Alert</span>
+                <span class="font-mono font-bold text-slate-700 text-[11px]">#<%=tid%></span>
+            </div>
+
+            <!-- Primary CTA Button -->
+            <button type="button" id="proceed-to-pay-btn" onclick="CheckoutApp.enterCheckout()"
+                class="w-full py-3.5 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-extrabold text-sm shadow-lg shadow-slate-900/15 transition flex items-center justify-center gap-2 cursor-pointer">
+                <span>Proceed to Pay</span>
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TOP FLOATING TOOLBAR: THEME SWITCHER (7 THEMES) + LANG + AUDIO   -->
+    <!-- ================================================================= -->
+    <div class="w-full max-w-4xl mb-3 flex flex-wrap items-center justify-between gap-2.5 z-20 px-0.5">
+        <!-- Brand & Security Pill -->
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs" style="background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V7l7-4z"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
                     <span class="text-xs font-extrabold tracking-tight">UPay 2.0</span>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/15 text-emerald-600 border border-emerald-500/25">Verified Gateway</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Verified</span>
                 </div>
-                <p class="text-[10px] opacity-65"><%= (cfg.tagline || 'UPay 2.0 • 100% Safe & Instant UPI Checkout').replace(/PhonePe/gi, 'UPay 2.0') %></p>
+                <p class="text-[11px] opacity-65 truncate"><%= (cfg.tagline || 'UPay 2.0 • 100% Safe & Instant UPI Checkout').replace(/PhonePe/gi, 'UPay 2.0') %></p>
             </div>
         </div>
 
-        <!-- Theme Bar (7 Presets + Customizer Button) & Language Selector -->
-        <div class="flex flex-wrap items-center gap-1.5 bg-white/85 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-black/5 shadow-xs">
+        <!-- Theme Bar (7 Presets + Customizer + Sound Toggle + Language) -->
+        <div class="flex flex-wrap items-center gap-1.5 bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-slate-200/80 shadow-xs text-slate-800">
             <% if (cfg.allowCustomerThemeChange !== false) { %>
-            <div class="flex items-center gap-1 pr-1.5 border-r border-slate-200" title="Switch Payment Page Theme">
-                <button type="button" onclick="CheckoutApp.applyTheme('upay2')" class="w-5 h-5 rounded-full bg-[#5f259f] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="UPay 2.0 Royal Purple"></button>
-                <button type="button" onclick="CheckoutApp.applyTheme('midnight')" class="w-5 h-5 rounded-full bg-[#0f172a] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Midnight Dark"></button>
-                <button type="button" onclick="CheckoutApp.applyTheme('emerald')" class="w-5 h-5 rounded-full bg-[#059669] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Emerald Mint"></button>
-                <button type="button" onclick="CheckoutApp.applyTheme('gold')" class="w-5 h-5 rounded-full bg-[#d97706] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Royal Gold"></button>
-                <button type="button" onclick="CheckoutApp.applyTheme('ocean')" class="w-5 h-5 rounded-full bg-[#0284c7] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Oceanic Cyan"></button>
-                <button type="button" onclick="CheckoutApp.applyTheme('rose')" class="w-5 h-5 rounded-full bg-[#e11d48] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Rose Sunset"></button>
-                <button type="button" onclick="CheckoutApp.applyTheme('monochrome')" class="w-5 h-5 rounded-full bg-[#27272a] border-2 border-white shadow-xs hover:scale-110 transition cursor-pointer" title="Minimal Monochrome"></button>
+            <div class="flex items-center gap-1 pr-2 border-r border-slate-200" title="Switch Payment Page Theme">
+                <button type="button" onclick="CheckoutApp.applyTheme('upay2')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#5b21b6] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="UPay 2.0 Royal Violet"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('midnight')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#0f172a] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="Midnight Dark"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('emerald')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#059669] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="Emerald Mint"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('gold')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#d97706] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="Royal Gold"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('ocean')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#0284c7] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="Oceanic Cyan"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('rose')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#e11d48] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="Rose Sunset"></button>
+                <button type="button" onclick="CheckoutApp.applyTheme('monochrome')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#27272a] ring-1 ring-black/10 hover:scale-110 transition cursor-pointer" title="Minimal Monochrome"></button>
             </div>
             <% } %>
 
             <% if (cfg.allowCustomTheme !== false) { %>
-            <button type="button" onclick="CheckoutApp.toggleModal('custom-theme-modal', true)" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold text-[#5f259f] bg-purple-50 hover:bg-purple-100 transition cursor-pointer flex items-center gap-1">
-                <span>🎨 Customize</span>
+            <button type="button" onclick="CheckoutApp.toggleModal('custom-theme-modal', true)" class="px-2.5 py-1 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer inline-flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 100 18h1.5a2 2 0 000-4H12a2 2 0 010-4h4a5 5 0 000-10H12z"/>
+                </svg>
+                <span>Theme</span>
             </button>
             <% } %>
 
+            <!-- Sound Status / Test Button -->
+            <button type="button" onclick="CheckoutApp.playDoneSound(true)" title="Test Payment Sound (/assets/done.mp3)" class="px-2 py-1 rounded-xl text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition cursor-pointer inline-flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/>
+                </svg>
+                <span class="hidden sm:inline">Sound</span>
+            </button>
+
             <!-- Multi-Language Toggle (EN / HI / Hinglish) -->
-            <select id="lang-select" onchange="CheckoutApp.setLanguage(this.value)" class="text-[11px] font-extrabold bg-slate-100 text-slate-700 rounded-xl px-2 py-1 outline-none cursor-pointer">
+            <select id="lang-select" onchange="CheckoutApp.setLanguage(this.value)" class="text-[11px] font-bold bg-slate-100 text-slate-700 rounded-xl px-2 py-1 outline-none cursor-pointer">
                 <option value="en">EN</option>
                 <option value="hi">हिन्दी</option>
                 <option value="hinglish">Hinglish</option>
@@ -171,42 +251,47 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MAIN UPay 2.0 CHECKOUT CARD                                       -->
+    <!-- MAIN FINTECH CHECKOUT CARD                                        -->
     <!-- ================================================================= -->
-    <main class="w-full max-w-4xl theme-card overflow-hidden relative z-10">
+    <main class="w-full max-w-4xl fintech-card overflow-hidden relative z-10">
 
-        <!-- UPay 2.0 Top Merchant Header Banner -->
-        <div class="theme-header-banner p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3.5">
-                <div class="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
+        <!-- Clean Merchant Header Strip -->
+        <div class="px-5 py-4 sm:px-7 sm:py-5 border-b border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-white border border-slate-200/80 p-1.5 shadow-2xs shrink-0 flex items-center justify-center overflow-hidden">
                     <img src="<%=logo%>" alt="<%=company%>" class="w-full h-full object-contain"
-                        onerror="this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('<%=company%>') + '&background=5f259f&color=fff'" />
+                        onerror="this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('<%=company%>') + '&background=5b21b6&color=fff'" />
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white"><%=company%></h1>
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-[10px] font-extrabold border border-emerald-300/30">
-                            ✓ UPay 2.0 Verified
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-base sm:text-lg font-extrabold tracking-tight truncate"><%=company%></h1>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Verified Merchant
                         </span>
                     </div>
-                    <p class="text-xs text-white/80 font-mono mt-0.5">Order ID: #<%=tid%> • Payer: <span id="header-payer-name" class="font-bold text-white"><%=customerName%></span></p>
+                    <p class="text-xs opacity-65 font-mono mt-0.5 truncate">Order #<%=tid%> • Payer: <span id="header-payer-name" class="font-bold opacity-100"><%=customerName%></span></p>
                 </div>
             </div>
 
             <!-- Live Total Payable Display -->
-            <div class="sm:text-right bg-black/15 backdrop-blur-xs px-4 py-2.5 rounded-2xl border border-white/15">
-                <span data-i18n="totalPayable" class="text-[10px] font-extrabold uppercase tracking-widest text-white/75 block">Total Payable</span>
-                <div class="flex items-baseline sm:justify-end gap-1">
-                    <span class="text-2xl sm:text-3xl font-black text-white tabular-nums">&#8377;<span id="live-amount-display"><%= Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></span>
+            <div class="sm:text-right px-4 py-2.5 rounded-2xl fintech-panel shrink-0">
+                <span data-i18n="totalPayable" class="text-[10px] font-bold uppercase tracking-widest opacity-60 block">Total Payable</span>
+                <div class="flex items-baseline sm:justify-end gap-1 mt-0.5">
+                    <span class="text-sm font-bold opacity-60">&#8377;</span>
+                    <span id="live-amount-display" class="text-2xl sm:text-[28px] font-black tracking-tight tabular-nums leading-none">
+                        <%= Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    </span>
                 </div>
-                <button type="button" onclick="CheckoutApp.toggleBreakdown()" class="text-[10px] font-bold text-white/85 underline hover:text-white cursor-pointer">
-                    View Price & Multi-Currency Breakdown &darr;
+                <button type="button" onclick="CheckoutApp.toggleBreakdown()" class="mt-1 text-[11px] font-bold inline-flex items-center gap-1 opacity-75 hover:opacity-100 cursor-pointer" style="color: var(--theme-primary);">
+                    <span>Price & FX Breakdown</span>
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
             </div>
         </div>
 
         <!-- Expandable Price & Multi-Currency Transparency Breakdown Bar -->
-        <div id="price-breakdown-drawer" class="hidden bg-slate-900 text-slate-200 px-6 py-3.5 text-xs border-b border-slate-800">
+        <div id="price-breakdown-drawer" class="hidden bg-slate-900 text-slate-200 px-5 sm:px-7 py-3.5 text-xs border-b border-slate-800">
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase block">Base Order</span>
@@ -217,16 +302,16 @@
                     <span class="font-bold mono text-emerald-400">-&#8377;<span id="brk-discount"><%=Number(discountAmount || 0).toFixed(2)%></span></span>
                 </div>
                 <div>
-                    <span class="text-[10px] text-slate-400 uppercase block">Gratuity / Tip</span>
+                    <span class="text-[10px] text-slate-400 uppercase block">Tip / Support</span>
                     <span class="font-bold mono text-amber-300">+&#8377;<span id="brk-tip"><%=Number(tipAmount || 0).toFixed(2)%></span></span>
                 </div>
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase block">Gateway Fee</span>
                     <span class="font-bold mono">+&#8377;<span id="brk-fee"><%=Number(feeAmount || 0).toFixed(2)%></span></span>
                 </div>
-                <div>
+                <div class="col-span-2 sm:col-span-1">
                     <span class="text-[10px] text-slate-400 uppercase block">Intl Approx (USD/EUR)</span>
-                    <span class="font-bold mono text-purple-300" id="brk-fx">$<%=(Number(amount) / 84).toFixed(2)%> / €<%=(Number(amount) / 91).toFixed(2)%></span>
+                    <span class="font-bold mono text-violet-300" id="brk-fx">$<%=(Number(amount) / 84).toFixed(2)%> / €<%=(Number(amount) / 91).toFixed(2)%></span>
                 </div>
             </div>
         </div>
@@ -235,109 +320,145 @@
         <div class="grid grid-cols-1 lg:grid-cols-12">
 
             <!-- LEFT COLUMN: QR SCANNER + SUPPORTED UPI APP LOGOS + DISPUTE/UTR (7 COLS) -->
-            <div class="lg:col-span-7 p-5 sm:p-7 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200/60">
+            <div class="lg:col-span-7 p-5 sm:p-7 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-black/5">
 
                 <!-- Top Status & Timer Pill -->
-                <div class="flex items-center justify-between gap-2 mb-5">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold theme-badge-soft">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <div class="flex items-center justify-between gap-2 mb-5 flex-wrap">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span data-i18n="scanPrompt">Scan QR with Any UPI App to Pay</span>
                     </span>
 
-                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200/70 text-xs font-extrabold">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 text-xs font-bold">
+                        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                        </svg>
                         <span id="timer" class="mono">05:00</span>
-                        <button type="button" onclick="CheckoutApp.refreshQrSession()" title="Extend Session / Regenerate QR without Reload" class="ml-1 text-[10px] underline hover:text-rose-800 cursor-pointer">Extend</button>
+                        <button type="button" onclick="CheckoutApp.refreshQrSession()" title="Extend Session / Regenerate QR without Reload" class="ml-1 text-[11px] font-extrabold underline cursor-pointer">Extend</button>
                     </div>
                 </div>
 
                 <!-- Centerpiece Dynamic QR with Animated Laser Sweep -->
                 <div class="flex flex-col items-center my-2">
-                    <div class="theme-qr-frame relative transform hover:scale-[1.01] transition duration-300">
-                        <div class="bg-white p-3.5 rounded-2xl relative overflow-hidden">
+                    <div class="qr-shell p-3.5 relative">
+                        <div class="relative rounded-2xl overflow-hidden bg-white">
                             <div class="scan-laser"></div>
-                            <img id="qr-image" src="<%=obj%>" alt="UPay 2.0 Dynamic UPI QR Code" class="w-48 h-48 sm:w-52 sm:h-52 object-contain mx-auto" crossorigin="anonymous">
+                            <img id="qr-image" src="<%=obj%>" alt="UPay 2.0 Dynamic UPI QR Code" class="w-48 h-48 sm:w-52 sm:h-52 object-contain mx-auto block" crossorigin="anonymous">
                         </div>
                     </div>
 
                     <!-- QR Utility Buttons: Download QR, Copy UPI ID, Copy Amount -->
                     <div class="flex flex-wrap items-center justify-center gap-2 mt-4">
-                        <button type="button" onclick="CheckoutApp.downloadQR()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <button type="button" onclick="CheckoutApp.downloadQR()" class="px-3 py-1.5 rounded-xl fintech-panel hover:opacity-85 text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16"/>
+                            </svg>
                             <span data-i18n="downloadQr">Save QR</span>
                         </button>
-                        <button type="button" onclick="CheckoutApp.copyText('<%=upi%>', 'Merchant UPI ID Copied!')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold mono transition cursor-pointer">
-                            Copy VPA: <%=upi%>
+                        <button type="button" onclick="CheckoutApp.copyText('<%=upi%>', 'Merchant UPI ID Copied!')" class="px-3 py-1.5 rounded-xl fintech-panel hover:opacity-85 text-xs font-bold mono inline-flex items-center gap-1.5 transition cursor-pointer max-w-full truncate">
+                            <svg class="w-3.5 h-3.5 shrink-0 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                            </svg>
+                            <span class="truncate">VPA: <%=upi%></span>
                         </button>
-                        <button type="button" onclick="CheckoutApp.copyText(CheckoutApp.state.amount, 'Exact Amount Copied!')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition cursor-pointer">
+                        <button type="button" onclick="CheckoutApp.copyText(CheckoutApp.state.amount, 'Exact Amount Copied!')" class="px-3 py-1.5 rounded-xl fintech-panel hover:opacity-85 text-xs font-bold tabular-nums transition cursor-pointer">
                             Copy &#8377;<span id="copy-amt-btn"><%=amount%></span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Supported UPI Apps Small Logos Strip (No Intent Launch Buttons) -->
-                <div class="mt-6 pt-4 border-t border-slate-200/60 text-center">
-                    <span data-i18n="supportedApps" class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block mb-2.5">Supported UPI Applications</span>
-                    <div class="flex flex-wrap items-center justify-center gap-2.5">
-                        <!-- GPay Small Logo Badge -->
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
-                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                            <span class="text-[11px] font-extrabold text-slate-700">GPay</span>
+                <!-- Supported UPI Apps Vector Logos Strip -->
+                <div class="mt-6 pt-4 border-t border-black/5 text-center">
+                    <span data-i18n="supportedApps" class="text-[10px] font-bold uppercase tracking-widest opacity-55 block mb-2.5">Supported UPI Applications</span>
+                    <div class="flex flex-wrap items-center justify-center gap-2 text-slate-800">
+                        <!-- GPay -->
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.28 6.61l3.99 3.1C5.74 6.86 8.57 4.75 12 4.75z"/>
+                                <path fill="#4285F4" d="M23.49 12.27c0-.78-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58l3.86 3c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+                                <path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 010-4.58l-3.99-3.1a11.98 11.98 0 000 10.78l3.99-3.1z"/>
+                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96l-3.99 3.1C3.26 21.31 7.31 24 12 24z"/>
+                            </svg>
+                            <span class="text-[11px] font-bold">GPay</span>
                         </div>
-                        <!-- PhonePe Small Logo Badge -->
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
-                            <span class="w-4 h-4 rounded-md bg-[#5f259f] text-white text-[9px] font-black flex items-center justify-center shrink-0">पे</span>
-                            <span class="text-[11px] font-extrabold text-slate-700">PhonePe</span>
+
+                        <!-- PhonePe -->
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <rect width="24" height="24" rx="6" fill="#5f259f"/>
+                                <path fill="#fff" d="M14.5 6.5h-2.2l-1.4 4.8H8.8l-.5 1.8h2.1l-.9 3.2c-.3 1.1.4 2.2 1.5 2.2h1.6l.4-1.7h-1.1c-.3 0-.5-.2-.4-.5l.8-3h2.1l.5-1.8h-2.1l.7-2.8h1.5l.4-2z"/>
+                            </svg>
+                            <span class="text-[11px] font-bold">PhonePe</span>
                         </div>
-                        <!-- Paytm Small Logo Badge -->
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
-                            <span class="w-4 h-4 rounded-md bg-[#00baf2] text-white text-[9px] font-black flex items-center justify-center shrink-0">P</span>
-                            <span class="text-[11px] font-extrabold text-slate-700">Paytm</span>
+
+                        <!-- Paytm -->
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <rect width="24" height="24" rx="6" fill="#002970"/>
+                                <path fill="#00baf2" d="M6 12h6.5a2.5 2.5 0 000-5H6v10h2.4v-5z"/>
+                            </svg>
+                            <span class="text-[11px] font-bold">Paytm</span>
                         </div>
-                        <!-- BHIM Small Logo Badge -->
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
-                            <span class="w-4 h-4 rounded-md bg-emerald-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">B</span>
-                            <span class="text-[11px] font-extrabold text-slate-700">BHIM</span>
+
+                        <!-- BHIM -->
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <rect width="24" height="24" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+                                <path fill="#ea580c" d="M12 4l4 16h-2.5l-.8-3.5h-1.4L10.5 20H8L12 4z"/>
+                                <path fill="#16a34a" d="M15.5 4h2.5l-2 16h-2.5l2-16z"/>
+                            </svg>
+                            <span class="text-[11px] font-bold">BHIM</span>
                         </div>
-                        <!-- CRED / Amazon Pay Small Logo Badge -->
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200/70">
-                            <span class="w-4 h-4 rounded-md bg-amber-500 text-white text-[9px] font-black flex items-center justify-center shrink-0">A</span>
-                            <span class="text-[11px] font-extrabold text-slate-700">Amazon Pay</span>
+
+                        <!-- Amazon Pay -->
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <rect width="24" height="24" rx="6" fill="#0f172a"/>
+                                <path fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" d="M6.5 14.5c3.2 2.2 7.8 2.2 11 0"/>
+                                <path fill="#f59e0b" d="M16.5 13.5l2 1.2-1.5 1.8z"/>
+                            </svg>
+                            <span class="text-[11px] font-bold">Amazon Pay</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Raise Dispute / Submit UTR with Screenshot Callout -->
-                <div class="mt-6 pt-4 border-t border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="mt-6 pt-4 border-t border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-extrabold text-slate-700">Paid but waiting for confirmation?</p>
-                        <p class="text-[11px] text-slate-500">Upload your payment screenshot, 12-digit UTR & query for Admin verification.</p>
+                        <p class="text-xs font-extrabold">Paid but waiting for confirmation?</p>
+                        <p class="text-[11px] opacity-65">Upload payment screenshot, 12-digit UTR & query for Admin verification.</p>
                     </div>
-                    <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', true)" class="theme-btn-primary px-4 py-2.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">
-                        Upload Screenshot & UTR
+                    <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', true)" class="fintech-accent-btn px-4 py-2.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0 inline-flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        <span>Upload Screenshot & UTR</span>
                     </button>
                 </div>
             </div>
 
             <!-- RIGHT COLUMN: PROMO COUPONS, TIPS, SPLIT BILL, PAYER DETAILS, SUPPORT (5 COLS) -->
-            <div class="lg:col-span-5 p-5 sm:p-7 bg-slate-50/60 flex flex-col justify-between space-y-5">
+            <div class="lg:col-span-5 p-5 sm:p-7 flex flex-col justify-between space-y-4">
 
-                <div class="space-y-5">
+                <div class="space-y-4">
                     <!-- 1. Promo Code / Discount Coupon Widget -->
                     <% if (cfg.enableCoupons !== false) { %>
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-                                <span>🏷️ Apply Promo / Offer Code</span>
+                    <div class="p-4 fintech-panel space-y-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-extrabold inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M3 11l8.59 8.59a2 2 0 002.82 0l6.18-6.18a2 2 0 000-2.82L12 1H4a1 1 0 00-1 1v9z"/>
+                                </svg>
+                                <span>Promo / Offer Code</span>
                             </span>
-                            <button type="button" onclick="CheckoutApp.quickFillCoupon('UPAY10')" class="text-[10px] font-extrabold text-[#5f259f] hover:underline cursor-pointer">
+                            <button type="button" onclick="CheckoutApp.quickFillCoupon('UPAY10')" class="text-[11px] font-bold hover:underline cursor-pointer" style="color: var(--theme-primary);">
                                 Try UPAY10
                             </button>
                         </div>
                         <form onsubmit="CheckoutApp.applyPromo(event)" class="flex gap-2">
                             <input type="text" id="coupon-input" value="<%=couponCode || ''%>" placeholder="e.g. UPAY10 or UPAY20"
-                                class="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs font-extrabold uppercase mono text-slate-900 outline-none focus:border-[#5f259f]">
-                            <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold cursor-pointer">
+                                class="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold uppercase mono text-slate-900 outline-none focus:border-slate-400">
+                            <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer shrink-0">
                                 Apply
                             </button>
                         </form>
@@ -347,17 +468,22 @@
                     </div>
                     <% } %>
 
-                    <!-- 2. Add Gratitude Tip / Support Widget -->
+                    <!-- 2. Add Tip / Support Widget -->
                     <% if (cfg.enableTips !== false) { %>
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-extrabold text-slate-800">💜 Add a Tip for <%=company%></span>
-                            <button type="button" onclick="CheckoutApp.setTip(0)" class="text-[10px] font-bold text-slate-400 hover:text-rose-600 cursor-pointer">Clear</button>
+                    <div class="p-4 fintech-panel space-y-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-extrabold inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                <span class="truncate">Add Tip for <%=company%></span>
+                            </span>
+                            <button type="button" onclick="CheckoutApp.setTip(0)" class="text-[11px] font-bold opacity-55 hover:opacity-100 cursor-pointer shrink-0">Clear</button>
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <% [10, 25, 50, 100].forEach(t => { %>
                             <button type="button" onclick="CheckoutApp.setTip(<%=t%>)" data-tip-btn="<%=t%>"
-                                class="tip-pill py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer <%=Number(tipAmount) === t ? 'border-[#5f259f] bg-purple-50 text-[#5f259f]' : 'border-slate-200 text-slate-700 hover:border-purple-300'%>">
+                                class="tip-pill py-2 rounded-xl border text-xs font-extrabold tabular-nums transition cursor-pointer <%=Number(tipAmount) === t ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'%>">
                                 +&#8377;<%=t%>
                             </button>
                             <% }) %>
@@ -367,53 +493,75 @@
 
                     <!-- 3. Split Bill Calculator Widget -->
                     <% if (cfg.enableSplitBill !== false) { %>
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-extrabold text-slate-800">👥 Split Bill with Friends</span>
-                            <span id="split-per-person" class="text-xs font-black text-[#5f259f] mono">&#8377;<%=(Number(amount)/2).toFixed(2)%>/person</span>
+                    <div class="p-4 fintech-panel space-y-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-extrabold inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span>Split Bill</span>
+                            </span>
+                            <span id="split-per-person" class="text-xs font-black mono tabular-nums" style="color: var(--theme-primary);">&#8377;<%=(Number(amount)/2).toFixed(2)%>/person</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <input type="range" id="split-slider" min="2" max="10" value="2" oninput="CheckoutApp.updateSplit(this.value)" class="flex-1 accent-[#5f259f] cursor-pointer">
-                            <span id="split-count-label" class="text-xs font-extrabold text-slate-700 w-16 text-right">2 People</span>
+                            <input type="range" id="split-slider" min="2" max="10" value="2" oninput="CheckoutApp.updateSplit(this.value)" class="flex-1 cursor-pointer" style="accent-color: var(--theme-primary);">
+                            <span id="split-count-label" class="text-xs font-bold w-16 text-right tabular-nums">2 People</span>
                         </div>
-                        <button type="button" onclick="CheckoutApp.shareSplitBill()" class="w-full py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5f259f] text-[11px] font-extrabold transition cursor-pointer">
-                            Copy Split Payment Request for WhatsApp
+                        <button type="button" onclick="CheckoutApp.shareSplitBill()" class="w-full py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 text-[11px] font-bold transition cursor-pointer inline-flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                            </svg>
+                            <span>Copy WhatsApp Split Request</span>
                         </button>
                     </div>
                     <% } %>
 
                     <!-- 4. Payer Info, Custom Note & Email Receipt Card -->
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-extrabold text-slate-800">📩 Payer Details & Digital Receipt</span>
-                            <button type="button" onclick="CheckoutApp.toggleModal('payer-modal', true)" class="text-[11px] font-extrabold text-[#5f259f] hover:underline cursor-pointer">
-                                Edit Details
+                    <div class="p-4 fintech-panel space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-extrabold inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 opacity-75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <span>Payer & Receipt</span>
+                            </span>
+                            <button type="button" onclick="CheckoutApp.toggleModal('payer-modal', true)" class="text-[11px] font-bold hover:underline cursor-pointer" style="color: var(--theme-primary);">
+                                Edit
                             </button>
                         </div>
-                        <p class="text-[11px] text-slate-500 truncate" id="payer-summary-line">
+                        <p class="text-[11px] opacity-70 truncate" id="payer-summary-line">
                             <%=customerName%> • <%=customerEmail !== 'Not Given' ? customerEmail : 'Add email for instant receipt'%>
                         </p>
                         <% if (customerNote) { %>
-                        <p class="text-[11px] text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg" id="payer-note-line">Note: <%=customerNote%></p>
+                        <p class="text-[11px] px-2.5 py-1 rounded-lg bg-black/5 truncate" id="payer-note-line">Note: <%=customerNote%></p>
                         <% } else { %>
-                        <p class="text-[11px] text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg hidden" id="payer-note-line"></p>
+                        <p class="text-[11px] px-2.5 py-1 rounded-lg bg-black/5 truncate hidden" id="payer-note-line"></p>
                         <% } %>
                     </div>
                 </div>
 
                 <!-- Bottom Action Bar: Receipt Download, Rating & Dispute Help -->
-                <div class="pt-4 border-t border-slate-200/80 space-y-2.5">
+                <div class="pt-4 border-t border-black/5 space-y-2.5">
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="CheckoutApp.toggleModal('feedback-modal', true)" class="py-2.5 px-3 rounded-xl bg-white border border-slate-200 hover:border-purple-300 text-slate-700 text-[11px] font-extrabold transition cursor-pointer flex items-center justify-center gap-1">
-                            <span>⭐ Rate Checkout</span>
+                        <button type="button" onclick="CheckoutApp.toggleModal('feedback-modal', true)" class="py-2 px-3 rounded-xl fintech-panel hover:opacity-85 text-[11px] font-bold transition cursor-pointer inline-flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+                            </svg>
+                            <span>Rate Checkout</span>
                         </button>
-                        <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', true)" class="py-2.5 px-3 rounded-xl bg-white border border-slate-200 hover:border-rose-300 text-slate-700 text-[11px] font-extrabold transition cursor-pointer flex items-center justify-center gap-1">
-                            <span>🛡️ Raise Dispute</span>
+                        <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', true)" class="py-2 px-3 rounded-xl fintech-panel hover:opacity-85 text-[11px] font-bold transition cursor-pointer inline-flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
+                            </svg>
+                            <span>Raise Dispute</span>
                         </button>
                     </div>
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold px-1">
-                        <span>🔒 UPay 2.0 • 256-Bit Encrypted</span>
-                        <button type="button" onclick="CheckoutApp.downloadReceiptSummary()" class="text-[#5f259f] font-extrabold hover:underline cursor-pointer">Download Summary</button>
+                    <div class="flex items-center justify-between text-[11px] opacity-60 font-medium px-0.5">
+                        <span class="inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            <span>UPay 2.0 Encrypted</span>
+                        </span>
+                        <button type="button" onclick="CheckoutApp.downloadReceiptSummary()" class="font-bold hover:underline cursor-pointer" style="color: var(--theme-primary);">Download Summary</button>
                     </div>
                 </div>
 
@@ -423,30 +571,34 @@
         <!-- ============================================================= -->
         <!-- OVERLAYS: SUCCESS / TIMEOUT (ONLY WHEN TIMER EXPIRES)         -->
         <!-- ============================================================= -->
-        <div id="popup-overlay" class="hidden absolute inset-0 bg-slate-950/75 backdrop-blur-md z-50 flex items-center justify-center p-5" role="dialog" aria-modal="true">
+        <div id="popup-overlay" class="hidden absolute inset-0 bg-slate-950/75 backdrop-blur-md z-40 flex items-center justify-center p-5" role="dialog" aria-modal="true">
 
             <!-- Success Popup -->
             <div id="success-popup" class="hidden popup-in bg-white rounded-3xl p-7 text-center w-full max-w-sm shadow-2xl relative overflow-hidden text-slate-900">
                 <div id="confetti"></div>
-                <div class="w-20 h-20 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-4 text-4xl font-black shadow-lg shadow-emerald-500/30">
-                    ✓
+                <div class="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/25">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
                 </div>
-                <h3 class="text-xl font-extrabold text-slate-900">Payment Successful!</h3>
+                <h3 class="text-xl font-extrabold text-slate-900">Payment Successful</h3>
                 <p class="text-3xl font-black text-slate-900 mt-2 tabular-nums">&#8377;<span id="success-amount">0.00</span></p>
-                <p class="text-slate-500 text-xs mt-2">Verified by UPay 2.0 Node. Redirecting to <%=company%>…</p>
+                <p class="text-slate-500 text-xs mt-2">Verified by UPay 2.0. Redirecting to <%=company%>…</p>
                 <p class="text-slate-600 text-xs mt-3 bg-slate-100 py-1.5 px-3 rounded-xl inline-block"><b>UTR:</b> <span id="utr" class="mono font-bold"></span></p>
                 <div id="redirect-bar" class="redirect-bar mt-5"><span></span></div>
             </div>
 
             <!-- Timeout Popup (Shown ONLY when the 5-minute countdown expires) -->
             <div id="timeout-popup" class="hidden popup-in bg-white rounded-3xl p-7 text-center w-full max-w-sm shadow-2xl text-slate-900">
-                <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-2xl font-black">
-                    ⏳
+                <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                    </svg>
                 </div>
-                <h3 class="text-xl font-extrabold text-slate-900">QR Session Timed Out</h3>
-                <p class="text-slate-500 text-xs mt-2">The 5-minute countdown has ended. Click below to generate a fresh QR code and extend your session without reloading the page.</p>
-                <button type="button" onclick="CheckoutApp.refreshQrSession()" class="mt-5 w-full py-3.5 theme-btn-primary rounded-2xl font-extrabold text-xs cursor-pointer">
-                    Generate Fresh QR (No Reload)
+                <h3 class="text-lg font-extrabold text-slate-900">QR Session Timed Out</h3>
+                <p class="text-slate-500 text-xs mt-2">The 5-minute countdown ended. Generate a fresh QR code without reloading the page.</p>
+                <button type="button" onclick="CheckoutApp.refreshQrSession()" class="mt-5 w-full py-3 fintech-accent-btn rounded-2xl font-extrabold text-xs cursor-pointer">
+                    Generate Fresh QR
                 </button>
             </div>
         </div>
@@ -459,16 +611,16 @@
         <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 popup-in">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#5f259f]">UPay 2.0 Theme Customizer</span>
-                    <h3 class="text-base font-extrabold">Customize Payment Page Theme</h3>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">UPay 2.0 Theme Customizer</span>
+                    <h3 class="text-base font-extrabold">Customize Checkout Theme</h3>
                 </div>
                 <button type="button" onclick="CheckoutApp.toggleModal('custom-theme-modal', false)" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold cursor-pointer">&times;</button>
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                    <label class="font-bold text-slate-600 block mb-1">Primary Brand Color</label>
-                    <input type="color" id="user-color-primary" value="<%=cTheme.primary || '#5f259f'%>" oninput="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer">
+                    <label class="font-bold text-slate-600 block mb-1">Primary Color</label>
+                    <input type="color" id="user-color-primary" value="<%=cTheme.primary || '#5b21b6'%>" oninput="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer">
                 </div>
                 <div>
                     <label class="font-bold text-slate-600 block mb-1">Secondary Accent</label>
@@ -476,7 +628,7 @@
                 </div>
                 <div>
                     <label class="font-bold text-slate-600 block mb-1">Page Background</label>
-                    <input type="color" id="user-color-bg" value="<%=cTheme.background || '#f5f0ff'%>" oninput="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer">
+                    <input type="color" id="user-color-bg" value="<%=cTheme.background || '#f8fafc'%>" oninput="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer">
                 </div>
                 <div>
                     <label class="font-bold text-slate-600 block mb-1">Card Surface</label>
@@ -487,21 +639,21 @@
                     <input type="color" id="user-color-text" value="<%=cTheme.text || '#0f172a'%>" oninput="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 cursor-pointer">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-600 block mb-1">Corner Roundness</label>
+                    <label class="font-bold text-slate-600 block mb-1">Corner Radius</label>
                     <select id="user-color-radius" onchange="CheckoutApp.previewCustomTheme()" class="w-full h-10 rounded-xl border border-slate-200 px-2 font-bold">
-                        <option value="14px">Sharp (14px)</option>
-                        <option value="24px" selected>UPay 2.0 (24px)</option>
-                        <option value="34px">Super Rounded (34px)</option>
+                        <option value="14px">Crisp (14px)</option>
+                        <option value="20px" selected>Fintech (20px)</option>
+                        <option value="28px">Soft (28px)</option>
                     </select>
                 </div>
             </div>
 
             <div class="flex gap-2 pt-2">
                 <button type="button" onclick="CheckoutApp.applyTheme('upay2'); CheckoutApp.toggleModal('custom-theme-modal', false)" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs cursor-pointer">
-                    Reset to Default
+                    Reset Default
                 </button>
-                <button type="button" onclick="CheckoutApp.saveCustomTheme()" class="flex-1 py-3 rounded-xl theme-btn-primary font-extrabold text-xs cursor-pointer">
-                    Save My Theme
+                <button type="button" onclick="CheckoutApp.saveCustomTheme()" class="flex-1 py-3 rounded-xl fintech-accent-btn font-extrabold text-xs cursor-pointer">
+                    Save Theme
                 </button>
             </div>
         </div>
@@ -533,8 +685,8 @@
                     <label class="font-bold text-slate-600">Payment Note / Order Remark</label>
                     <input type="text" id="inp-cust-note" value="<%=customerNote%>" placeholder="Optional message for merchant" class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold">
                 </div>
-                <button type="submit" class="w-full py-3 rounded-xl theme-btn-primary font-extrabold text-xs cursor-pointer">
-                    Save Details (Zero Reload)
+                <button type="submit" class="w-full py-3 rounded-xl fintech-accent-btn font-extrabold text-xs cursor-pointer">
+                    Save Details
                 </button>
             </form>
         </div>
@@ -554,8 +706,8 @@
                 <button type="button" onclick="CheckoutApp.setRating(<%=s%>)" data-star="<%=s%>" class="star-btn text-amber-400 hover:scale-125 transition cursor-pointer">★</button>
                 <% }) %>
             </div>
-            <input type="text" id="feedback-comment" placeholder="What did you like about UPay 2.0?" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold">
-            <button type="button" onclick="CheckoutApp.submitFeedback()" class="w-full py-3 rounded-xl theme-btn-primary font-extrabold text-xs cursor-pointer">
+            <input type="text" id="feedback-comment" placeholder="Share quick feedback..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold">
+            <button type="button" onclick="CheckoutApp.submitFeedback()" class="w-full py-3 rounded-xl fintech-accent-btn font-extrabold text-xs cursor-pointer">
                 Submit Rating
             </button>
         </div>
@@ -568,32 +720,32 @@
         <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 popup-in">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase text-rose-600">Manual Admin Verification Desk</span>
-                    <h3 class="text-base font-extrabold">Raise Dispute / Submit Payment Proof</h3>
+                    <span class="text-[10px] font-extrabold uppercase text-rose-600">Manual Verification Desk</span>
+                    <h3 class="text-base font-extrabold">Submit Payment Proof</h3>
                 </div>
                 <button type="button" onclick="CheckoutApp.toggleModal('dispute-modal', false)" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold cursor-pointer">&times;</button>
             </div>
             <form onsubmit="CheckoutApp.submitDispute(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="font-bold text-slate-600">12-Digit Bank UTR / UPI Reference Number *</label>
-                    <input type="text" id="dispute-utr" required maxlength="12" pattern="\d{12}" placeholder="Enter 12-digit numeric UTR (e.g. 412890123456)" class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 mono font-semibold">
+                    <input type="text" id="dispute-utr" required maxlength="12" pattern="\d{12}" placeholder="e.g. 412890123456" class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 mono font-semibold">
                 </div>
                 <div>
                     <label class="font-bold text-slate-600">Upload Payment Screenshot *</label>
-                    <input type="file" id="dispute-screenshot-file" accept="image/*" required onchange="CheckoutApp.previewDisputeScreenshot(event)" class="w-full mt-1 px-3 py-2 rounded-xl border border-dashed border-purple-300 bg-purple-50/40 text-xs font-semibold cursor-pointer">
+                    <input type="file" id="dispute-screenshot-file" accept="image/*" required onchange="CheckoutApp.previewDisputeScreenshot(event)" class="w-full mt-1 px-3 py-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 text-xs font-semibold cursor-pointer">
                     <div id="dispute-screenshot-preview-wrap" class="hidden mt-2 p-2 rounded-xl bg-slate-50 border border-slate-200 text-center">
                         <img id="dispute-screenshot-preview" src="" alt="Screenshot Preview" class="max-h-32 mx-auto rounded-lg object-contain">
                     </div>
                 </div>
                 <div>
-                    <label class="font-bold text-slate-600">Your Query / Issue Details *</label>
-                    <textarea id="dispute-reason" required rows="3" placeholder="Describe your query (e.g. Paid via UPI app, amount deducted, please verify attached screenshot and UTR)..." class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold"></textarea>
+                    <label class="font-bold text-slate-600">Query / Issue Details *</label>
+                    <textarea id="dispute-reason" required rows="3" placeholder="Describe your payment issue..." class="w-full mt-1 px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold"></textarea>
                 </div>
                 <p class="text-[11px] text-slate-500 bg-amber-50 border border-amber-200/70 p-2.5 rounded-xl">
-                    Note: Disputes are reviewed manually by the Merchant Admin before settlement approval.
+                    Disputes are reviewed manually by the Merchant Admin before settlement approval.
                 </p>
                 <button type="submit" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs cursor-pointer">
-                    Submit Screenshot, UTR & Query to Admin
+                    Submit Screenshot, UTR & Query
                 </button>
             </form>
         </div>
@@ -602,68 +754,68 @@
     <script>
         const THEME_PRESETS = {
             upay2: {
-                primary: '#5f259f',
+                primary: '#5b21b6',
                 secondary: '#7c3aed',
-                bg: 'radial-gradient(circle at top center, #ede9fe 0%, #f5f0ff 55%, #f8fafc 100%)',
+                bg: '#f8fafc',
                 surface: '#ffffff',
                 text: '#0f172a',
-                radius: '24px'
+                radius: '20px'
             },
             midnight: {
                 primary: '#6366f1',
                 secondary: '#8b5cf6',
-                bg: 'radial-gradient(circle at top center, #1e1b4b 0%, #090d16 70%)',
+                bg: '#090d16',
                 surface: '#111827',
                 text: '#f8fafc',
-                radius: '24px'
+                radius: '20px'
             },
             emerald: {
                 primary: '#059669',
                 secondary: '#10b981',
-                bg: 'radial-gradient(circle at top center, #d1fae5 0%, #ecfdf5 60%, #f8fafc 100%)',
+                bg: '#f4fbf8',
                 surface: '#ffffff',
                 text: '#064e3b',
-                radius: '24px'
+                radius: '20px'
             },
             gold: {
                 primary: '#b45309',
                 secondary: '#f59e0b',
-                bg: 'radial-gradient(circle at top center, #fef3c7 0%, #fffbeb 60%, #fafaf9 100%)',
+                bg: '#faf9f5',
                 surface: '#ffffff',
-                text: '#451a03',
-                radius: '20px'
+                text: '#291d0e',
+                radius: '18px'
             },
             ocean: {
                 primary: '#0284c7',
-                secondary: '#06b6d4',
-                bg: 'radial-gradient(circle at top center, #e0f2fe 0%, #f0f9ff 60%, #f8fafc 100%)',
+                secondary: '#0ea5e9',
+                bg: '#f6fafe',
                 surface: '#ffffff',
                 text: '#0c4a6e',
-                radius: '24px'
+                radius: '20px'
             },
             rose: {
                 primary: '#e11d48',
                 secondary: '#f43f5e',
-                bg: 'radial-gradient(circle at top center, #ffe4e6 0%, #fff1f2 60%, #f8fafc 100%)',
+                bg: '#fdf7f8',
                 surface: '#ffffff',
                 text: '#4c0519',
-                radius: '28px'
+                radius: '24px'
             },
             monochrome: {
                 primary: '#18181b',
-                secondary: '#52525b',
+                secondary: '#3f3f46',
                 bg: '#f4f4f5',
                 surface: '#ffffff',
                 text: '#09090b',
                 radius: '16px'
             },
             custom: {
-                primary: '<%=cTheme.primary || "#5f259f"%>',
+                primary: '<%=cTheme.primary || "#5b21b6"%>',
                 secondary: '<%=cTheme.secondary || "#7c3aed"%>',
-                bg: '<%=cTheme.background || "#f5f0ff"%>',
+                bg: '<%=cTheme.background || "#f8fafc"%>',
                 surface: '<%=cTheme.surface || "#ffffff"%>',
                 text: '<%=cTheme.text || "#0f172a"%>',
-                radius: '<%=cTheme.radius || "24px"%>'
+                radius: '<%=cTheme.radius || "20px"%>'
             }
         };
 
@@ -702,10 +854,17 @@
                 countdownTimer: null,
                 rating: 5,
                 currentTheme: "<%=initTheme%>",
-                disputeScreenshotBase64: ""
+                disputeScreenshotBase64: "",
+                audioUnlocked: false,
+                doneAudio: null
             },
 
             init() {
+                // Prepare /assets/done.mp3 audio instance
+                const audio = new Audio('/assets/done.mp3');
+                audio.preload = 'auto';
+                this.state.doneAudio = audio;
+
                 let savedTheme = this.state.currentTheme;
                 try {
                     const localTheme = localStorage.getItem('upay_checkout_theme');
@@ -723,6 +882,64 @@
                 this.state.pollTimer = setTimeout(() => this.checkPaymentStatus(), 2200);
             },
 
+            // User gesture handler on "Proceed to Pay" overlay button
+            enterCheckout() {
+                this.unlockAudioContext();
+                const overlay = document.getElementById('gesture-gate-overlay');
+                if (overlay) {
+                    overlay.classList.add('dismissed');
+                }
+            },
+
+            unlockAudioContext() {
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        const ctx = new AudioCtx();
+                        if (ctx.state === 'suspended') {
+                            ctx.resume().catch(() => {});
+                        }
+                        const buffer = ctx.createBuffer(1, 1, 22050);
+                        const source = ctx.createBufferSource();
+                        source.buffer = buffer;
+                        source.connect(ctx.destination);
+                        source.start(0);
+                    }
+                } catch (e) {}
+
+                try {
+                    if (this.state.doneAudio) {
+                        this.state.doneAudio.load();
+                        const playPromise = this.state.doneAudio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                this.state.doneAudio.pause();
+                                this.state.doneAudio.currentTime = 0;
+                                this.state.audioUnlocked = true;
+                            }).catch(() => {
+                                this.state.audioUnlocked = true;
+                            });
+                        }
+                    }
+                } catch (e) {}
+            },
+
+            playDoneSound(isPreview = false) {
+                try {
+                    if (!this.state.doneAudio) {
+                        this.state.doneAudio = new Audio('/assets/done.mp3');
+                    }
+                    this.state.doneAudio.pause();
+                    this.state.doneAudio.currentTime = 0;
+                    const p = this.state.doneAudio.play();
+                    if (p && typeof p.catch === 'function') {
+                        p.catch(() => {
+                            if (isPreview) this.toast('Audio playback blocked by browser', true);
+                        });
+                    }
+                } catch (e) {}
+            },
+
             applyTheme(themeKey, persist = true) {
                 const normalizedKey = themeKey === 'phonepe' ? 'upay2' : themeKey;
                 const t = THEME_PRESETS[normalizedKey] || THEME_PRESETS.upay2;
@@ -732,7 +949,7 @@
                 root.style.setProperty('--theme-bg', t.bg);
                 root.style.setProperty('--theme-surface', t.surface);
                 root.style.setProperty('--theme-text', t.text);
-                root.style.setProperty('--theme-radius', t.radius || '24px');
+                root.style.setProperty('--theme-radius', t.radius || '20px');
 
                 this.state.currentTheme = normalizedKey;
                 if (persist) {
@@ -798,7 +1015,10 @@
             updateOrderDOM(data) {
                 if (typeof data.amount === 'number') {
                     this.state.amount = data.amount;
-                    document.getElementById('live-amount-display').textContent = data.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const formatted = data.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    document.getElementById('live-amount-display').textContent = formatted;
+                    const gateAmt = document.getElementById('gate-amount-display');
+                    if (gateAmt) gateAmt.textContent = formatted;
                     document.getElementById('copy-amt-btn').textContent = data.amount;
                     document.getElementById('brk-base').textContent = Number(data.baseAmount || data.amount).toFixed(2);
                     document.getElementById('brk-discount').textContent = Number(data.discountAmount || 0).toFixed(2);
@@ -857,9 +1077,9 @@
                     this.updateOrderDOM(data);
                     document.querySelectorAll('.tip-pill').forEach(btn => {
                         if (Number(btn.getAttribute('data-tip-btn')) === Number(amount) && amount > 0) {
-                            btn.className = 'tip-pill py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer border-[#5f259f] bg-purple-50 text-[#5f259f]';
+                            btn.className = 'tip-pill py-2 rounded-xl border text-xs font-extrabold tabular-nums transition cursor-pointer border-slate-900 bg-slate-900 text-white';
                         } else {
-                            btn.className = 'tip-pill py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer border-slate-200 text-slate-700 hover:border-purple-300';
+                            btn.className = 'tip-pill py-2 rounded-xl border text-xs font-extrabold tabular-nums transition cursor-pointer border-slate-200 bg-white text-slate-700 hover:border-slate-300';
                         }
                     });
                     this.toast(data.message);
@@ -1039,7 +1259,10 @@
                 });
                 document.getElementById('popup-overlay').classList.remove('hidden');
                 document.getElementById(`${type}-popup`)?.classList.remove('hidden');
-                if (type === 'success') this.playSuccessConfetti();
+                if (type === 'success') {
+                    this.playDoneSound(false);
+                    this.playSuccessConfetti();
+                }
             },
 
             handlePaymentVerified(utr) {
@@ -1057,7 +1280,7 @@
                 document.getElementById('redirect-bar').classList.add('run');
 
                 const box = document.getElementById('confetti');
-                const colors = ['#00b970', '#5f259f', '#f59e0b', '#6366f1', '#ec4899'];
+                const colors = ['#10b981', '#5b21b6', '#f59e0b', '#6366f1', '#ec4899'];
                 for (let i = 0; i < 24; i++) {
                     const b = document.createElement('span');
                     b.className = 'bit';
