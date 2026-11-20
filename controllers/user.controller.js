@@ -774,39 +774,312 @@ export const simulateSandboxPayment = async (req, res) => {
   }
 };
 
-// Admin Feature 11: Analytics Summary & Chart Data by Range (7D / 30D / 90D)
+// Admin Feature 11: Real-Time Analytics Summary & Multi-Chart Data (100% DB-backed)
 export const getAnalyticsSummary = async (req, res) => {
   try {
     const MID = req.user.MID;
-    const range = req.query.range || "7D";
-    const allTx = await payment.find({ MID }).sort({ created_at: -1 }).limit(500);
-    const paidTx = allTx.filter((t) => t.isPaid);
-    const totalVolume = paidTx.reduce((acc, t) => acc + (t.amount || 0), 0);
-    const avgTicket = paidTx.length ? Number((totalVolume / paidTx.length).toFixed(2)) : 0;
-    const conversionRate = allTx.length ? Number(((paidTx.length / allTx.length) * 100).toFixed(1)) : 99.2;
+    const range = String(req.query.range || "30D").toUpperCase();
+    const statusFilter = String(req.query.status || "ALL").toUpperCase();
+    const modeFilter = String(req.query.mode || "ALL").toUpperCase();
 
-    let labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    let series = [4800, 8200, 6900, 12400, 10900, 16800, Math.max(14500, Math.round(totalVolume))];
-    if (range === "30D") {
-      labels = ["Wk 1", "Wk 2", "Wk 3", "Wk 4"];
-      series = [28400, 39200, 44800, Math.max(52400, Math.round(totalVolume))];
-    } else if (range === "90D") {
-      labels = ["Month 1", "Month 2", "Month 3"];
-      series = [112000, 148500, Math.max(176000, Math.round(totalVolume))];
+    const now = new Date();
+    let daysBack = 30;
+    if (range === "7D") daysBack = 7;
+    else if (range === "14D") daysBack = 14;
+    else if (range === "30D") daysBack = 30;
+    else if (range === "90D") daysBack = 90;
+    else if (range === "12M" || range === "365D") daysBack = 365;
+    else if (range === "ALL") daysBack = 3650;
+
+    const rangeStart = new Date(now);
+    rangeStart.setHours(0, 0, 0, 0);
+    rangeStart.setDate(rangeStart.getDate() - (daysBack - 1));
+
+    // Fetch all merchant payments for full-history monthly & mode discovery, lean for speed
+    const [allMerchantTx, usr] = await Promise.all([
+      payment
+        .find({ MID })
+        .select("amount baseAmount discountAmount tipAmount feeAmount isPaid status mode created_at paymentDate expiresAt dispute feedback")
+        .sort({ created_at: 1 })
+        .lean(),
+      user.findOne({ email: req.user.email }).select("withdrawals wallet").lean()
+    ]);
+
+    // Distinct payment modes available for filter dropdown
+    const availableModes = Array.from(
+      new Set(allMerchantTx.map((t) => (t.mode || "UPI").trim().toUpperCase()).filter(Boolean))
+    );
+
+    // Helper to normalize effective status
+    const getEffectiveStatus = (t) => {
+      if (t.status === "REFUNDED" || t.status === "REFUND_REQUESTED") return t.status;
+      if (t.isPaid || t.status === "PAID") return "PAID";
+      if (t.status === "FAILED") return "FAILED";
+      return "PENDING";
+    };
+
+    // Apply range, status, and mode filters
+    const filteredTx = allMerchantTx.filter((t) => {
+      const created = t.created_at ? new Date(t.created_at) : null;
+      if (range !== "ALL" && created && created < rangeStart) return false;
+      const effStatus = getEffectiveStatus(t);
+      if (statusFilter !== "ALL") {
+        if (statusFilter === "REFUNDED" && effStatus !== "REFUNDED" && effStatus !== "REFUND_REQUESTED") return false;
+        else if (statusFilter !== "REFUNDED" && effStatus !== statusFilter) return false;
+      }
+      const tMode = (t.mode || "UPI").trim().toUpperCase();
+      if (modeFilter !== "ALL" && tMode !== modeFilter) return false;
+      return true;
+    });
+
+    // Core KPIs (100% real)
+    let totalVolume = 0;
+    let paidCount = 0;
+    let pendingCount = 0;
+    let failedCount = 0;
+    let expiredPendingCount = 0;
+    let refundRequestedCount = 0;
+    let refundedCount = 0;
+    let disputedCount = 0;
+    let totalTips = 0;
+    let totalDiscounts = 0;
+    let totalFees = 0;
+
+    for (const t of filteredTx) {
+      const eff = getEffectiveStatus(t);
+      const amt = Number(t.amount || 0);
+      if (eff === "PAID") {
+        totalVolume += amt;
+        paidCount++;
+        totalTips += Number(t.tipAmount || 0);
+        totalDiscounts += Number(t.discountAmount || 0);
+        totalFees += Number(t.feeAmount || 0);
+      } else if (eff === "FAILED") {
+        failedCount++;
+      } else if (eff === "REFUND_REQUESTED") {
+        refundRequestedCount++;
+      } else if (eff === "REFUNDED") {
+        refundedCount++;
+      } else {
+        pendingCount++;
+        if (t.expiresAt && new Date(t.expiresAt) < now) {
+          expiredPendingCount++;
+        }
+      }
+      if (t.dispute?.raised) disputedCount++;
     }
+
+    totalVolume = Number(totalVolume.toFixed(2));
+    const totalOrders = filteredTx.length;
+    const avgTicket = paidCount > 0 ? Number((totalVolume / paidCount).toFixed(2)) : 0;
+    const conversionRate = totalOrders > 0 ? Number(((paidCount / totalOrders) * 100).toFixed(1)) : 0;
+    const failureRate = totalOrders > 0 ? Number((((failedCount + expiredPendingCount) / totalOrders) * 100).toFixed(1)) : 0;
+
+    // 1. DAILY STATISTICS (Continuous day-by-day series)
+    const dailyWindowDays = range === "ALL" ? 30 : Math.min(daysBack, 90);
+    const dailyStart = new Date(now);
+    dailyStart.setHours(0, 0, 0, 0);
+    dailyStart.setDate(dailyStart.getDate() - (dailyWindowDays - 1));
+
+    const dailyMap = new Map();
+    for (let i = 0; i < dailyWindowDays; i++) {
+      const d = new Date(dailyStart);
+      d.setDate(dailyStart.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+      dailyMap.set(key, { label, volume: 0, paidCount: 0, failedCount: 0, pendingCount: 0 });
+    }
+
+    for (const t of filteredTx) {
+      if (!t.created_at) continue;
+      const key = new Date(t.created_at).toISOString().slice(0, 10);
+      const bucket = dailyMap.get(key);
+      if (!bucket) continue;
+      const eff = getEffectiveStatus(t);
+      if (eff === "PAID") {
+        bucket.volume = Number((bucket.volume + Number(t.amount || 0)).toFixed(2));
+        bucket.paidCount++;
+      } else if (eff === "FAILED") {
+        bucket.failedCount++;
+      } else if (eff === "PENDING") {
+        bucket.pendingCount++;
+      }
+    }
+
+    const dailyLabels = [];
+    const dailyVolume = [];
+    const dailyPaidCount = [];
+    const dailyFailedCount = [];
+    const dailyPendingCount = [];
+    for (const b of dailyMap.values()) {
+      dailyLabels.push(b.label);
+      dailyVolume.push(b.volume);
+      dailyPaidCount.push(b.paidCount);
+      dailyFailedCount.push(b.failedCount);
+      dailyPendingCount.push(b.pendingCount);
+    }
+
+    // 2. MONTHLY STATISTICS (Last 12 Months: Gross Volume, Withdrawals/Settlements, Refunds)
+    const monthlyMap = new Map();
+    for (let m = 11; m >= 0; m--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - m, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
+      monthlyMap.set(key, { label, paidVolume: 0, withdrawnVolume: 0, refundedVolume: 0, txCount: 0 });
+    }
+
+    for (const t of allMerchantTx) {
+      if (!t.created_at) continue;
+      const tMode = (t.mode || "UPI").trim().toUpperCase();
+      if (modeFilter !== "ALL" && tMode !== modeFilter) continue;
+      const d = new Date(t.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const bucket = monthlyMap.get(key);
+      if (!bucket) continue;
+      const eff = getEffectiveStatus(t);
+      bucket.txCount++;
+      if (eff === "PAID") bucket.paidVolume = Number((bucket.paidVolume + Number(t.amount || 0)).toFixed(2));
+      else if (eff === "REFUNDED" || eff === "REFUND_REQUESTED") {
+        bucket.refundedVolume = Number((bucket.refundedVolume + Number(t.amount || 0)).toFixed(2));
+      }
+    }
+
+    const withdrawals = usr?.withdrawals || [];
+    let totalWithdrawn = 0;
+    for (const w of withdrawals) {
+      if (!w.createdAt) continue;
+      const wd = new Date(w.createdAt);
+      if (range === "ALL" || wd >= rangeStart) {
+        totalWithdrawn += Number(w.amount || 0);
+      }
+      const key = `${wd.getFullYear()}-${String(wd.getMonth() + 1).padStart(2, "0")}`;
+      const bucket = monthlyMap.get(key);
+      if (bucket && w.status === "COMPLETED") {
+        bucket.withdrawnVolume = Number((bucket.withdrawnVolume + Number(w.amount || 0)).toFixed(2));
+      }
+    }
+    totalWithdrawn = Number(totalWithdrawn.toFixed(2));
+
+    const monthlyLabels = [];
+    const monthlyPaidVolume = [];
+    const monthlyWithdrawnVolume = [];
+    const monthlyRefundedVolume = [];
+    const monthlyTxCount = [];
+    for (const b of monthlyMap.values()) {
+      monthlyLabels.push(b.label);
+      monthlyPaidVolume.push(b.paidVolume);
+      monthlyWithdrawnVolume.push(b.withdrawnVolume);
+      monthlyRefundedVolume.push(b.refundedVolume);
+      monthlyTxCount.push(b.txCount);
+    }
+
+    // 3. DELIVERY & FAILURE BREAKDOWN
+    const deliveryBreakdown = {
+      labels: ["Paid / Delivered", "Pending", "Failed", "Refunded / Req"],
+      counts: [paidCount, pendingCount, failedCount, refundedCount + refundRequestedCount]
+    };
+
+    const failureDiagnostics = {
+      labels: ["Failed Orders", "Expired Unpaid", "Active Pending", "Disputes Raised", "Refunds"],
+      counts: [
+        failedCount,
+        expiredPendingCount,
+        Math.max(0, pendingCount - expiredPendingCount),
+        disputedCount,
+        refundedCount + refundRequestedCount
+      ]
+    };
+
+    // 4. PAYMENT MODE & TICKET SIZE DISTRIBUTION
+    const modeStatsMap = new Map();
+    const ticketBuckets = [0, 0, 0, 0]; // <100, 100-500, 500-2000, 2000+
+    for (const t of filteredTx) {
+      const mName = (t.mode || "UPI").trim().toUpperCase();
+      if (!modeStatsMap.has(mName)) modeStatsMap.set(mName, { count: 0, volume: 0 });
+      const ms = modeStatsMap.get(mName);
+      ms.count++;
+      if (getEffectiveStatus(t) === "PAID") {
+        const amt = Number(t.amount || 0);
+        ms.volume = Number((ms.volume + amt).toFixed(2));
+        if (amt < 100) ticketBuckets[0]++;
+        else if (amt <= 500) ticketBuckets[1]++;
+        else if (amt <= 2000) ticketBuckets[2]++;
+        else ticketBuckets[3]++;
+      }
+    }
+
+    const modeLabels = Array.from(modeStatsMap.keys());
+    const modeCounts = modeLabels.map((k) => modeStatsMap.get(k).count);
+    const modeVolumes = modeLabels.map((k) => modeStatsMap.get(k).volume);
+
+    // 5. HOURLY VELOCITY (IST 00:00 - 23:00)
+    const hourlyPaid = new Array(24).fill(0);
+    const hourlyFailed = new Array(24).fill(0);
+    for (const t of filteredTx) {
+      if (!t.created_at) continue;
+      const istStr = new Date(t.created_at).toLocaleString("en-US", { timeZone: "Asia/Kolkata", hour: "numeric", hour12: false });
+      const hr = Math.min(23, Math.max(0, parseInt(istStr, 10) % 24));
+      const eff = getEffectiveStatus(t);
+      if (eff === "PAID") hourlyPaid[hr]++;
+      else if (eff === "FAILED" || eff === "PENDING") hourlyFailed[hr]++;
+    }
+    const hourlyLabels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
     return res.json({
       status: true,
-      totalVolume,
-      paidCount: paidTx.length,
-      pendingCount: allTx.length - paidTx.length,
-      avgTicket,
-      conversionRate,
-      labels,
-      series
+      range,
+      filters: { status: statusFilter, mode: modeFilter, availableModes },
+      kpis: {
+        totalVolume,
+        totalOrders,
+        paidCount,
+        pendingCount,
+        failedCount,
+        expiredPendingCount,
+        refundedCount: refundedCount + refundRequestedCount,
+        disputedCount,
+        avgTicket,
+        conversionRate,
+        failureRate,
+        totalWithdrawn,
+        totalTips: Number(totalTips.toFixed(2)),
+        totalDiscounts: Number(totalDiscounts.toFixed(2)),
+        totalFees: Number(totalFees.toFixed(2))
+      },
+      daily: {
+        labels: dailyLabels,
+        volume: dailyVolume,
+        paidCount: dailyPaidCount,
+        failedCount: dailyFailedCount,
+        pendingCount: dailyPendingCount
+      },
+      monthly: {
+        labels: monthlyLabels,
+        paidVolume: monthlyPaidVolume,
+        withdrawnVolume: monthlyWithdrawnVolume,
+        refundedVolume: monthlyRefundedVolume,
+        txCount: monthlyTxCount
+      },
+      deliveryBreakdown,
+      failureDiagnostics,
+      modeDistribution: {
+        labels: modeLabels,
+        counts: modeCounts,
+        volumes: modeVolumes
+      },
+      ticketDistribution: {
+        labels: ["< ₹100", "₹100 – ₹500", "₹500 – ₹2,000", "₹2,000+"],
+        counts: ticketBuckets
+      },
+      hourlyVelocity: {
+        labels: hourlyLabels,
+        paid: hourlyPaid,
+        nonPaid: hourlyFailed
+      }
     });
   } catch (e) {
-    return res.json({ status: false });
+    console.error("getAnalyticsSummary error:", e);
+    return res.status(500).json({ status: false, message: "Analytics aggregation failed" });
   }
 };
 

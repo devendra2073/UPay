@@ -13,7 +13,7 @@
     <script src="/js/money-loader.js"></script>
     <script src="/js/trig.js"></script>
     <script src="/js/toast.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
@@ -246,139 +246,192 @@
             <div class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
                 <!-- ========================================================= -->
-                <!-- TAB 1: HOME & ANALYTICS OVERVIEW                          -->
+                <!-- TAB 1: HOME & ANALYTICS OVERVIEW (CHARTS-FIRST)           -->
                 <!-- ========================================================= -->
-                <section id="view-overview" class="tab-pane active space-y-6">
+                <section id="view-overview" class="tab-pane active space-y-5">
 
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                        <!-- UPay 2.0 Purple Hero Settlement Card -->
-                        <div class="lg:col-span-7 pp-hero-banner rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden flex flex-col justify-between">
-                            <div class="absolute -right-10 -bottom-10 w-52 h-52 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-                            <div class="relative z-10">
-                                <div class="flex items-center justify-between">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-[11px] font-extrabold uppercase tracking-wider">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                        UPay 2.0 Merchant Wallet
-                                    </span>
-                                    <button onclick="Terminal.refreshBalance(this)" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer" title="Sync Wallet">
-                                        <svg id="balance-refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                                    </button>
-                                </div>
-
-                                <p class="text-purple-200 text-xs font-semibold uppercase tracking-widest mt-5">Available Settlement Balance</p>
-                                <h2 id="stat-balance" class="text-4xl sm:text-5xl font-black mt-1 tracking-tight tabular-nums">&#8377;<%=Number(user.wallet || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})%></h2>
-
-                                <div class="flex flex-wrap items-center gap-2 mt-3">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-xs font-bold">
-                                        &#9650; 0% Commission Direct UPI
-                                    </span>
-                                    <span class="text-xs text-purple-200">• Active Theme: <strong id="badge-active-theme" class="uppercase text-white"><%=curDefaultTheme%></strong></span>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-wrap items-center gap-3 mt-7 relative z-10">
-                                <button onclick="Terminal.nav('settlements')" class="flex-1 bg-white text-[#5f259f] hover:bg-purple-50 py-3.5 px-5 rounded-2xl font-extrabold text-xs shadow-lg transition cursor-pointer">
-                                    Instant Bank Payout &rarr;
-                                </button>
-                                <button onclick="openpop()" class="py-3.5 px-5 bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-2xl font-extrabold text-xs transition cursor-pointer flex items-center gap-1.5">
-                                    <span>+ Collect Money</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Right Quick Rail & KPI Grid -->
-                        <div class="lg:col-span-5 space-y-4">
-                            <div class="pp-card p-5 flex items-center justify-between cursor-pointer" onclick="Terminal.nav('profile'); Terminal.subProfile('paytm')">
-                                <div class="space-y-1">
+                    <!-- Compact Merchant Wallet & Quick Actions Strip -->
+                    <div class="pp-hero-banner rounded-2xl px-5 py-4 text-white relative overflow-hidden">
+                        <div class="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+                        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div class="flex flex-wrap items-center gap-5">
+                                <div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] font-extrabold text-[#5f259f] uppercase tracking-wider">Active UPay 2.0 UPI Rail</span>
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold <%=user.paytm?.UPI ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'%>">
-                                            <%=user.paytm?.UPI ? 'VERIFIED' : 'SETUP NEEDED'%>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-purple-200">Available Settlement Balance</span>
+                                        <button onclick="Terminal.refreshBalance(this)" class="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition cursor-pointer" title="Sync Wallet">
+                                            <svg id="balance-refresh-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                        </button>
+                                    </div>
+                                    <h2 id="stat-balance" class="text-2xl sm:text-3xl font-black tracking-tight tabular-nums mt-0.5">&#8377;<%=Number(user.wallet || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})%></h2>
+                                </div>
+
+                                <div class="h-9 w-px bg-white/15 hidden sm:block"></div>
+
+                                <div onclick="Terminal.nav('profile'); Terminal.subProfile('paytm')" class="cursor-pointer group">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-purple-200">UPI Rail</span>
+                                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold <%=user.paytm?.UPI ? 'bg-emerald-400/20 text-emerald-200' : 'bg-amber-400/25 text-amber-100'%>">
+                                            <%=user.paytm?.UPI ? 'VERIFIED' : 'SETUP'%>
                                         </span>
                                     </div>
-                                    <h4 class="text-sm font-extrabold text-slate-900" id="overview-upi-display"><%=user.paytm?.UPI || 'Click to link Merchant UPI'%></h4>
-                                    <p class="mono text-xs text-slate-500">MID: <%=user.paytm?.MID || 'Not Configured'%></p>
-                                </div>
-                                <div class="w-11 h-11 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#5f259f] font-extrabold">
-                                    UPI
+                                    <p id="overview-upi-display" class="text-xs font-extrabold text-white group-hover:underline truncate max-w-[190px]"><%=user.paytm?.UPI || 'Link Merchant UPI'%></p>
+                                    <p class="text-[10px] text-purple-200">Theme: <strong id="badge-active-theme" class="uppercase text-white"><%=curDefaultTheme%></strong></p>
                                 </div>
                             </div>
 
-                            <!-- 4 Mini KPI Cards -->
-                            <div class="grid grid-cols-2 gap-3.5">
-                                <div class="pp-card p-4">
-                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Conversion Rate</p>
-                                    <p id="kpi-conversion" class="text-xl font-black text-emerald-600 mt-1">99.4%</p>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Dynamic QR Checkout</p>
-                                </div>
-                                <div class="pp-card p-4">
-                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Avg Order Ticket</p>
-                                    <p id="kpi-avg-ticket" class="text-xl font-black text-slate-900 mt-1">&#8377;840</p>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">Across UPI apps</p>
-                                </div>
-                                <div class="pp-card p-4 cursor-pointer" onclick="Terminal.nav('coupons')">
-                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Active Coupons</p>
-                                    <p id="kpi-coupons-count" class="text-xl font-black text-[#5f259f] mt-1"><%=(user.coupons || []).length%></p>
-                                    <p class="text-[11px] text-purple-600 font-semibold mt-0.5">Manage Offers &rarr;</p>
-                                </div>
-                                <div class="pp-card p-4 cursor-pointer" onclick="Terminal.nav('links')">
-                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Payment Links</p>
-                                    <p id="kpi-links-count" class="text-xl font-black text-slate-900 mt-1"><%=(user.paymentLinks || []).length%></p>
-                                    <p class="text-[11px] text-purple-600 font-semibold mt-0.5">Inspect Details &rarr;</p>
-                                </div>
+                            <!-- Compact Quick Actions Bar -->
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="openpop()" class="px-3.5 py-2 rounded-xl bg-white text-[#5f259f] hover:bg-purple-50 font-extrabold text-xs shadow-sm transition cursor-pointer">+ Collect</button>
+                                <button onclick="Terminal.nav('settlements')" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition cursor-pointer">Payout</button>
+                                <button onclick="Terminal.nav('links')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer">Links</button>
+                                <button onclick="Terminal.nav('themes')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer">Themes</button>
+                                <button onclick="Terminal.nav('disputes')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer">Disputes</button>
+                                <button onclick="Terminal.nav('developer')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer">Webhooks</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- UPay 2.0 Quick Actions Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                        <button onclick="openpop()" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-purple-100 text-[#5f259f] flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">&#8377;</div>
-                            <p class="text-xs font-extrabold text-slate-900">Quick Collect</p>
-                            <p class="text-[10px] text-slate-400">Redirects /pay/thanks</p>
-                        </button>
-                        <button onclick="Terminal.nav('profile')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🖼️</div>
-                            <p class="text-xs font-extrabold text-slate-900">Change Logo</p>
-                            <p class="text-[10px] text-slate-400">Upload brand pic</p>
-                        </button>
-                        <button onclick="Terminal.nav('links')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🔗</div>
-                            <p class="text-xs font-extrabold text-slate-900">Payment Links</p>
-                            <p class="text-[10px] text-slate-400">View UTR & status</p>
-                        </button>
-                        <button onclick="Terminal.nav('themes')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🎨</div>
-                            <p class="text-xs font-extrabold text-slate-900">Theme Studio</p>
-                            <p class="text-[10px] text-slate-400">7+ Themes & Custom</p>
-                        </button>
-                        <button onclick="Terminal.nav('disputes')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">🛡️</div>
-                            <p class="text-xs font-extrabold text-slate-900">Dispute Desk</p>
-                            <p class="text-[10px] text-slate-400">Screenshots & UTRs</p>
-                        </button>
-                        <button onclick="Terminal.nav('developer')" class="pp-card p-4 text-left hover:bg-purple-50/40 cursor-pointer group">
-                            <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-black mb-2.5 group-hover:scale-105 transition">⚡</div>
-                            <p class="text-xs font-extrabold text-slate-900">Webhook Test</p>
-                            <p class="text-[10px] text-slate-400">HMAC simulator</p>
-                        </button>
-                    </div>
-
-                    <!-- Interactive Volume Chart with Timeframe Switcher (7D / 30D / 90D via API) -->
-                    <div class="pp-card p-6">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                            <div>
-                                <h3 class="text-sm font-extrabold text-slate-900">UPay 2.0 Settlement Volume & Velocity</h3>
-                                <p class="text-xs text-slate-400">Real-time UPI collection trend across all supported UPI apps</p>
+                    <!-- Real-Time KPI Summary Strip (100% DB-Backed) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div class="pp-card p-3.5">
+                            <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Paid Volume</p>
+                            <p id="kpi-gross-volume" class="text-lg font-black text-slate-900 mt-0.5 tabular-nums">&#8377;0.00</p>
+                            <p id="kpi-paid-orders" class="text-[11px] text-emerald-600 font-bold mt-0.5">0 paid orders</p>
+                        </div>
+                        <div class="pp-card p-3.5">
+                            <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Delivery / Success</p>
+                            <p id="kpi-conversion" class="text-lg font-black text-emerald-600 mt-0.5 tabular-nums">0.0%</p>
+                            <p id="kpi-total-orders" class="text-[11px] text-slate-400 font-semibold mt-0.5">0 total attempts</p>
+                        </div>
+                        <div class="pp-card p-3.5">
+                            <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Avg Ticket Size</p>
+                            <p id="kpi-avg-ticket" class="text-lg font-black text-slate-900 mt-0.5 tabular-nums">&#8377;0.00</p>
+                            <p id="kpi-tips-discounts" class="text-[11px] text-slate-400 font-semibold mt-0.5">Tips &#8377;0 • Disc &#8377;0</p>
+                        </div>
+                        <div class="pp-card p-3.5">
+                            <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Failure & Drop-off</p>
+                            <p id="kpi-failure-rate" class="text-lg font-black text-rose-600 mt-0.5 tabular-nums">0.0%</p>
+                            <p id="kpi-failure-counts" class="text-[11px] text-slate-500 font-semibold mt-0.5">0 failed • 0 pending</p>
+                        </div>
+                        <div class="pp-card p-3.5 col-span-2 sm:col-span-1 flex items-center justify-between gap-2">
+                            <div onclick="Terminal.nav('links')" class="cursor-pointer">
+                                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Links</p>
+                                <p id="kpi-links-count" class="text-lg font-black text-slate-900 mt-0.5"><%=(user.paymentLinks || []).length%></p>
+                                <p class="text-[10px] text-[#5f259f] font-bold">View &rarr;</p>
                             </div>
-                            <div class="flex items-center gap-1.5 bg-purple-50 p-1 rounded-xl border border-purple-100">
-                                <button onclick="Terminal.loadAnalytics('7D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#5f259f] text-white cursor-pointer">7D</button>
-                                <button onclick="Terminal.loadAnalytics('30D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">30D</button>
-                                <button onclick="Terminal.loadAnalytics('90D', this)" class="range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">90D</button>
+                            <div class="h-8 w-px bg-purple-100"></div>
+                            <div onclick="Terminal.nav('coupons')" class="cursor-pointer text-right">
+                                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Coupons</p>
+                                <p id="kpi-coupons-count" class="text-lg font-black text-[#5f259f] mt-0.5"><%=(user.coupons || []).length%></p>
+                                <p class="text-[10px] text-[#5f259f] font-bold">Manage &rarr;</p>
                             </div>
                         </div>
-                        <div class="relative h-64 w-full">
-                            <canvas id="mainChart"></canvas>
+                    </div>
+
+                    <!-- Unified Analytics Filter Toolbar -->
+                    <div class="pp-card p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-extrabold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Live DB Analytics
+                            </span>
+                            <div class="flex items-center gap-1 bg-purple-50 p-1 rounded-xl border border-purple-100">
+                                <button onclick="Terminal.setChartRange('7D', this)" data-range="7D" class="range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">7D</button>
+                                <button onclick="Terminal.setChartRange('14D', this)" data-range="14D" class="range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">14D</button>
+                                <button onclick="Terminal.setChartRange('30D', this)" data-range="30D" class="range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-[#5f259f] text-white cursor-pointer">30D</button>
+                                <button onclick="Terminal.setChartRange('90D', this)" data-range="90D" class="range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">90D</button>
+                                <button onclick="Terminal.setChartRange('12M', this)" data-range="12M" class="range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">12M</button>
+                                <button onclick="Terminal.setChartRange('ALL', this)" data-range="ALL" class="range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer">ALL</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="chart-filter-status" onchange="Terminal.loadAnalytics()" class="pp-input !w-auto !py-1.5 !px-3 text-xs">
+                                <option value="ALL">All Statuses</option>
+                                <option value="PAID">Paid Only</option>
+                                <option value="PENDING">Pending Only</option>
+                                <option value="FAILED">Failed Only</option>
+                                <option value="REFUNDED">Refunded / Req</option>
+                            </select>
+                            <select id="chart-filter-mode" onchange="Terminal.loadAnalytics()" class="pp-input !w-auto !py-1.5 !px-3 text-xs">
+                                <option value="ALL">All Payment Modes</option>
+                            </select>
+                            <select id="daily-metric-mode" onchange="Terminal.renderDailyChart()" class="pp-input !w-auto !py-1.5 !px-3 text-xs">
+                                <option value="COMBO">Daily: Volume (&#8377;) + Orders</option>
+                                <option value="COUNTS">Daily: Paid vs Failed vs Pending</option>
+                            </select>
+                            <button onclick="Terminal.resetChartFilters()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold cursor-pointer">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- ROW 1: Daily Statistics (8 cols) + Delivery & Failure Breakdown (4 cols) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <div class="lg:col-span-8 pp-card p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Daily Statistics — Volume & Order Flow</h3>
+                                    <p class="text-[11px] text-slate-400">Day-by-day paid collection (&#8377;) and transaction outcomes</p>
+                                </div>
+                                <span id="daily-chart-badge" class="px-2.5 py-1 rounded-full bg-purple-50 text-[#5f259f] text-[10px] font-extrabold">30D Window</span>
+                            </div>
+                            <div id="chart-daily" class="min-h-[290px]"></div>
+                        </div>
+
+                        <div class="lg:col-span-4 pp-card p-5">
+                            <div class="mb-3">
+                                <h3 class="text-sm font-extrabold text-slate-900">Payment Delivery Status</h3>
+                                <p class="text-[11px] text-slate-400">Paid vs Pending vs Failed vs Refunded share</p>
+                            </div>
+                            <div id="chart-delivery" class="min-h-[290px] flex items-center justify-center"></div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 2: Monthly Statistics (7 cols) + Failure & Dispute Diagnostics (5 cols) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <div class="lg:col-span-7 pp-card p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Monthly Statistics (12-Month Trend)</h3>
+                                    <p class="text-[11px] text-slate-400">Gross Paid Collections vs Bank Payouts vs Refunds (&#8377;)</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold">Last 12 Months</span>
+                            </div>
+                            <div id="chart-monthly" class="min-h-[280px]"></div>
+                        </div>
+
+                        <div class="lg:col-span-5 pp-card p-5">
+                            <div class="mb-3">
+                                <h3 class="text-sm font-extrabold text-slate-900">Failure & Delivery Diagnostics</h3>
+                                <p class="text-[11px] text-slate-400">Failed orders, expired QRs, disputes & refund friction</p>
+                            </div>
+                            <div id="chart-failure" class="min-h-[280px]"></div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 3: Channel/Mode Mix (4 cols) + Ticket Size Distribution (4 cols) + Hourly Velocity (4 cols) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+                        <div class="lg:col-span-4 pp-card p-5">
+                            <div class="mb-3">
+                                <h3 class="text-sm font-extrabold text-slate-900">Payment Channel Mix</h3>
+                                <p class="text-[11px] text-slate-400">Orders & volume by mode (UPI, Links, API)</p>
+                            </div>
+                            <div id="chart-mode" class="min-h-[250px] flex items-center justify-center"></div>
+                        </div>
+
+                        <div class="lg:col-span-4 pp-card p-5">
+                            <div class="mb-3">
+                                <h3 class="text-sm font-extrabold text-slate-900">Ticket Size Distribution</h3>
+                                <p class="text-[11px] text-slate-400">Paid orders grouped by amount slab</p>
+                            </div>
+                            <div id="chart-ticket" class="min-h-[250px]"></div>
+                        </div>
+
+                        <div class="lg:col-span-4 pp-card p-5">
+                            <div class="mb-3">
+                                <h3 class="text-sm font-extrabold text-slate-900">Hourly Velocity (24h IST)</h3>
+                                <p class="text-[11px] text-slate-400">Peak hours for Paid vs Non-Paid attempts</p>
+                            </div>
+                            <div id="chart-hourly" class="min-h-[250px]"></div>
                         </div>
                     </div>
                 </section>
@@ -1078,7 +1131,9 @@
             state: {
                 balance: parseFloat(<%=user.wallet || 0%>),
                 isRefreshing: false,
-                chart: null,
+                charts: {},
+                analyticsData: null,
+                analyticsRange: '30D',
                 transactions: [],
                 filteredTransactions: [],
                 coupons: INITIAL_COUPONS,
@@ -1090,7 +1145,7 @@
 
             init() {
                 this.refreshHistory();
-                this.initChart();
+                this.loadAnalytics();
                 this.renderCoupons();
                 this.loadPaymentLinks();
                 this.renderWithdrawals();
@@ -1124,7 +1179,7 @@
                 const activeMob = document.querySelector(`[data-mob="${viewId}"]`);
                 if (activeMob) activeMob.classList.replace('text-slate-400', 'text-[#5f259f]');
 
-                if (viewId === 'overview') this.initChart();
+                if (viewId === 'overview') this.loadAnalytics();
                 if (viewId === 'links') this.loadPaymentLinks();
                 if (viewId === 'customers') this.loadCustomers();
                 if (viewId === 'disputes') this.loadDisputes();
@@ -1534,6 +1589,7 @@
                     this.loadDisputes();
                     this.refreshBalance();
                     this.refreshHistory();
+                    this.loadAnalytics();
                 } else {
                     this.notify(data.message, 'warn');
                 }
@@ -1605,26 +1661,86 @@
                 }
             },
 
-            async loadAnalytics(range, btn) {
+            setChartRange(range, btn) {
+                this.state.analyticsRange = range;
                 document.querySelectorAll('.range-btn').forEach(b => {
-                    b.className = 'range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer';
+                    b.className = 'range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer';
                 });
-                if (btn) btn.className = 'range-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#5f259f] text-white cursor-pointer';
+                if (btn) btn.className = 'range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-[#5f259f] text-white cursor-pointer';
+                const badge = document.getElementById('daily-chart-badge');
+                if (badge) badge.textContent = `${range} Window`;
+                this.loadAnalytics();
+            },
 
-                const res = await fetch(`/user/dashboard/analytics?range=${range}`);
-                const data = await res.json();
-                if (data.status && this.state.chart) {
-                    this.state.chart.data.labels = data.labels;
-                    this.state.chart.data.datasets[0].data = data.series;
-                    this.state.chart.update();
-                    if (data.avgTicket) document.getElementById('kpi-avg-ticket').textContent = `₹${data.avgTicket}`;
-                    if (data.conversionRate) document.getElementById('kpi-conversion').textContent = `${data.conversionRate}%`;
+            resetChartFilters() {
+                this.state.analyticsRange = '30D';
+                document.querySelectorAll('.range-btn').forEach(b => {
+                    const is30 = b.getAttribute('data-range') === '30D';
+                    b.className = is30
+                        ? 'range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-[#5f259f] text-white cursor-pointer'
+                        : 'range-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-600 hover:text-[#5f259f] cursor-pointer';
+                });
+                const st = document.getElementById('chart-filter-status');
+                const md = document.getElementById('chart-filter-mode');
+                const dm = document.getElementById('daily-metric-mode');
+                if (st) st.value = 'ALL';
+                if (md) md.value = 'ALL';
+                if (dm) dm.value = 'COMBO';
+                const badge = document.getElementById('daily-chart-badge');
+                if (badge) badge.textContent = '30D Window';
+                this.loadAnalytics();
+            },
+
+            async loadAnalytics() {
+                try {
+                    const range = this.state.analyticsRange || '30D';
+                    const status = document.getElementById('chart-filter-status')?.value || 'ALL';
+                    const mode = document.getElementById('chart-filter-mode')?.value || 'ALL';
+                    const res = await fetch(`/user/dashboard/analytics?range=${encodeURIComponent(range)}&status=${encodeURIComponent(status)}&mode=${encodeURIComponent(mode)}`);
+                    const data = await res.json();
+                    if (!data.status) return;
+                    this.state.analyticsData = data;
+
+                    // Populate dynamic Payment Mode dropdown while keeping selection
+                    const modeSelect = document.getElementById('chart-filter-mode');
+                    if (modeSelect && data.filters?.availableModes) {
+                        const prev = modeSelect.value;
+                        const opts = ['<option value="ALL">All Payment Modes</option>']
+                            .concat(data.filters.availableModes.map(m => `<option value="${m}">${m}</option>`));
+                        modeSelect.innerHTML = opts.join('');
+                        modeSelect.value = data.filters.availableModes.includes(prev) ? prev : 'ALL';
+                    }
+
+                    // Update real-time KPI cards
+                    const k = data.kpis || {};
+                    const fmtINR = (v) => `₹${Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    const elVol = document.getElementById('kpi-gross-volume');
+                    const elPaid = document.getElementById('kpi-paid-orders');
+                    const elConv = document.getElementById('kpi-conversion');
+                    const elTot = document.getElementById('kpi-total-orders');
+                    const elAvg = document.getElementById('kpi-avg-ticket');
+                    const elTips = document.getElementById('kpi-tips-discounts');
+                    const elFail = document.getElementById('kpi-failure-rate');
+                    const elFailCnt = document.getElementById('kpi-failure-counts');
+
+                    if (elVol) elVol.textContent = fmtINR(k.totalVolume);
+                    if (elPaid) elPaid.textContent = `${k.paidCount || 0} paid orders`;
+                    if (elConv) elConv.textContent = `${Number(k.conversionRate || 0).toFixed(1)}%`;
+                    if (elTot) elTot.textContent = `${k.totalOrders || 0} total attempts`;
+                    if (elAvg) elAvg.textContent = fmtINR(k.avgTicket);
+                    if (elTips) elTips.textContent = `Tips ₹${Math.round(k.totalTips || 0)} • Disc ₹${Math.round(k.totalDiscounts || 0)}`;
+                    if (elFail) elFail.textContent = `${Number(k.failureRate || 0).toFixed(1)}%`;
+                    if (elFailCnt) elFailCnt.textContent = `${k.failedCount || 0} failed • ${k.pendingCount || 0} pending`;
+
+                    this.renderAllCharts(data);
+                } catch (err) {
+                    console.error('Analytics load error:', err);
                 }
             },
 
             async refreshAll(btn) {
                 if (btn) btn.classList.add('refresh-spin');
-                await Promise.all([this.refreshBalance(), this.refreshHistory(), this.loadPaymentLinks()]);
+                await Promise.all([this.refreshBalance(), this.refreshHistory(), this.loadPaymentLinks(), this.loadAnalytics()]);
                 if (btn) setTimeout(() => btn.classList.remove('refresh-spin'), 600);
             },
 
@@ -1731,6 +1847,7 @@
                     this.refreshBalance();
                     this.refreshHistory();
                     this.loadPaymentLinks();
+                    this.loadAnalytics();
                 } else {
                     this.notify(data.message, 'warn');
                 }
@@ -1853,47 +1970,215 @@
                 this.notify(result.message, result.status ? 'success' : 'warn');
             },
 
-            initChart() {
-                const canvas = document.getElementById('mainChart');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                if (this.state.chart) this.state.chart.destroy();
+            mountChart(key, elId, options) {
+                const el = document.getElementById(elId);
+                if (!el || typeof ApexCharts === 'undefined') return;
+                if (this.state.charts[key]) {
+                    this.state.charts[key].destroy();
+                }
+                const chart = new ApexCharts(el, options);
+                chart.render();
+                this.state.charts[key] = chart;
+            },
 
-                const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-                gradient.addColorStop(0, 'rgba(95, 37, 159, 0.22)');
-                gradient.addColorStop(1, 'rgba(95, 37, 159, 0.00)');
+            renderAllCharts(data) {
+                this.renderDailyChart(data);
+                this.renderDeliveryChart(data);
+                this.renderMonthlyChart(data);
+                this.renderFailureChart(data);
+                this.renderModeChart(data);
+                this.renderTicketChart(data);
+                this.renderHourlyChart(data);
+            },
 
-                this.state.chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                        datasets: [{
-                            data: [4800, 8200, 6900, 12400, 10900, 16800, 19450],
-                            borderColor: '#5f259f',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#5f259f',
-                            pointBorderWidth: 2.5,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            tension: 0.38,
-                            fill: true,
-                            backgroundColor: gradient
-                        }]
+            renderDailyChart(dataArg) {
+                const data = dataArg || this.state.analyticsData;
+                if (!data || !data.daily) return;
+                const d = data.daily;
+                const viewMode = document.getElementById('daily-metric-mode')?.value || 'COMBO';
+
+                if (viewMode === 'COUNTS') {
+                    this.mountChart('daily', 'chart-daily', {
+                        chart: { type: 'bar', height: 290, stacked: true, toolbar: { show: true }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                        series: [
+                            { name: 'Paid Orders', data: d.paidCount },
+                            { name: 'Pending Orders', data: d.pendingCount },
+                            { name: 'Failed Orders', data: d.failedCount }
+                        ],
+                        colors: ['#00b970', '#f59e0b', '#ef4444'],
+                        plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+                        dataLabels: { enabled: false },
+                        xaxis: { categories: d.labels, labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } } },
+                        yaxis: { labels: { formatter: (v) => Math.round(v), style: { colors: '#64748b', fontSize: '10px' } } },
+                        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                        legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+                        noData: { text: 'No daily orders found for this filter' }
+                    });
+                    return;
+                }
+
+                this.mountChart('daily', 'chart-daily', {
+                    chart: { type: 'line', height: 290, toolbar: { show: true }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: [
+                        { name: 'Paid Volume (₹)', type: 'area', data: d.volume },
+                        { name: 'Paid Orders', type: 'column', data: d.paidCount }
+                    ],
+                    colors: ['#5f259f', '#00b970'],
+                    stroke: { width: [3, 0], curve: 'smooth' },
+                    fill: {
+                        type: ['gradient', 'solid'],
+                        gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.04, stops: [0, 95, 100] }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, tooltip: { cornerRadius: 10, padding: 10 } },
-                        scales: {
-                            y: { display: false },
-                            x: {
-                                grid: { display: false },
-                                border: { display: false },
-                                ticks: { font: { size: 11, weight: 'bold' }, color: '#64748b' }
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+                    dataLabels: { enabled: false },
+                    xaxis: { categories: d.labels, labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } } },
+                    yaxis: [
+                        {
+                            title: { text: 'Volume (₹)', style: { color: '#5f259f', fontSize: '10px', fontWeight: 700 } },
+                            labels: { formatter: (v) => `₹${Math.round(v).toLocaleString('en-IN')}`, style: { colors: '#64748b', fontSize: '10px' } }
+                        },
+                        {
+                            opposite: true,
+                            title: { text: 'Orders', style: { color: '#00b970', fontSize: '10px', fontWeight: 700 } },
+                            labels: { formatter: (v) => Math.round(v), style: { colors: '#64748b', fontSize: '10px' } }
+                        }
+                    ],
+                    tooltip: { shared: true, intersect: false },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                    legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+                    noData: { text: 'No daily transactions found' }
+                });
+            },
+
+            renderDeliveryChart(data) {
+                const db = data.deliveryBreakdown || { labels: [], counts: [] };
+                const hasData = (db.counts || []).some(c => c > 0);
+                this.mountChart('delivery', 'chart-delivery', {
+                    chart: { type: 'donut', height: 290, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: hasData ? db.counts : [],
+                    labels: db.labels,
+                    colors: ['#00b970', '#f59e0b', '#ef4444', '#6366f1'],
+                    stroke: { width: 2, colors: ['#ffffff'] },
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '68%',
+                                labels: {
+                                    show: true,
+                                    total: {
+                                        show: true,
+                                        label: 'Total Orders',
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        color: '#64748b',
+                                        formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0)
+                                    }
+                                }
                             }
                         }
-                    }
+                    },
+                    dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 700 } },
+                    legend: { position: 'bottom', fontSize: '11px', fontWeight: 700 },
+                    noData: { text: 'No orders in selected filter', style: { color: '#94a3b8', fontSize: '12px' } }
+                });
+            },
+
+            renderMonthlyChart(data) {
+                const m = data.monthly || { labels: [], paidVolume: [], withdrawnVolume: [], refundedVolume: [] };
+                this.mountChart('monthly', 'chart-monthly', {
+                    chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: [
+                        { name: 'Paid Collections (₹)', data: m.paidVolume },
+                        { name: 'Bank Withdrawals (₹)', data: m.withdrawnVolume },
+                        { name: 'Refunds (₹)', data: m.refundedVolume }
+                    ],
+                    colors: ['#5f259f', '#00b970', '#ef4444'],
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '62%' } },
+                    dataLabels: { enabled: false },
+                    xaxis: { categories: m.labels, labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } } },
+                    yaxis: { labels: { formatter: (v) => `₹${Math.round(v).toLocaleString('en-IN')}`, style: { colors: '#64748b', fontSize: '10px' } } },
+                    tooltip: { y: { formatter: (v) => `₹${Number(v || 0).toLocaleString('en-IN')}` } },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                    legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+                    noData: { text: 'No monthly history yet' }
+                });
+            },
+
+            renderFailureChart(data) {
+                const f = data.failureDiagnostics || { labels: [], counts: [] };
+                this.mountChart('failure', 'chart-failure', {
+                    chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: [{ name: 'Orders', data: f.counts }],
+                    colors: ['#ef4444', '#f97316', '#f59e0b', '#ec4899', '#6366f1'],
+                    plotOptions: { bar: { horizontal: true, distributed: true, borderRadius: 6, barHeight: '55%' } },
+                    dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 700, colors: ['#ffffff'] } },
+                    xaxis: { categories: f.labels, labels: { formatter: (v) => Math.round(v), style: { colors: '#64748b', fontSize: '10px' } } },
+                    yaxis: { labels: { style: { colors: '#334155', fontSize: '11px', fontWeight: 700 } } },
+                    legend: { show: false },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                    noData: { text: 'Zero failures or disputes' }
+                });
+            },
+
+            renderModeChart(data) {
+                const md = data.modeDistribution || { labels: [], counts: [], volumes: [] };
+                const hasData = (md.counts || []).some(c => c > 0);
+                this.mountChart('mode', 'chart-mode', {
+                    chart: { type: 'donut', height: 250, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: hasData ? md.counts : [],
+                    labels: md.labels,
+                    colors: ['#5f259f', '#7c3aed', '#0ea5e9', '#10b981', '#f59e0b'],
+                    stroke: { width: 2, colors: ['#ffffff'] },
+                    plotOptions: { pie: { donut: { size: '64%' } } },
+                    tooltip: {
+                        y: {
+                            formatter: (val, opts) => {
+                                const vol = md.volumes?.[opts.seriesIndex] || 0;
+                                return `${val} orders (₹${Number(vol).toLocaleString('en-IN')})`;
+                            }
+                        }
+                    },
+                    legend: { position: 'bottom', fontSize: '11px', fontWeight: 700 },
+                    noData: { text: 'No channel data in filter', style: { color: '#94a3b8', fontSize: '12px' } }
+                });
+            },
+
+            renderTicketChart(data) {
+                const td = data.ticketDistribution || { labels: [], counts: [] };
+                this.mountChart('ticket', 'chart-ticket', {
+                    chart: { type: 'bar', height: 250, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: [{ name: 'Paid Orders', data: td.counts }],
+                    colors: ['#7c3aed'],
+                    plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
+                    dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 700 } },
+                    xaxis: { categories: td.labels, labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } } },
+                    yaxis: { labels: { formatter: (v) => Math.round(v), style: { colors: '#64748b', fontSize: '10px' } } },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                    noData: { text: 'No paid orders in filter' }
+                });
+            },
+
+            renderHourlyChart(data) {
+                const hv = data.hourlyVelocity || { labels: [], paid: [], nonPaid: [] };
+                this.mountChart('hourly', 'chart-hourly', {
+                    chart: { type: 'area', height: 250, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    series: [
+                        { name: 'Paid', data: hv.paid },
+                        { name: 'Pending / Failed', data: hv.nonPaid }
+                    ],
+                    colors: ['#00b970', '#f59e0b'],
+                    stroke: { width: 2, curve: 'smooth' },
+                    fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0.02 } },
+                    dataLabels: { enabled: false },
+                    xaxis: {
+                        categories: hv.labels,
+                        tickAmount: 6,
+                        labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } }
+                    },
+                    yaxis: { labels: { formatter: (v) => Math.round(v), style: { colors: '#64748b', fontSize: '10px' } } },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                    legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+                    noData: { text: 'No hourly activity yet' }
                 });
             },
 
