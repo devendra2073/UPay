@@ -723,9 +723,7 @@ export const paymentStatus = async (req, res) => {
     // DO NOT expire the QR or return FAILED — keep returning PENDING until client timer expires!
     let info = {};
     try {
-      const verifyUrl = `https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData=${encodeURIComponent(
-        JSON.stringify({ MID: paytmMid, ORDERID })
-      )}`;
+      const verifyUrl = `https://securegw.paytm.in/merchant-status/getTxnStatus?JsonData=${JSON.stringify({ MID: paytmMid, ORDERID })}`;
       const response = await fetch(verifyUrl);
       info = await response.json();
     } catch (fetchErr) {
