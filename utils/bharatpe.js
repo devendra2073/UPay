@@ -56,7 +56,7 @@ export default class BharatPe {
    * 1. Uses got-scraping (Chrome Android TLS/JA3 + HTTP/2 fingerprint).
    * 2. Supports optional BHARATPE_PROXY_URL (residential proxy) or SCRAPER_API_KEY (sticky Indian IP).
    */
-  async request(targetUrl, { method = "GET", headers = {}, body = undefined, responseType = "text", sessionNumber = null } = {}) {
+  async request(targetUrl, { method = "GET", headers = {}, body = undefined, responseType = "text", sessionNumber = null, useProxy = true } = {}) {
     const useScraperApi = Boolean(process.env.SCRAPER_API_KEY);
 
     const reqHeaders = {
@@ -83,11 +83,11 @@ export default class BharatPe {
       options.body = body;
     }
 
-    if (useScraperApi) {
+    if (useProxy && useScraperApi) {
       const sess = sessionNumber || this.sessionNumber;
       options.proxyUrl = `http://scraperapi.keep_headers=true.country_code=in.device_type=mobile.session_number=${sess}:${process.env.SCRAPER_API_KEY}@proxy-server.scraperapi.com:8001`;
       options.https = { rejectUnauthorized: false };
-    } else if (process.env.BHARATPE_PROXY_URL) {
+    } else if (useProxy && process.env.BHARATPE_PROXY_URL) {
       options.proxyUrl = process.env.BHARATPE_PROXY_URL;
     }
 
@@ -254,11 +254,10 @@ export default class BharatPe {
     try {
       const state = this.decryptText(encryptedData);
 
-      const res = await this.request(`${this.BASE_URL}/v1/api/load-captcha?context=otp`, {
+      const res = await fetch(`${this.BASE_URL}/v1/api/load-captcha?context=otp`, {
         method: "GET",
-        responseType: "buffer",
-        sessionNumber: state.sessionNumber || this.sessionNumber,
         headers: {
+          ...MOBILE_BASE_HEADERS,
           Cookie: state.cookies || this.getcookie(),
           Accept: "*/*",
           "X-Requested-With": "XMLHttpRequest",
@@ -272,19 +271,17 @@ export default class BharatPe {
       const updatedCookies = this.mergeCookieStrings(state.cookies, res);
 
       if (!res.ok) {
-        console.error("[BharatPe.loadCaptcha] HTTP Error:", res.status, String(res.rawBody || res.body || "").slice(0, 300));
+        const errText = await res.text().catch(() => "");
+        console.error("[BharatPe.loadCaptcha] HTTP Error:", res.status, errText.slice(0, 300));
         throw new Error(`Failed to load captcha: ${res.status}`);
       }
 
-      const contentType = String(res.headers["content-type"] || "image/jpeg")
+      const contentType = String(res.headers.get("content-type") || "image/jpeg")
         .split(";")[0]
         .trim()
         .toLowerCase();
-      const buf = Buffer.isBuffer(res.rawBody)
-        ? res.rawBody
-        : Buffer.isBuffer(res.body)
-        ? res.body
-        : Buffer.from(res.body || "");
+      const arrayBuffer = await res.arrayBuffer();
+      const buf = Buffer.from(arrayBuffer);
 
       if (contentType.includes("text/html")) {
         console.error("[BharatPe.loadCaptcha] Received HTML instead of image:", buf.toString("utf8").slice(0, 300));
