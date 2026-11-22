@@ -8,9 +8,17 @@ import sendMail from "../utils/mailer.js";
 import upload from "../utils/cloud.js";
 import paymentModel from "../schema/payment.model.js";
 import user from "../schema/user.model.js";
+import BharatPe from "../utils/bharatpe.js";
+import {
+  allocateUniqueBharatPeAmount,
+  expireBharatPeOrderIfNeeded
+} from "../utils/bharatpeOrderHelper.js";
 
 const buildUpiQr = async (info) => {
-  const upi = info.paytm?.UPI || process.env.UPI_ID || "merchant@paytm";
+  const upi =
+    info.provider === "BHARATPE"
+      ? (info.bharatpe?.UPI || "")
+      : (info.paytm?.UPI || process.env.UPI_ID || "merchant@paytm");
   const { amount, company, order } = info;
   const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(order)}&am=${Number(amount).toFixed(2)}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + order)}`;
   const intent = `upi://pay?${commonParams}`;
@@ -73,7 +81,15 @@ export const paymentPage = async (req, res) => {
       convenienceFeePercent: 0
     };
 
-    const { upi, commonParams, intent, obj } = await buildUpiQr(info);
+    const isExpiredOrDisabled = await expireBharatPeOrderIfNeeded(info);
+    const remainingSeconds = info.expiresAt
+      ? Math.max(0, Math.floor((new Date(info.expiresAt).getTime() - Date.now()) / 1000))
+      : 300;
+
+    const qrResult = isExpiredOrDisabled
+      ? { upi: info.provider === "BHARATPE" ? (info.bharatpe?.UPI || "") : (info.paytm?.UPI || ""), commonParams: "", intent: "", obj: "" }
+      : await buildUpiQr(info);
+    const { upi, commonParams, intent, obj } = qrResult;
     const { amount, company } = info;
     const logo = merchant?.pic || info.logo;
     const baseAmount = info.baseAmount || amount;
@@ -94,6 +110,10 @@ export const paymentPage = async (req, res) => {
       redirect,
       logo,
       upi,
+      provider: info.provider || "PAYTM",
+      isExpired: Boolean(isExpiredOrDisabled),
+      isDisabled: Boolean(info.isDisabled),
+      remainingSeconds,
       customerName: info.customerName || "Guest Customer",
       customerEmail: info.customerEmail || "",
       customerPhone: info.customerPhone || "",
@@ -113,7 +133,12 @@ const recalculateOrderTotal = async (info) => {
   const discount = Number(info.discountAmount || 0);
   const tip = Number(info.tipAmount || 0);
   const fee = Number(info.feeAmount || 0);
-  const newTotal = Math.max(1, Number((base - discount + tip + fee).toFixed(2)));
+  let newTotal = Math.max(1, Number((base - discount + tip + fee).toFixed(2)));
+  if (info.provider === "BHARATPE") {
+    const allocated = await allocateUniqueBharatPeAmount(info.MID, newTotal, info.order);
+    newTotal = allocated.amount;
+    info.uniqueAmountOffset = allocated.offset;
+  }
   info.amount = newTotal;
   await info.save();
   return buildUpiQr(info);
@@ -127,6 +152,9 @@ export const applyCoupon = async (req, res) => {
     const info = await paymentModel.findOne({ order: tid });
     if (!info || info.isPaid) {
       return res.json({ status: false, message: "Order not eligible for coupon" });
+    }
+    if (await expireBharatPeOrderIfNeeded(info)) {
+      return res.json({ status: false, state: "EXPIRED", message: "Order QR has expired and is disabled." });
     }
     if (!info.baseAmount) info.baseAmount = info.amount;
 
@@ -218,6 +246,9 @@ export const applyTip = async (req, res) => {
     if (!info || info.isPaid) {
       return res.json({ status: false, message: "Order not found or already paid" });
     }
+    if (await expireBharatPeOrderIfNeeded(info)) {
+      return res.json({ status: false, state: "EXPIRED", message: "Order QR has expired and is disabled." });
+    }
     if (!info.baseAmount) info.baseAmount = info.amount;
     info.tipAmount = Number(tip.toFixed(2));
     const qr = await recalculateOrderTotal(info);
@@ -287,6 +318,29 @@ export const refreshPaymentQr = async (req, res) => {
     if (!info) return res.json({ status: false, message: "Order not found" });
     if (info.isPaid) return res.json({ status: true, isPaid: true, redirect: info.redirect || "/pay/thanks" });
 
+    const expired = await expireBharatPeOrderIfNeeded(info);
+    if (info.provider === "BHARATPE") {
+      if (expired || info.isDisabled || info.status === "EXPIRED") {
+        return res.json({
+          status: false,
+          state: "EXPIRED",
+          isDisabled: true,
+          message: "BharatPe QR is valid for 5 minutes only and has been disabled. Please create a new order."
+        });
+      }
+      const remaining = Math.max(0, Math.floor((new Date(info.expiresAt).getTime() - Date.now()) / 1000));
+      const qr = await buildUpiQr(info);
+      return res.json({
+        status: true,
+        message: "Active BharatPe QR",
+        timeInSeconds: remaining,
+        amount: info.amount,
+        qrDataUrl: qr.obj,
+        intent: qr.intent,
+        upiParams: qr.commonParams
+      });
+    }
+
     info.expiresAt = new Date(Date.now() + 5 * 60 * 1000);
     await info.save();
     const qr = await buildUpiQr(info);
@@ -302,6 +356,37 @@ export const refreshPaymentQr = async (req, res) => {
     });
   } catch (e) {
     return res.status(500).json({ status: false, message: "Failed to refresh QR session" });
+  }
+};
+
+// Explicitly expire & disable an unpaid order when the 5-minute countdown ends
+export const expireOrder = async (req, res) => {
+  try {
+    const { tid } = req.params;
+    const info = await paymentModel.findOne({ order: tid });
+    if (!info) return res.status(404).json({ status: false, message: "Order not found" });
+    if (info.isPaid) return res.json({ status: true, state: "SUCCESS", isPaid: true });
+
+    const now = new Date();
+    await paymentModel.updateOne(
+      { _id: info._id, isPaid: false },
+      {
+        $set: {
+          isDisabled: true,
+          status: "EXPIRED",
+          disabledAt: now
+        }
+      }
+    );
+
+    return res.json({
+      status: true,
+      state: "EXPIRED",
+      isDisabled: true,
+      message: "Order expired and disabled in database"
+    });
+  } catch (e) {
+    return res.status(500).json({ status: false, message: "Failed to expire order" });
   }
 };
 
@@ -431,6 +516,15 @@ export const paymentStatus = async (req, res) => {
       });
     }
 
+    if (await expireBharatPeOrderIfNeeded(dbresp)) {
+      return res.status(200).json({
+        status: false,
+        state: "EXPIRED",
+        isDisabled: true,
+        message: "QR code expired and disabled. Please create a new order."
+      });
+    }
+
     const now = Date.now();
     const lastChecked = dbresp.lastCheckedAt ? new Date(dbresp.lastCheckedAt).getTime() : 0;
 
@@ -445,6 +539,166 @@ export const paymentStatus = async (req, res) => {
     dbresp.lastCheckedAt = new Date();
     await dbresp.save();
 
+    // ==========================================
+    // BHARATPE BUSINESS VERIFICATION FLOW
+    // ==========================================
+    if (dbresp.provider === "BHARATPE") {
+      const merchant = await user.findOne({ MID: dbresp.MID });
+      const bpSession = merchant?.bharatpe?.session;
+      const bpMerchantId = dbresp.bharatpe?.merchantId || merchant?.bharatpe?.merchantId;
+
+      if (!bpSession || !bpMerchantId) {
+        return res.status(200).json({
+          status: false,
+          state: "PENDING",
+          message: "Waiting for BharatPe merchant session"
+        });
+      }
+
+      let matchedTx = null;
+      try {
+        const bpClient = new BharatPe();
+        const { transactions, session: updatedSession } = await bpClient.getTransactions(bpSession, {
+          merchantId: bpMerchantId,
+          date: new Date()
+        });
+
+        if (updatedSession) {
+          await user.updateOne(
+            { MID: dbresp.MID },
+            { $set: { "bharatpe.session": updatedSession } }
+          );
+        }
+
+        const createdAtMs = new Date(dbresp.created_at).getTime();
+        const expireAtMs = dbresp.expiresAt
+          ? new Date(dbresp.expiresAt).getTime()
+          : createdAtMs + 5 * 60 * 1000;
+
+        matchedTx = bpClient.findPayment(transactions, {
+          amount: dbresp.amount,
+          createdAtMs,
+          expireAtMs
+        });
+      } catch (bpErr) {
+        console.warn("BharatPe status check warning:", bpErr.message);
+        return res.status(200).json({
+          status: false,
+          state: "PENDING",
+          message: "Waiting for BharatPe payment confirmation"
+        });
+      }
+
+      if (matchedTx) {
+        const bpUtr = String(
+          matchedTx.utr ||
+            matchedTx.bankReferenceNo ||
+            matchedTx.rrn ||
+            matchedTx.txnId ||
+            matchedTx.paymentId ||
+            matchedTx.id ||
+            `BP${Date.now().toString().slice(-10)}`
+        ).trim();
+
+        const updatedOrder = await paymentModel.findOneAndUpdate(
+          { order: ORDERID, isPaid: false, isDisabled: { $ne: true } },
+          {
+            $set: {
+              isPaid: true,
+              status: "PAID",
+              api_response: JSON.stringify(matchedTx),
+              utr: bpUtr,
+              paymentDate: Date.now()
+            }
+          },
+          { new: true }
+        );
+
+        if (!updatedOrder) {
+          return res.status(200).json({ status: true, state: "SUCCESS", utr: dbresp.utr || bpUtr });
+        }
+
+        await user.findOneAndUpdate(
+          { MID: dbresp.MID },
+          { $inc: { wallet: dbresp.amount } }
+        );
+        const api = merchant?.api || "secret";
+
+        if (dbresp.callback) {
+          const payment_info = JSON.stringify({
+            ORDERID,
+            amount: dbresp.amount,
+            UTR: bpUtr,
+            status: "SUCCESS"
+          });
+          const signature = crypto.createHmac("sha256", api).update(payment_info).digest("hex");
+          fetch(dbresp.callback, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ORDERID,
+              amount: dbresp.amount,
+              UTR: bpUtr,
+              status: "SUCCESS",
+              signature
+            }),
+            signal: AbortSignal.timeout(5000)
+          }).catch((err) => console.error("Webhook callback failed:", err.message));
+        }
+
+        const payinfo = jwt.sign(
+          { amount: dbresp.amount, ORDERID },
+          process.env.JWT || "upay_secret_key",
+          { expiresIn: "1h" }
+        );
+        res.cookie("payment_session", payinfo, { httpOnly: true });
+
+        try {
+          const merchant_name = updatedOrder.company;
+          const customer_name = updatedOrder.customerName;
+          const mobile_number = updatedOrder.customerPhone;
+          const email = updatedOrder.customerEmail;
+          const order_id = updatedOrder.order;
+          const transaction_id = updatedOrder.upaytr;
+          const amount = updatedOrder.amount;
+          const dt = updatedOrder.paymentDate;
+          const payment_date = dt.toLocaleString();
+          const html = await parser("purchase", {
+            customer_name,
+            mobile_number,
+            merchant_name,
+            email,
+            amount,
+            payment_date,
+            transaction_id,
+            order_id
+          });
+          if (email && email.includes("@")) {
+            await sendMail({ email, firstname: customer_name, subject: "Payment confirmation for " + merchant_name, html });
+          }
+          const cl = await client(req);
+          const clientData = new clientModel({
+            upaytr: updatedOrder.upaytr,
+            ...cl
+          });
+          await clientData.save();
+        } catch (auxErr) {
+          console.warn("Auxiliary post-payment hook warning:", auxErr.message);
+        }
+
+        return res.status(200).json({ status: true, state: "SUCCESS", utr: bpUtr });
+      }
+
+      return res.status(200).json({
+        status: false,
+        state: "PENDING",
+        message: "Waiting for BharatPe payment completion"
+      });
+    }
+
+    // ==========================================
+    // PAYTM BUSINESS VERIFICATION FLOW
+    // ==========================================
     const paytmMid = dbresp.paytm?.MID || process.env.PAYTM_MID;
     if (!paytmMid) {
       return res.status(200).json({

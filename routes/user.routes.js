@@ -36,7 +36,13 @@ import {
   withdrawFunds,
   getCustomersList,
   simulateSandboxPayment,
-  getAnalyticsSummary
+  getAnalyticsSummary,
+  bharatpeSendOtp,
+  bharatpeRefreshCaptcha,
+  bharatpeVerifyOtp,
+  bharatpeSaveUpi,
+  bharatpeDisconnect,
+  setActiveProvider
 } from "../controllers/user.controller.js";
 import SignIn from "../controllers/GOauth.js";
 
@@ -67,6 +73,12 @@ router.get("/dashboard", dashboard);
 router.get("/dashboard/transections", transections);
 router.get("/dashboard/paytm", paytmconf);
 router.post("/dashboard/paytm", paytmcnf);
+router.post("/dashboard/provider", setActiveProvider);
+router.post("/dashboard/bharatpe/send-otp", bharatpeSendOtp);
+router.post("/dashboard/bharatpe/refresh-captcha", bharatpeRefreshCaptcha);
+router.post("/dashboard/bharatpe/verify-otp", bharatpeVerifyOtp);
+router.post("/dashboard/bharatpe/save-upi", bharatpeSaveUpi);
+router.post("/dashboard/bharatpe/disconnect", bharatpeDisconnect);
 router.get("/dashboard/balance", balance);
 router.post("/dashboard/bank", bank);
 router.get("/dashboard/transaction/:upaytr", transaction);

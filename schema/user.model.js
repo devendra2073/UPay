@@ -122,11 +122,28 @@ const userSchema = new Schema({
   otpblockedtime: {
     type: Number
   },
+  activeProvider: {
+    type: String,
+    enum: ["PAYTM", "BHARATPE"],
+    default: "PAYTM"
+  },
   paytm: {
     MID: String,
     UPI: String,
     fallbackUPI: String,
     autoFailover: { type: Boolean, default: true }
+  },
+  bharatpe: {
+    merchantId: String,
+    UPI: String,
+    businessName: String,
+    beneficiaryName: String,
+    maskedAccountNumber: String,
+    ifscLogo: String,
+    mobile: String,
+    session: String,
+    isConnected: { type: Boolean, default: false },
+    connectedAt: Date
   },
   // UPay 2.0 Admin & Checkout Theme Configuration
   checkoutConfig: {

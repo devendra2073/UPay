@@ -9,6 +9,8 @@ import client from "../schema/clientModel.js";
 import banks from "../utils/getBanks.js";
 import jwt from "jsonwebtoken";
 import user from "../schema/user.model.js";
+import BharatPe from "../utils/bharatpe.js";
+import { allocateUniqueBharatPeAmount, BHARATPE_QR_TTL_MS } from "../utils/bharatpeOrderHelper.js";
 
 export const genMID = (len = 8) => {
   let uid = "";
@@ -429,12 +431,28 @@ export const managePaymentLinks = async (req, res) => {
       const newLinkId = `PL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const logo = usr.pic || `https://ui-avatars.com/api/?background=5f259f&color=fff&size=128&name=${encodeURIComponent(usr.company)}`;
 
+      const activeProvider = usr.activeProvider === "BHARATPE" ? "BHARATPE" : "PAYTM";
+      let finalAmt = amt;
+      let uniqueOffset = 0;
+      let expiresAt = new Date(Date.now() + BHARATPE_QR_TTL_MS);
+
+      if (activeProvider === "BHARATPE") {
+        if (!usr.bharatpe?.isConnected || !usr.bharatpe?.session || !usr.bharatpe?.merchantId || !usr.bharatpe?.UPI) {
+          return res.json({ status: false, message: "BharatPe Business is selected as active provider but not connected/configured with UPI ID." });
+        }
+        const allocated = await allocateUniqueBharatPeAmount(usr.MID, amt);
+        finalAmt = allocated.amount;
+        uniqueOffset = allocated.offset;
+      }
+
       // Admin-created Payment Links are manual payments and MUST always redirect to /pay/thanks
       const payOrder = new payment({
         order: orderId,
         logo,
         baseAmount: amt,
-        amount: amt,
+        amount: finalAmt,
+        uniqueAmountOffset: uniqueOffset,
+        provider: activeProvider,
         MID: usr.MID,
         mode: "PAYMENT LINK",
         company: usr.company,
@@ -445,10 +463,15 @@ export const managePaymentLinks = async (req, res) => {
         customerPhone: usr.mobile || "Not Given",
         customerNote: description || title,
         upaytr,
-        paytm: {
+        expiresAt,
+        paytm: activeProvider === "PAYTM" ? {
           MID: usr.paytm?.MID || process.env.mid,
           UPI: usr.paytm?.UPI || process.env.upi
-        },
+        } : undefined,
+        bharatpe: activeProvider === "BHARATPE" ? {
+          merchantId: usr.bharatpe.merchantId,
+          UPI: usr.bharatpe.UPI
+        } : undefined,
         selectedTheme: usr.checkoutConfig?.defaultTheme || "upay2"
       });
       await payOrder.save();
@@ -1232,7 +1255,8 @@ export const transactionApi = async (req, res) => {
       customerPhone: order.customerPhone,
       customerNote: order.customerNote || "",
       merchant: order.company,
-      upi: order.paytm?.UPI || "merchant@paytm",
+      provider: order.provider || "PAYTM",
+      upi: order.provider === "BHARATPE" ? (order.bharatpe?.UPI || "") : (order.paytm?.UPI || "merchant@paytm"),
       upaytr,
       feedback: order.feedback || {},
       dispute: order.dispute || {},
@@ -1293,7 +1317,7 @@ export const transaction = async (req, res) => {
     customerPhone: order.customerPhone,
     timezone: clientInfo.location.timezone,
     merchant: order.company,
-    upi: order.paytm?.UPI || "",
+    upi: order.provider === "BHARATPE" ? (order.bharatpe?.UPI || "") : (order.paytm?.UPI || ""),
     ip: clientInfo.ip,
     deviceType: clientInfo.device.type,
     deviceBrand: clientInfo.device.brand,
@@ -1337,5 +1361,192 @@ export const paytmcnf = async (req, res) => {
     });
   } catch (e) {
     return res.status(500).json({ status: false, message: "Failed to configure Paytm rails" });
+  }
+};
+
+
+// ==========================================
+// BharatPe Business Integration Endpoints
+// ==========================================
+
+export const bharatpeSendOtp = async (req, res) => {
+  try {
+    const mobile = String(req.body?.mobile || "").trim();
+    if (!mobile) {
+      return res.json({ status: false, message: "BharatPe registered mobile number is required" });
+    }
+    const client = await BharatPe.create();
+    const otpSession = await client.sendOtpRequest(mobile);
+    const { captcha, session } = await client.loadCaptcha(otpSession);
+
+    return res.json({
+      status: true,
+      uuid: session,
+      captcha,
+      message: "OTP sent to your BharatPe mobile number. Enter OTP and Captcha."
+    });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: err.message || "Failed to send BharatPe OTP" });
+  }
+};
+
+export const bharatpeRefreshCaptcha = async (req, res) => {
+  try {
+    const { uuid } = req.body;
+    if (!uuid) {
+      return res.status(400).json({ status: false, message: "Session uuid is required" });
+    }
+    const client = await BharatPe.create();
+    const { captcha, session } = await client.loadCaptcha(uuid);
+    return res.json({ status: true, uuid: session, captcha });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: err.message || "Failed to refresh captcha" });
+  }
+};
+
+export const bharatpeVerifyOtp = async (req, res) => {
+  try {
+    const { otp, captcha, uuid, UPI } = req.body;
+    if (!otp || !captcha || !uuid) {
+      return res.json({ status: false, message: "OTP, Captcha, and Session are required" });
+    }
+
+    const client = await BharatPe.create();
+    const verified = await client.verify(otp, captcha, uuid);
+    if (!verified.status || !verified.data) {
+      return res.json({
+        status: false,
+        message: verified.raw?.message || "BharatPe OTP or Captcha verification failed"
+      });
+    }
+
+    const merchantInfo = await client.getMerchantInfo(verified.data);
+    const m = merchantInfo?.merchant || {};
+    const usr = await user.findOne({ email: req.user.email });
+
+    const resolvedUpi = String(UPI || m.upiId || usr.bharatpe?.UPI || "").trim();
+    usr.bharatpe = {
+      merchantId: m.merchantId || usr.bharatpe?.merchantId || "",
+      UPI: resolvedUpi,
+      businessName: m.businessName || "",
+      beneficiaryName: m.beneficiaryName || "",
+      maskedAccountNumber: m.maskedAccountNumber || "",
+      ifscLogo: m.ifscLogo || "",
+      mobile: m.mobile || "",
+      session: verified.data,
+      isConnected: true,
+      connectedAt: new Date()
+    };
+
+    if (!usr.activeProvider) {
+      usr.activeProvider = "BHARATPE";
+    }
+    await usr.save();
+
+    let qrDataUrl = "";
+    if (resolvedUpi) {
+      const upiData = `upi://pay?pa=${encodeURIComponent(resolvedUpi)}&pn=${encodeURIComponent(m.businessName || usr.company || "Merchant")}&mode=02&purpose=00`;
+      qrDataUrl = await QRCode.toDataURL(upiData, { width: 260, margin: 2 });
+    }
+
+    return res.json({
+      status: true,
+      message: "BharatPe Business Connected & Verified!",
+      qrDataUrl,
+      bharatpe: {
+        merchantId: usr.bharatpe.merchantId,
+        UPI: usr.bharatpe.UPI,
+        businessName: usr.bharatpe.businessName,
+        beneficiaryName: usr.bharatpe.beneficiaryName,
+        maskedAccountNumber: usr.bharatpe.maskedAccountNumber,
+        ifscLogo: usr.bharatpe.ifscLogo,
+        isConnected: usr.bharatpe.isConnected
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: err.message || "BharatPe verification failed" });
+  }
+};
+
+export const bharatpeSaveUpi = async (req, res) => {
+  try {
+    const UPI = String(req.body?.UPI || "").trim();
+    const merchantId = String(req.body?.merchantId || "").trim();
+    if (!UPI) {
+      return res.json({ status: false, message: "BharatPe Merchant UPI ID is required" });
+    }
+    const usr = await user.findOne({ email: req.user.email });
+    if (!usr.bharatpe) usr.bharatpe = {};
+    usr.bharatpe.UPI = UPI;
+    if (merchantId) usr.bharatpe.merchantId = merchantId;
+    await usr.save();
+
+    const upiData = `upi://pay?pa=${encodeURIComponent(UPI)}&pn=${encodeURIComponent(usr.bharatpe.businessName || usr.company || "Merchant")}&mode=02&purpose=00`;
+    const qrDataUrl = await QRCode.toDataURL(upiData, { width: 260, margin: 2 });
+
+    return res.json({
+      status: true,
+      qrDataUrl,
+      UPI,
+      merchantId: usr.bharatpe.merchantId,
+      message: "BharatPe UPI ID Saved!"
+    });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: "Failed to save BharatPe UPI ID" });
+  }
+};
+
+export const bharatpeDisconnect = async (req, res) => {
+  try {
+    const usr = await user.findOne({ email: req.user.email });
+    usr.bharatpe = {
+      ...usr.bharatpe,
+      session: "",
+      isConnected: false
+    };
+    if (usr.activeProvider === "BHARATPE") {
+      usr.activeProvider = "PAYTM";
+    }
+    await usr.save();
+    return res.json({
+      status: true,
+      activeProvider: usr.activeProvider,
+      message: "BharatPe Business disconnected"
+    });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: "Failed to disconnect BharatPe" });
+  }
+};
+
+export const setActiveProvider = async (req, res) => {
+  try {
+    const provider = String(req.body?.provider || "").toUpperCase();
+    if (!["PAYTM", "BHARATPE"].includes(provider)) {
+      return res.json({ status: false, message: "Invalid payment provider" });
+    }
+
+    const usr = await user.findOne({ email: req.user.email });
+    if (provider === "BHARATPE" && (!usr.bharatpe?.isConnected || !usr.bharatpe?.session || !usr.bharatpe?.merchantId || !usr.bharatpe?.UPI)) {
+      return res.json({
+        status: false,
+        message: "Please connect BharatPe Business and set your BharatPe UPI ID first."
+      });
+    }
+    if (provider === "PAYTM" && (!usr.paytm?.MID || !usr.paytm?.UPI)) {
+      return res.json({
+        status: false,
+        message: "Please configure Paytm Business MID and UPI ID first."
+      });
+    }
+
+    usr.activeProvider = provider;
+    await usr.save();
+    return res.json({
+      status: true,
+      activeProvider: usr.activeProvider,
+      message: `Active payment provider switched to ${provider === "BHARATPE" ? "BharatPe Business" : "Paytm Business"}!`
+    });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: "Failed to switch payment provider" });
   }
 };

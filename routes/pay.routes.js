@@ -7,6 +7,7 @@ import {
   applyTip,
   submitManualUtr,
   refreshPaymentQr,
+  expireOrder,
   updateCustomerInfo,
   submitPaymentFeedback,
   raisePaymentDispute,
@@ -24,6 +25,7 @@ router.post("/api/:tid/coupon", applyCoupon);
 router.post("/api/:tid/tip", applyTip);
 router.post("/api/:tid/verify-utr", submitManualUtr);
 router.post("/api/:tid/refresh-qr", refreshPaymentQr);
+router.post("/api/:tid/expire", expireOrder);
 router.post("/api/:tid/customer-info", updateCustomerInfo);
 router.post("/api/:tid/feedback", submitPaymentFeedback);
 router.post("/api/:tid/dispute", raisePaymentDispute);

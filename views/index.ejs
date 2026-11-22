@@ -211,7 +211,7 @@
             </div>
             <h3 class="text-base font-extrabold text-slate-900">QR Session Timed Out</h3>
             <p class="text-slate-500 text-[11px] mt-1.5">Generate a fresh QR code without reloading the page.</p>
-            <button type="button" onclick="CheckoutApp.refreshQrSession()" class="mt-4 w-full py-2.5 fintech-accent-btn rounded-2xl font-extrabold text-xs cursor-pointer">
+            <button type="button" id="timeout-refresh-btn" onclick="CheckoutApp.refreshQrSession()" class="<%= (typeof provider !== 'undefined' && provider === 'BHARATPE') ? 'hidden' : '' %> mt-4 w-full py-2.5 fintech-accent-btn rounded-2xl font-extrabold text-xs cursor-pointer">
                 Generate Fresh QR
             </button>
         </div>
@@ -350,7 +350,7 @@
                     <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[11px] font-bold shrink-0">
                         <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
                         <span id="timer" class="mono">05:00</span>
-                        <button type="button" onclick="CheckoutApp.refreshQrSession()" title="Extend Session" class="ml-0.5 text-[10px] font-extrabold underline cursor-pointer">Extend</button>
+                        <button type="button" id="extend-qr-btn" onclick="CheckoutApp.refreshQrSession()" title="Extend Session" class="<%= (typeof provider !== 'undefined' && provider === 'BHARATPE') ? 'hidden' : '' %> ml-0.5 text-[10px] font-extrabold underline cursor-pointer">Extend</button>
                     </div>
                 </div>
 
@@ -768,7 +768,9 @@
                 discountAmount: Number("<%=discountAmount || 0%>") || 0,
                 tipAmount: Number("<%=tipAmount || 0%>") || 0,
                 feeAmount: Number("<%=feeAmount || 0%>") || 0,
-                timeInSeconds: 300,
+                provider: "<%= typeof provider !== 'undefined' ? provider : 'PAYTM' %>",
+                isExpired: <%= (typeof isExpired !== 'undefined' && isExpired) || (typeof isDisabled !== 'undefined' && isDisabled) ? 'true' : 'false' %>,
+                timeInSeconds: Number("<%= typeof remainingSeconds !== 'undefined' ? remainingSeconds : 300 %>"),
                 isPollingStopped: false,
                 pollTimer: null,
                 countdownTimer: null,
@@ -797,6 +799,10 @@
                 } catch (e) {}
 
                 this.applyTheme(savedTheme, false);
+                if (this.state.isExpired || this.state.timeInSeconds <= 0) {
+                    this.handleOrderExpired(false);
+                    return;
+                }
                 this.startCountdown();
                 this.state.pollTimer = setTimeout(() => this.checkPaymentStatus(), 2200);
             },
@@ -1159,12 +1165,30 @@
                     const s = this.state.timeInSeconds % 60;
                     if (timerEl) timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                     if (this.state.timeInSeconds <= 0) {
-                        this.stopPolling();
-                        this.showPopup('timeout');
+                        this.handleOrderExpired(true);
                         return;
                     }
                     this.state.timeInSeconds--;
                 }, 1000);
+            },
+
+            async handleOrderExpired(notifyServer = true) {
+                this.stopPolling();
+                this.state.isExpired = true;
+                const timerEl = document.getElementById('timer');
+                if (timerEl) timerEl.textContent = '00:00';
+                const qrImg = document.getElementById('qr-code-img');
+                if (qrImg) {
+                    qrImg.style.filter = 'blur(8px)';
+                    qrImg.style.opacity = '0.25';
+                    qrImg.style.pointerEvents = 'none';
+                }
+                if (notifyServer) {
+                    try {
+                        await fetch(`/pay/api/${this.state.tid}/expire`, { method: 'POST' });
+                    } catch (e) {}
+                }
+                this.showPopup('timeout');
             },
 
             stopPolling() {
@@ -1250,6 +1274,10 @@
 
                     if (data.status === true || data.state === "SUCCESS") {
                         this.handlePaymentVerified(data.utr);
+                        return;
+                    }
+                    if (data.state === "EXPIRED" || data.isDisabled) {
+                        this.handleOrderExpired(false);
                         return;
                     }
                     // For any other state (including PENDING or Invalid Order ID from Paytm),

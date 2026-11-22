@@ -1,10 +1,25 @@
 import crypto from "node:crypto";
 import QRCode from "qrcode";
 import paymentModel from "../schema/payment.model.js";
+import {
+  allocateUniqueBharatPeAmount,
+  BHARATPE_QR_TTL_MS
+} from "../utils/bharatpeOrderHelper.js";
 
 const createOrder = async (req, res) => {
   try {
-    const { MID, company, redirect, pic, paytm, callback, checkoutConfig, securityConfig } = req.user;
+    const {
+      MID,
+      company,
+      redirect,
+      pic,
+      paytm,
+      bharatpe,
+      activeProvider,
+      callback,
+      checkoutConfig,
+      securityConfig
+    } = req.user;
 
     if (securityConfig?.maintenanceMode) {
       return res.json({
@@ -13,10 +28,27 @@ const createOrder = async (req, res) => {
       });
     }
 
+    const requestedProvider = String(req.body.provider || activeProvider || "PAYTM").toUpperCase();
+    const provider = requestedProvider === "BHARATPE" ? "BHARATPE" : "PAYTM";
+
     const paytmdata = {
       MID: paytm?.MID ? paytm.MID : process.env.mid,
       UPI: paytm?.UPI ? paytm.UPI : process.env.upi
     };
+
+    const bharatpeData = {
+      merchantId: bharatpe?.merchantId || "",
+      UPI: bharatpe?.UPI || ""
+    };
+
+    if (provider === "BHARATPE") {
+      if (!bharatpe?.isConnected || !bharatpe?.session || !bharatpeData.merchantId || !bharatpeData.UPI) {
+        return res.json({
+          status: false,
+          message: "BharatPe Business is not connected or missing Merchant ID / UPI ID. Please configure it in Dashboard."
+        });
+      }
+    }
 
     const rawAmount = parseFloat(req.amount || req.body.amount || 0);
     if (!rawAmount || rawAmount <= 0) {
@@ -36,9 +68,19 @@ const createOrder = async (req, res) => {
     if (checkoutConfig?.passFeeToCustomer && checkoutConfig?.convenienceFeePercent > 0) {
       feeAmount = Number(((rawAmount * checkoutConfig.convenienceFeePercent) / 100).toFixed(2));
     }
-    const finalAmount = Number((rawAmount + feeAmount).toFixed(2));
+    const computedAmount = Number((rawAmount + feeAmount).toFixed(2));
 
-    const mode = req.body.mode || req.mode || "UPI DEPOSIT";
+    let finalAmount = computedAmount;
+    let uniqueAmountOffset = 0;
+    const expiresAt = new Date(Date.now() + BHARATPE_QR_TTL_MS);
+
+    if (provider === "BHARATPE") {
+      const allocated = await allocateUniqueBharatPeAmount(MID, computedAmount);
+      finalAmount = allocated.amount;
+      uniqueAmountOffset = allocated.offset;
+    }
+
+    const mode = req.body.mode || req.mode || (provider === "BHARATPE" ? "BHARATPE UPI" : "UPI DEPOSIT");
 
     // Redirect logic:
     // - If created via external API (req.mode === "PORTAL"), redirect user to merchant's configured redirect URL.
@@ -69,9 +111,11 @@ const createOrder = async (req, res) => {
       logo,
       baseAmount: rawAmount,
       amount: finalAmount,
+      uniqueAmountOffset,
       feeAmount,
       MID,
       mode,
+      provider,
       company,
       redirect: resolvedRedirect,
       callback: isApiOrder ? callback : (req.body.callback || callback),
@@ -80,25 +124,31 @@ const createOrder = async (req, res) => {
       customerEmail,
       customerNote: req.body.customerNote || "",
       upaytr,
-      paytm: paytmdata,
+      expiresAt,
+      isDisabled: false,
+      paytm: provider === "PAYTM" ? paytmdata : undefined,
+      bharatpe: provider === "BHARATPE" ? bharatpeData : undefined,
       selectedTheme: checkoutConfig?.defaultTheme || "upay2"
     });
     await pay.save();
 
-    const upi = paytmdata.UPI || "merchant@paytm";
-    const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(order)}&am=${finalAmount}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + order)}`;
+    const upi = provider === "BHARATPE" ? bharatpeData.UPI : (paytmdata.UPI || "merchant@paytm");
+    const commonParams = `pa=${encodeURIComponent(upi)}&tr=${encodeURIComponent(order)}&am=${finalAmount.toFixed(2)}&pn=${encodeURIComponent(company)}&tn=${encodeURIComponent("Payment for order " + order)}`;
     const intent = `upi://pay?${commonParams}`;
     const qrDataUrl = await QRCode.toDataURL(intent, { width: 280, margin: 2 });
 
-    const hostUrl = "https://u-pay-seven.vercel.app"
+    const hostUrl = "https://u-pay-seven.vercel.app";
 
     return res.json({
       status: true,
+      provider,
       order,
       upaytr,
       amount: finalAmount,
       baseAmount: rawAmount,
+      uniqueAmountOffset,
       feeAmount,
+      expiresAt,
       redirect: resolvedRedirect,
       qrDataUrl,
       intent,

@@ -13,6 +13,11 @@ const paymentSchema = new Schema({
     type: String,
     required: true
   },
+  provider: {
+    type: String,
+    enum: ["PAYTM", "BHARATPE"],
+    default: "PAYTM"
+  },
   company: {
     type: String,
     required: true
@@ -23,6 +28,10 @@ const paymentSchema = new Schema({
   amount: {
     required: true,
     type: Number
+  },
+  uniqueAmountOffset: {
+    type: Number,
+    default: 0
   },
   discountAmount: {
     type: Number,
@@ -45,9 +54,17 @@ const paymentSchema = new Schema({
     required: true,
     default: false
   },
+  isDisabled: {
+    type: Boolean,
+    default: false
+  },
+  disabledAt: {
+    type: Date,
+    default: null
+  },
   status: {
     type: String,
-    enum: ["PENDING", "PAID", "FAILED", "REFUND_REQUESTED", "REFUNDED"],
+    enum: ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUND_REQUESTED", "REFUNDED"],
     default: "PENDING"
   },
   utr: {
@@ -114,6 +131,10 @@ const paymentSchema = new Schema({
     MID: String,
     UPI: String
   },
+  bharatpe: {
+    merchantId: String,
+    UPI: String
+  },
   selectedTheme: {
     type: String,
     default: "upay2"
@@ -133,6 +154,8 @@ const paymentSchema = new Schema({
     createdAt: { type: Date }
   }
 });
+
+paymentSchema.index({ MID: 1, provider: 1, isPaid: 1, isDisabled: 1, expiresAt: 1, amount: 1 });
 
 const paymentModel = model("payment", paymentSchema);
 export default paymentModel;
