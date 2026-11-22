@@ -95,7 +95,7 @@ export default class BharatPe {
 
     if (!res.ok) {
       console.log(res)
-      console.log(res.text())
+      console.log(await res.text())
       throw new Error(`Failed to load page: ${res.status}`);
     }
 
