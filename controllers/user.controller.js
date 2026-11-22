@@ -1433,6 +1433,8 @@ export const bharatpeVerifyOtp = async (req, res) => {
       maskedAccountNumber: m.maskedAccountNumber || "",
       ifscLogo: m.ifscLogo || "",
       mobile: m.mobile || "",
+      accessToken: verified.accessToken || "",
+      tokenExpiresAt: verified.tokenExpiresAt ? new Date(verified.tokenExpiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       session: verified.data,
       isConnected: true,
       connectedAt: new Date()
@@ -1460,6 +1462,7 @@ export const bharatpeVerifyOtp = async (req, res) => {
         beneficiaryName: usr.bharatpe.beneficiaryName,
         maskedAccountNumber: usr.bharatpe.maskedAccountNumber,
         ifscLogo: usr.bharatpe.ifscLogo,
+        tokenExpiresAt: usr.bharatpe.tokenExpiresAt,
         isConnected: usr.bharatpe.isConnected
       }
     });
@@ -1501,6 +1504,8 @@ export const bharatpeDisconnect = async (req, res) => {
     const usr = await user.findOne({ email: req.user.email });
     usr.bharatpe = {
       ...usr.bharatpe,
+      accessToken: "",
+      tokenExpiresAt: null,
       session: "",
       isConnected: false
     };

@@ -555,6 +555,16 @@ export const paymentStatus = async (req, res) => {
         });
       }
 
+      if (merchant?.bharatpe?.tokenExpiresAt && new Date(merchant.bharatpe.tokenExpiresAt).getTime() <= Date.now()) {
+        console.warn("[BharatPe] Stored accessToken expired for merchant:", bpMerchantId);
+        await user.updateOne({ MID: dbresp.MID }, { $set: { "bharatpe.isConnected": false } });
+        return res.status(200).json({
+          status: false,
+          state: "PENDING",
+          message: "BharatPe token expired. Please reconnect BharatPe in Dashboard."
+        });
+      }
+
       let matchedTx = null;
       try {
         const bpClient = new BharatPe();

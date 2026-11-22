@@ -141,6 +141,8 @@ const userSchema = new Schema({
     maskedAccountNumber: String,
     ifscLogo: String,
     mobile: String,
+    accessToken: String,
+    tokenExpiresAt: Date,
     session: String,
     isConnected: { type: Boolean, default: false },
     connectedAt: Date

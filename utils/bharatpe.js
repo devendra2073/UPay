@@ -434,9 +434,29 @@ export default class BharatPe {
         Token: accessToken,
       };
 
+      const rawExpiry =
+        result.data?.expiresAt ||
+        result.data?.expiry ||
+        result.data?.expiresIn ||
+        result.data?.expires_in ||
+        result.expiresIn ||
+        result.expires_in ||
+        null;
+
+      let tokenExpiresAt;
+      if (typeof rawExpiry === "number" && rawExpiry > 0) {
+        tokenExpiresAt = rawExpiry > 1e12 ? new Date(rawExpiry) : new Date(Date.now() + rawExpiry * 1000);
+      } else if (typeof rawExpiry === "string" && !Number.isNaN(Date.parse(rawExpiry))) {
+        tokenExpiresAt = new Date(rawExpiry);
+      } else {
+        tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      }
+
       return {
         status: Boolean(result.success),
         data: this.encryptText(updatedState),
+        accessToken,
+        tokenExpiresAt,
         raw: result,
       };
     } catch (err) {
