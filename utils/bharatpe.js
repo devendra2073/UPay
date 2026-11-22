@@ -106,6 +106,7 @@ export default class BharatPe {
       status: res.statusCode,
       headers: res.headers || {},
       body: res.body,
+      rawBody: res.rawBody,
     };
   }
 
@@ -275,15 +276,42 @@ export default class BharatPe {
           "Sec-Fetch-Site": "same-origin",
         },
       });
-console.log(res)
+
       const updatedCookies = this.mergeCookieStrings(state.cookies, res);
 
       if (!res.ok) {
-        console.error("[BharatPe.loadCaptcha] HTTP Error:", res.status);
+        console.error("[BharatPe.loadCaptcha] HTTP Error:", res.status, String(res.rawBody || res.body || "").slice(0, 300));
         throw new Error(`Failed to load captcha: ${res.status}`);
       }
 
-      const base64 = Buffer.from(res.body).toString("base64");
+      const contentType = String(res.headers["content-type"] || "image/jpeg")
+        .split(";")[0]
+        .trim()
+        .toLowerCase();
+      const buf = Buffer.isBuffer(res.rawBody)
+        ? res.rawBody
+        : Buffer.isBuffer(res.body)
+        ? res.body
+        : Buffer.from(res.body || "");
+
+      if (contentType.includes("text/html")) {
+        console.error("[BharatPe.loadCaptcha] Received HTML instead of image:", buf.toString("utf8").slice(0, 300));
+        throw new Error("Captcha blocked or returned HTML instead of image");
+      }
+
+      let captchaDataUri = "";
+      if (contentType.includes("application/json")) {
+        const json = JSON.parse(buf.toString("utf8"));
+        const imgVal = json.captcha || json.image || json.data?.captcha || json.data?.image || "";
+        if (!imgVal) {
+          console.error("[BharatPe.loadCaptcha] JSON response missing captcha:", json);
+          throw new Error("Captcha missing in JSON response");
+        }
+        captchaDataUri = String(imgVal).startsWith("data:") ? imgVal : `data:image/jpeg;base64,${imgVal}`;
+      } else {
+        const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
+        captchaDataUri = `data:${mime};base64,${buf.toString("base64")}`;
+      }
 
       const updatedState = {
         ...state,
@@ -291,7 +319,7 @@ console.log(res)
       };
 
       return {
-        captcha: `data:image/jpeg;base64,${base64}`,
+        captcha: captchaDataUri,
         session: this.encryptText(updatedState),
       };
     } catch (err) {
