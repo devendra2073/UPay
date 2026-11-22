@@ -570,6 +570,7 @@ export const paymentStatus = async (req, res) => {
         const bpClient = new BharatPe();
         const { transactions, session: updatedSession } = await bpClient.getTransactions(bpSession, {
           merchantId: bpMerchantId,
+          token: merchant?.bharatpe?.accessToken || null,
           date: new Date()
         });
 
@@ -601,8 +602,8 @@ export const paymentStatus = async (req, res) => {
 
       if (matchedTx) {
         const bpUtr = String(
-          matchedTx.utr ||
-            matchedTx.bankReferenceNo ||
+          matchedTx.bankReferenceNo ||
+            matchedTx.utr ||
             matchedTx.rrn ||
             matchedTx.txnId ||
             matchedTx.paymentId ||
