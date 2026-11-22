@@ -253,12 +253,94 @@ export default class BharatPe {
   async loadCaptcha(encryptedData) {
     try {
       const state = this.decryptText(encryptedData);
+      const cookieHeader = state.cookies || this.getcookie();
 
-      const res = await fetch(`${this.BASE_URL}/v1/api/load-captcha?context=otp`, {
+      // Method 1: ScrapingBee (returns raw untouched binary JPEG + Set-Cookie)
+      if (process.env.SCRAPINGBEE_API_KEY) {
+        const sbUrl = new URL("https://app.scrapingbee.com/api/v1/");
+        sbUrl.searchParams.set("api_key", process.env.SCRAPINGBEE_API_KEY);
+        sbUrl.searchParams.set("url", `${this.BASE_URL}/v1/api/load-captcha?context=otp`);
+        sbUrl.searchParams.set("render_js", "false");
+        sbUrl.searchParams.set("forward_headers", "true");
+        sbUrl.searchParams.set("country_code", "in");
+
+        const sbRes = await fetch(sbUrl.toString(), {
+          method: "GET",
+          headers: {
+            "Spb-Cookie": cookieHeader,
+            "Spb-Accept": "*/*",
+            "Spb-X-Requested-With": "XMLHttpRequest",
+            "Spb-Referer": `${this.BASE_URL}/`,
+            "Spb-User-Agent": MOBILE_USER_AGENT,
+          },
+        });
+
+        const updatedCookies = this.mergeCookieStrings(cookieHeader, sbRes);
+        if (!sbRes.ok) {
+          const errText = await sbRes.text().catch(() => "");
+          console.error("[BharatPe.loadCaptcha] ScrapingBee HTTP Error:", sbRes.status, errText.slice(0, 300));
+          throw new Error(`Failed to load captcha via ScrapingBee: ${sbRes.status}`);
+        }
+
+        const buf = Buffer.from(await sbRes.arrayBuffer());
+        const contentType = String(sbRes.headers.get("content-type") || "image/jpeg").split(";")[0].trim().toLowerCase();
+        const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
+        return {
+          captcha: `data:${mime};base64,${buf.toString("base64")}`,
+          session: this.encryptText({ ...state, cookies: updatedCookies }),
+        };
+      }
+
+      // Method 2: ScraperAPI Screenshot Mode (avoids ScraperAPI UTF-8 binary corruption by capturing rendered PNG)
+      if (process.env.SCRAPER_API_KEY) {
+        const saUrl = new URL("https://api.scraperapi.com/");
+        saUrl.searchParams.set("api_key", process.env.SCRAPER_API_KEY);
+        saUrl.searchParams.set("url", `${this.BASE_URL}/v1/api/load-captcha?context=otp`);
+        saUrl.searchParams.set("screenshot", "true");
+        saUrl.searchParams.set("keep_headers", "true");
+        saUrl.searchParams.set("country_code", "in");
+        saUrl.searchParams.set("device_type", "mobile");
+        saUrl.searchParams.set("session_number", state.sessionNumber || this.sessionNumber);
+
+        const saRes = await fetch(saUrl.toString(), {
+          method: "GET",
+          headers: {
+            ...MOBILE_BASE_HEADERS,
+            Cookie: cookieHeader,
+            Accept: "*/*",
+            "X-Requested-With": "XMLHttpRequest",
+            Referer: `${this.BASE_URL}/`,
+          },
+        });
+
+        const updatedCookies = this.mergeCookieStrings(cookieHeader, saRes);
+        const screenshotUrl = saRes.headers.get("sa-screenshot");
+
+        if (!saRes.ok || !screenshotUrl) {
+          const errText = await saRes.text().catch(() => "");
+          console.error("[BharatPe.loadCaptcha] ScraperAPI Screenshot Error:", saRes.status, screenshotUrl, errText.slice(0, 300));
+          throw new Error(`Failed to load captcha screenshot: ${saRes.status}`);
+        }
+
+        const imgRes = await fetch(screenshotUrl);
+        if (!imgRes.ok) {
+          throw new Error(`Failed to download captcha screenshot: ${imgRes.status}`);
+        }
+        const imgBuf = Buffer.from(await imgRes.arrayBuffer());
+
+        return {
+          captcha: `data:image/png;base64,${imgBuf.toString("base64")}`,
+          session: this.encryptText({ ...state, cookies: updatedCookies }),
+        };
+      }
+
+      // Method 3: Direct / Custom Residential Proxy via got-scraping
+      const res = await this.request(`${this.BASE_URL}/v1/api/load-captcha?context=otp`, {
         method: "GET",
+        responseType: "buffer",
+        sessionNumber: state.sessionNumber || this.sessionNumber,
         headers: {
-          ...MOBILE_BASE_HEADERS,
-          Cookie: state.cookies || this.getcookie(),
+          Cookie: cookieHeader,
           Accept: "*/*",
           "X-Requested-With": "XMLHttpRequest",
           Referer: `${this.BASE_URL}/`,
@@ -268,48 +350,32 @@ export default class BharatPe {
         },
       });
 
-      const updatedCookies = this.mergeCookieStrings(state.cookies, res);
+      const updatedCookies = this.mergeCookieStrings(cookieHeader, res);
 
       if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        console.error("[BharatPe.loadCaptcha] HTTP Error:", res.status, errText.slice(0, 300));
+        console.error("[BharatPe.loadCaptcha] HTTP Error:", res.status, String(res.rawBody || res.body || "").slice(0, 300));
         throw new Error(`Failed to load captcha: ${res.status}`);
       }
 
-      const contentType = String(res.headers.get("content-type") || "image/jpeg")
+      const contentType = String(res.headers["content-type"] || "image/jpeg")
         .split(";")[0]
         .trim()
         .toLowerCase();
-      const arrayBuffer = await res.arrayBuffer();
-      const buf = Buffer.from(arrayBuffer);
+      const buf = Buffer.isBuffer(res.rawBody)
+        ? res.rawBody
+        : Buffer.isBuffer(res.body)
+        ? res.body
+        : Buffer.from(res.body || "");
 
       if (contentType.includes("text/html")) {
         console.error("[BharatPe.loadCaptcha] Received HTML instead of image:", buf.toString("utf8").slice(0, 300));
         throw new Error("Captcha blocked or returned HTML instead of image");
       }
 
-      let captchaDataUri = "";
-      if (contentType.includes("application/json")) {
-        const json = JSON.parse(buf.toString("utf8"));
-        const imgVal = json.captcha || json.image || json.data?.captcha || json.data?.image || "";
-        if (!imgVal) {
-          console.error("[BharatPe.loadCaptcha] JSON response missing captcha:", json);
-          throw new Error("Captcha missing in JSON response");
-        }
-        captchaDataUri = String(imgVal).startsWith("data:") ? imgVal : `data:image/jpeg;base64,${imgVal}`;
-      } else {
-        const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
-        captchaDataUri = `data:${mime};base64,${buf.toString("base64")}`;
-      }
-
-      const updatedState = {
-        ...state,
-        cookies: updatedCookies,
-      };
-
+      const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
       return {
-        captcha: captchaDataUri,
-        session: this.encryptText(updatedState),
+        captcha: `data:${mime};base64,${buf.toString("base64")}`,
+        session: this.encryptText({ ...state, cookies: updatedCookies }),
       };
     } catch (err) {
       console.error("[BharatPe.loadCaptcha] Error:", err);
