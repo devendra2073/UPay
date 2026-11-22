@@ -729,6 +729,7 @@ export const paymentStatus = async (req, res) => {
       const response = await fetch(verifyUrl);
       info = await response.json();
     } catch (fetchErr) {
+      cobsole.log(fetchErr)
       return res.status(200).json({
         status: false,
         state: "PENDING",
