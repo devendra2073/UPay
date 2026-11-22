@@ -58,18 +58,6 @@ export default class BharatPe {
    */
   async request(targetUrl, { method = "GET", headers = {}, body = undefined, responseType = "text", sessionNumber = null } = {}) {
     const useScraperApi = Boolean(process.env.SCRAPER_API_KEY);
-    let finalUrl = targetUrl;
-
-    if (useScraperApi) {
-      const proxyEndpoint = new URL("https://api.scraperapi.com/");
-      proxyEndpoint.searchParams.set("api_key", process.env.SCRAPER_API_KEY);
-      proxyEndpoint.searchParams.set("url", targetUrl);
-      proxyEndpoint.searchParams.set("keep_headers", "true");
-      proxyEndpoint.searchParams.set("country_code", "in");
-      proxyEndpoint.searchParams.set("device_type", "mobile");
-      proxyEndpoint.searchParams.set("session_number", sessionNumber || this.sessionNumber);
-      finalUrl = proxyEndpoint.toString();
-    }
 
     const reqHeaders = {
       ...MOBILE_BASE_HEADERS,
@@ -77,7 +65,7 @@ export default class BharatPe {
     };
 
     const options = {
-      url: finalUrl,
+      url: targetUrl,
       method,
       headers: reqHeaders,
       throwHttpErrors: false,
@@ -95,7 +83,11 @@ export default class BharatPe {
       options.body = body;
     }
 
-    if (!useScraperApi && process.env.BHARATPE_PROXY_URL) {
+    if (useScraperApi) {
+      const sess = sessionNumber || this.sessionNumber;
+      options.proxyUrl = `http://scraperapi.keep_headers=true.country_code=in.device_type=mobile.session_number=${sess}:${process.env.SCRAPER_API_KEY}@proxy-server.scraperapi.com:8001`;
+      options.https = { rejectUnauthorized: false };
+    } else if (process.env.BHARATPE_PROXY_URL) {
       options.proxyUrl = process.env.BHARATPE_PROXY_URL;
     }
 
