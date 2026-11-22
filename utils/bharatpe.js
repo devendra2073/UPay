@@ -652,43 +652,45 @@ export default class BharatPe {
     };
   }
 
-  async getTransactions(encryptedData, { merchantId, date = new Date() } = {}) {
+  async getTransactions(encryptedData, { merchantId, token: explicitToken = null, date = new Date(), pageSize = 20, pageCount = 0 } = {}) {
     try {
       const state = encryptedData ? this.decryptText(encryptedData) : {};
-      const cookieHeader = state.cookies || this.getcookie();
-      const token = state.Token || this.#Token;
+      const token = explicitToken || state.Token || this.#Token;
 
       if (!merchantId) {
         throw new Error("merchantId is required to fetch transaction history");
       }
-
-      const { start_date, end_date } = this.formatDateRangeIST(date);
-      const url = new URL(`${this.BASE_URL}/v1/api/allHistory`);
-      url.searchParams.set("type", "txns");
-      url.searchParams.set("merchant_id", String(merchantId));
-      url.searchParams.set("start_date", start_date);
-      url.searchParams.set("end_date", end_date);
-
-      const headers = {
-        Cookie: cookieHeader,
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "X-Requested-With": "XMLHttpRequest",
-        Referer: `${this.BASE_URL}/transactionhistory`,
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin",
-      };
-
-      if (token) {
-        headers.Token = token;
+      if (!token) {
+        throw new Error("Token is required to fetch BharatPe transaction history");
       }
+
+      const dayUtcStart = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0);
+      const dayUtcEnd = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 23, 59, 59);
+      const sDate = dayUtcStart - 6 * 60 * 60 * 1000;
+      const eDate = dayUtcEnd + 6 * 60 * 60 * 1000;
+
+      const url = new URL(`${this.PAYMENTS_API_BASE_URL}/api/v1/merchant/transactions`);
+      url.searchParams.set("module", "PAYMENT_QR");
+      url.searchParams.set("merchantId", String(merchantId));
+      url.searchParams.set("sDate", String(sDate));
+      url.searchParams.set("eDate", String(eDate));
+      url.searchParams.set("pageSize", String(pageSize));
+      url.searchParams.set("pageCount", String(pageCount));
+      url.searchParams.set("isFromOtDashboard", "1");
 
       const res = await this.request(url.toString(), {
         method: "GET",
-        headers,
         sessionNumber: state.sessionNumber || this.sessionNumber,
+        headers: {
+          Accept: "application/json, text/javascript, */*; q=0.01",
+          Token: token,
+          Origin: this.BASE_URL,
+          Referer: `${this.BASE_URL}/`,
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+        },
       });
-      const updatedCookies = this.mergeCookieStrings(cookieHeader, res);
 
       if (res.status === 401 || res.status === 403) {
         console.error("[BharatPe.getTransactions] Session expired / blocked HTTP:", res.status, String(res.body || "").slice(0, 300));
@@ -708,27 +710,18 @@ export default class BharatPe {
         console.error("[BharatPe.getTransactions] Non-JSON response:", text.slice(0, 300), parseErr);
         throw new Error("BharatPe returned non-JSON response (possible session expiry)");
       }
-      console.log(json)
-      if (json.success === false || json.status === false) {
+
+      if (json.status === false || json.success === false) {
         console.error("[BharatPe.getTransactions] API failure response:", json);
         throw new Error(json.message || "BharatPe transaction API returned failure");
       }
 
       const data = json.data || {};
-      const transactions =
-        Array.isArray(data.transactions) ? data.transactions :
-        Array.isArray(data.txns) ? data.txns :
-        Array.isArray(data.records) ? data.records :
-        Array.isArray(data.list) ? data.list :
-        [];
-
-      const updatedSession = encryptedData
-        ? this.encryptText({ ...state, cookies: updatedCookies })
-        : null;
+      const transactions = Array.isArray(data.transactions) ? data.transactions : [];
 
       return {
         transactions,
-        session: updatedSession,
+        session: encryptedData || null,
         raw: json,
       };
     } catch (err) {
@@ -742,8 +735,11 @@ export default class BharatPe {
       const targetAmount = Number(amount);
 
       for (const tx of transactions) {
+        if (tx.type && String(tx.type).toUpperCase() !== "PAYMENT_RECV") {
+          continue;
+        }
         const txStatus = String(tx.status ?? tx.txnStatus ?? "").toUpperCase();
-        if (txStatus && ["FAILED", "FAILURE", "CANCELLED", "EXPIRED", "PENDING"].includes(txStatus)) {
+        if (txStatus && txStatus !== "SUCCESS" && txStatus !== "PAID" && txStatus !== "COMPLETED") {
           continue;
         }
 
