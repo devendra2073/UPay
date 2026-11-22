@@ -267,7 +267,7 @@ export default class BharatPe {
         sessionNumber: state.sessionNumber || this.sessionNumber,
         headers: {
           Cookie: state.cookies || this.getcookie(),
-          Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+          Accept: "*/*",
           "X-Requested-With": "XMLHttpRequest",
           Referer: `${this.BASE_URL}/`,
           "Sec-Fetch-Dest": "empty",
@@ -275,7 +275,7 @@ export default class BharatPe {
           "Sec-Fetch-Site": "same-origin",
         },
       });
-
+console.log(res)
       const updatedCookies = this.mergeCookieStrings(state.cookies, res);
 
       if (!res.ok) {
