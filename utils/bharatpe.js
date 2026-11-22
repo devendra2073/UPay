@@ -1,6 +1,8 @@
 import * as cheerio from "cheerio";
 import crypto from "crypto";
 import { gotScraping } from "got-scraping";
+import { PNG } from "pngjs";
+import jsQR from "jsqr";
 
 const KEY = crypto
   .createHash("sha256")
@@ -24,6 +26,7 @@ export default class BharatPe {
   constructor() {
     this.BASE_URL = "https://enterprise.bharatpe.in";
     this.API_BASE_URL = "https://api-merchant.bharatpe.in";
+    this.PAYMENTS_API_BASE_URL = "https://payments-tesseract.bharatpe.in";
     this.cookies = [];
     this.csrfToken = null;
     this.mobile = null;
@@ -462,6 +465,73 @@ export default class BharatPe {
     } catch (err) {
       console.error("[BharatPe.verify] Error:", err);
       throw err;
+    }
+  }
+
+  async getMerchantQrAndUpi(encryptedData, merchantId) {
+    try {
+      const state = encryptedData ? this.decryptText(encryptedData) : {};
+      const token = state.Token || this.#Token;
+
+      if (!token || !merchantId) {
+        throw new Error("Token and merchantId are required to fetch BharatPe QR");
+      }
+
+      const url = `${this.PAYMENTS_API_BASE_URL}/api/merchant/v1/downloadQr?merchantId=${encodeURIComponent(String(merchantId))}`;
+      const res = await this.request(url, {
+        method: "GET",
+        sessionNumber: state.sessionNumber || this.sessionNumber,
+        headers: {
+          Accept: "application/json, text/javascript, */*; q=0.01",
+          Token: token,
+          Origin: this.BASE_URL,
+          Referer: `${this.BASE_URL}/`,
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+        },
+      });
+
+      if (!res.ok) {
+        console.error("[BharatPe.getMerchantQrAndUpi] HTTP Error:", res.status, String(res.body || "").slice(0, 300));
+        throw new Error(`Failed to fetch BharatPe QR: ${res.status}`);
+      }
+
+      const json = JSON.parse(res.body);
+      const qrUrl = json?.data?.url || "";
+      if (!qrUrl) {
+        console.error("[BharatPe.getMerchantQrAndUpi] QR URL missing:", json);
+        return { qrUrl: "", upiDeepLink: "", upiId: "" };
+      }
+
+      const imgRes = await fetch(qrUrl);
+      if (!imgRes.ok) {
+        console.error("[BharatPe.getMerchantQrAndUpi] S3 QR download failed:", imgRes.status);
+        return { qrUrl, upiDeepLink: "", upiId: "" };
+      }
+
+      const imgBuf = Buffer.from(await imgRes.arrayBuffer());
+      const png = PNG.sync.read(imgBuf);
+      const decoded = jsQR(new Uint8ClampedArray(png.data), png.width, png.height);
+      const upiDeepLink = decoded?.data || "";
+
+      let upiId = "";
+      if (upiDeepLink) {
+        try {
+          const parsed = new URL(upiDeepLink);
+          upiId = parsed.searchParams.get("pa") || "";
+        } catch (parseErr) {
+          const match = upiDeepLink.match(/[?&]pa=([^&]+)/i);
+          upiId = match ? decodeURIComponent(match[1]) : "";
+        }
+      } else {
+        console.error("[BharatPe.getMerchantQrAndUpi] jsQR could not decode QR image:", qrUrl);
+      }
+
+      return { qrUrl, upiDeepLink, upiId: String(upiId).trim() };
+    } catch (err) {
+      console.error("[BharatPe.getMerchantQrAndUpi] Error:", err);
+      return { qrUrl: "", upiDeepLink: "", upiId: "" };
     }
   }
 

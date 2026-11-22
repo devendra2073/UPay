@@ -27,7 +27,9 @@
     "mongoose": "^9.2.4",
     "nodemailer": "^8.0.2",
     "qrcode": "^1.5.4",
-    "ua-parser-js": "^2.0.0"
+    "ua-parser-js": "^2.0.0",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

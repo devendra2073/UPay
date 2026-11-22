@@ -1424,7 +1424,12 @@ export const bharatpeVerifyOtp = async (req, res) => {
     const m = merchantInfo?.merchant || {};
     const usr = await user.findOne({ email: req.user.email });
 
-    const resolvedUpi = String(UPI || m.upiId || usr.bharatpe?.UPI || "").trim();
+    let qrUpiId = "";
+    if (!UPI && !m.upiId && m.merchantId) {
+      const qrDecoded = await client.getMerchantQrAndUpi(verified.data, m.merchantId);
+      qrUpiId = qrDecoded.upiId || "";
+    }
+    const resolvedUpi = String(UPI || m.upiId || qrUpiId || usr.bharatpe?.UPI || "").trim();
     usr.bharatpe = {
       merchantId: m.merchantId || usr.bharatpe?.merchantId || "",
       UPI: resolvedUpi,

@@ -1104,16 +1104,18 @@
 
                                 <div id="bp-verify-box" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                                     <input type="hidden" id="bp-session-uuid">
-                                    <div class="flex items-center gap-3">
-                                        <img id="bp-captcha-img" src="" alt="Captcha" class="h-14 max-w-[200px] w-auto object-contain rounded-xl border border-slate-300 bg-white p-1">
-                                        <button type="button" onclick="Terminal.bpRefreshCaptcha()" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">Refresh Captcha</button>
+                                    <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200">
+                                        <div class="flex items-center gap-3">
+                                            <img id="bp-captcha-img" src="" alt="Captcha" class="h-16 min-w-[150px] max-w-[240px] w-auto object-contain rounded-lg border border-slate-200 bg-slate-50 p-1">
+                                        </div>
+                                        <button type="button" onclick="Terminal.bpRefreshCaptcha()" class="px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-700 hover:bg-slate-200 transition cursor-pointer shrink-0">↻ Refresh Captcha</button>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <input type="text" id="bp-otp-input" placeholder="Enter OTP" class="pp-input mono">
                                         <input type="text" id="bp-captcha-input" placeholder="Enter Captcha Text" class="pp-input mono">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase">BharatPe Merchant UPI ID (for QR)</label>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">BharatPe Merchant UPI ID (Optional — auto-fetched from QR if blank)</label>
                                         <input type="text" id="bp-upi-input" value="<%= user.bharatpe?.UPI || '' %>" placeholder="bharatpe.xxxx@fbpe" class="pp-input mt-1 mono">
                                     </div>
                                     <button type="button" onclick="Terminal.bpVerifyOtp()" class="w-full py-3 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">
@@ -1778,12 +1780,14 @@
                             const ctx = c.getContext('2d');
                             ctx.drawImage(img, 0, 0);
                             const { data } = ctx.getImageData(0, 0, w, h);
-                            const bgR = data[0], bgG = data[1], bgB = data[2];
+                            const margin = Math.min(20, Math.floor(Math.min(w, h) * 0.05));
+                            const sampleIdx = (margin * w + margin) * 4;
+                            const bgR = data[sampleIdx], bgG = data[sampleIdx + 1], bgB = data[sampleIdx + 2];
                             let minX = w, minY = h, maxX = -1, maxY = -1;
-                            for (let y = 0; y < h; y++) {
-                                for (let x = 0; x < w; x++) {
+                            for (let y = margin; y < h - margin; y++) {
+                                for (let x = margin; x < w - margin; x++) {
                                     const i = (y * w + x) * 4;
-                                    if (Math.abs(data[i] - bgR) > 12 || Math.abs(data[i + 1] - bgG) > 12 || Math.abs(data[i + 2] - bgB) > 12) {
+                                    if (Math.abs(data[i] - bgR) > 20 || Math.abs(data[i + 1] - bgG) > 20 || Math.abs(data[i + 2] - bgB) > 20) {
                                         if (x < minX) minX = x;
                                         if (x > maxX) maxX = x;
                                         if (y < minY) minY = y;
