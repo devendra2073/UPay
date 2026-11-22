@@ -708,7 +708,7 @@ export default class BharatPe {
         console.error("[BharatPe.getTransactions] Non-JSON response:", text.slice(0, 300), parseErr);
         throw new Error("BharatPe returned non-JSON response (possible session expiry)");
       }
-
+      console.log(json)
       if (json.success === false || json.status === false) {
         console.error("[BharatPe.getTransactions] API failure response:", json);
         throw new Error(json.message || "BharatPe transaction API returned failure");
